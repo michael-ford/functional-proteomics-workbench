@@ -1,5 +1,55 @@
 # Roadmap
 
-> Status: **stub** — to be filled by in-session.
+Build DAG and implementation waves (HANDOFF §29–§30), annotated with current status.
 
-Build DAG and implementation waves (HANDOFF §29–§30).
+## Critical dependency
+**Shared schemas + Tool registry + Trace model** unblock everything else. Specs for all three
+are drafted (`docs/DATA_CONTRACTS.md`, `docs/MCP_TOOLS.md`, `docs/TRACE_MODEL.md`).
+
+## Status legend
+✅ done · 🟡 in progress · ⬜ not started · 🔬 handed off (async research)
+
+## Phase 0 — bootstrap ✅
+- ✅ Public repo (`michael-ford/functional-proteomics-workbench`)
+- ✅ Skeleton + governance docs (DEVELOPMENT_WORKFLOW, OPEN_QUESTIONS, AGENTS, README)
+- ⬜ New self-hosted runner registration (deferred until Phase 1 check names exist)
+- ⬜ Branch protection (deferred — needs `ci`/`claude-review`/`codex-review` to exist)
+
+## Spec sprint (in-session) 🟡
+- ✅ SPEC-001 repo constitution / stack decisions (R7–R14)
+- ✅ SPEC-002 data contracts
+- ✅ SPEC-003 tool registry & MCP/web parity (ARCHITECTURE)
+- ✅ SPEC-004 trace & eval replay model
+- ✅ SPEC-005 MVP tool list + first-pass schemas
+- ✅ SPEC-007 CI / governance / security (DEVELOPMENT_WORKFLOW, SECURITY)
+- 🟡 EVALS spec (eval-case schema + gating policy) ✅ drafted
+- 🔬 SPEC-006 demo dataset fixture contract (depends on DATA-001)
+- 🔬 SPEC-008 labels/templates — templates done; label taxonomy to finalize
+
+## Handed-off research (async runners) 🔬
+- 🔬 **DATA-001** explore Perturb-PBMC → propose 3 hero comparisons (gates hero question,
+  subset, plot choice)
+- 🔬 **STAT-001** stats best practices → finalize the supported method menu
+- 🔬 Corpus source list (depends on the hero question)
+
+## Phase 1 — the harness ⬜
+- ⬜ `ci.yml` (lint/test/typecheck; `eval-smoke` path-conditional, non-blocking until gate
+  activation)
+- ⬜ `review.yml` + `scripts/spawn-review-agent.sh` (Claude + Codex in tmux)
+- ⬜ check-run gate + watchdog; GitHub native auto-merge
+- ⬜ register runner + set branch protection
+
+## Phase 2+ — implementation waves (HANDOFF §29.3, §30)
+IMPL-001 scaffold · IMPL-002 shared schemas pkg · IMPL-003 FastAPI skeleton ·
+IMPL-004 ToolRegistry skeleton · IMPL-005 trace models · IMPL-006 Next.js shell ·
+IMPL-007 seeded demo project · IMPL-008 eval runner skeleton → web chat → dashboard →
+eval page → deployment → polish + screen recording.
+
+Agents can parallelize on frontend shell / backend skeleton / analysis / corpus / eval
+runner / docs **only after** shared schemas + tool registry + trace are implemented.
+
+## Eval-gate activation milestone
+`eval-smoke` becomes a **required** check once the end-to-end hero workflow runs against the
+seeded demo project (target: after IMPL of the analysis + tool pipeline, i.e. once
+`run_comparison` → `rank_proteins` → `export_report` work on fixture data). Until then it runs
+informationally only (`docs/EVALS.md`).
