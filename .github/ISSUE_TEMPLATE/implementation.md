@@ -1,8 +1,13 @@
 ---
 name: Implementation task
 about: A contract-bound implementation task for an agent or human
-labels: implementation, agent-ready
+labels: implementation
 ---
+
+<!-- Do NOT pre-apply `agent-ready` — it is the human gate that triggers the implementer
+     (Codex) AFTER the spec's open questions are resolved. Add `needs-spec` to have Claude
+     draft a spec first. See docs/DEVELOPMENT_WORKFLOW.md. -->
+
 
 # Goal
 
