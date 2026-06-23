@@ -41,6 +41,7 @@ class ProbeToolInput(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     value: int
+    project_id: str | None = None
     secret: str | None = None
 
 
@@ -141,6 +142,80 @@ def test_registry_records_invalid_input_trace_without_calling_handler() -> None:
     assert sink.traces == [result.trace]
 
 
+def test_project_scoped_tool_trace_uses_validated_input_project_id() -> None:
+    registry = create_default_tool_registry()
+    sink = InMemoryTraceSink()
+
+    result = asyncio.run(
+        invoke_for_web_chat(
+            registry,
+            "get_project_status",
+            {"project_id": "proj_demo"},
+            trace_sink=sink,
+        )
+    )
+
+    assert result.output is None
+    assert result.error is not None
+    assert result.error.code == "out_of_scope"
+    assert result.trace.project_id == "proj_demo"
+    assert sink.traces == [result.trace]
+
+
+def test_project_scoped_tool_rejects_context_input_project_id_mismatch() -> None:
+    calls = 0
+
+    def handler(tool_input: BaseModel, context: ToolContext) -> ProbeToolOutput:
+        nonlocal calls
+        calls += 1
+        return _probe_output(tool_input, context)
+
+    registry = ToolRegistry()
+    registry.register(_probe_definition(handler))
+    sink = InMemoryTraceSink()
+
+    result = asyncio.run(
+        registry.invoke(
+            "probe",
+            {"value": 1, "project_id": "proj_input"},
+            ToolContext(
+                origin=TraceOrigin(surface="api"),
+                trace_sink=sink,
+                project_id="proj_context",
+            ),
+        )
+    )
+
+    assert calls == 0
+    assert result.output is None
+    assert result.error is not None
+    assert result.error.code == "invalid_input"
+    assert result.trace.project_id == "proj_context"
+    assert sink.traces == [result.trace]
+
+
+def test_project_scoped_tool_without_input_project_id_requires_context() -> None:
+    registry = create_default_tool_registry()
+    sink = InMemoryTraceSink()
+
+    result = asyncio.run(
+        invoke_for_mcp(
+            registry,
+            "search_corpus",
+            {"query": "IL-10"},
+            trace_sink=sink,
+            client="codex",
+        )
+    )
+
+    assert result.output is None
+    assert result.error is not None
+    assert result.error.code == "invalid_input"
+    assert result.trace.project_id is None
+    assert result.trace.origin.surface == "mcp"
+    assert sink.traces == [result.trace]
+
+
 def test_registry_records_invalid_output_as_internal_error() -> None:
     registry = ToolRegistry()
     registry.register(_probe_definition(lambda _tool_input, _context: {"value": "bad"}))
@@ -149,7 +224,7 @@ def test_registry_records_invalid_output_as_internal_error() -> None:
     result = asyncio.run(
         registry.invoke(
             "probe",
-            {"value": 1},
+            {"value": 1, "project_id": "proj_demo"},
             ToolContext(origin=TraceOrigin(surface="api"), trace_sink=sink),
         )
     )
@@ -157,7 +232,12 @@ def test_registry_records_invalid_output_as_internal_error() -> None:
     assert result.output is None
     assert result.error is not None
     assert result.error.code == "internal_error"
-    assert result.trace.input == {"value": 1, "secret": "[redacted]"}
+    assert result.trace.project_id == "proj_demo"
+    assert result.trace.input == {
+        "value": 1,
+        "project_id": "proj_demo",
+        "secret": "[redacted]",
+    }
     assert result.trace.output is None
     assert sink.traces == [result.trace]
 

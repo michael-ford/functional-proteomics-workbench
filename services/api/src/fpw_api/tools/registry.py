@@ -172,6 +172,7 @@ class ToolRegistry:
             trace = _close_trace(
                 definition=definition,
                 context=context,
+                project_id=_best_effort_trace_project_id(payload, context),
                 started_at=started_at,
                 monotonic_start=monotonic_start,
                 trace_input=trace_input,
@@ -187,15 +188,42 @@ class ToolRegistry:
             return ToolInvocationResult(output=None, trace=trace)
 
         trace_input = _redact_model(tool_input, definition.trace.redact_input_keys)
+        trace_project_id, project_error = _resolve_trace_project_id(
+            definition, tool_input, context
+        )
+        if project_error is not None:
+            trace = _close_trace(
+                definition=definition,
+                context=context,
+                project_id=trace_project_id,
+                started_at=started_at,
+                monotonic_start=monotonic_start,
+                trace_input=trace_input,
+                output=None,
+                status="error",
+                error=project_error,
+            )
+            context.trace_sink.record(trace)
+            return ToolInvocationResult(output=None, trace=trace)
 
         try:
             raw_output = definition.handler(tool_input, context)
             if inspect.isawaitable(raw_output):
                 raw_output = await raw_output
             output = definition.output_model.model_validate(raw_output)
+            output_project_id = _model_project_id(output)
+            if output_project_id is not None:
+                if trace_project_id is None:
+                    trace_project_id = output_project_id
+                elif output_project_id != trace_project_id:
+                    raise ToolExecutionError(
+                        "internal_error",
+                        "tool output project_id does not match the traced project_id.",
+                    )
             trace = _close_trace(
                 definition=definition,
                 context=context,
+                project_id=trace_project_id,
                 started_at=started_at,
                 monotonic_start=monotonic_start,
                 trace_input=trace_input,
@@ -209,6 +237,7 @@ class ToolRegistry:
             trace = _close_trace(
                 definition=definition,
                 context=context,
+                project_id=trace_project_id,
                 started_at=started_at,
                 monotonic_start=monotonic_start,
                 trace_input=trace_input,
@@ -224,6 +253,7 @@ class ToolRegistry:
             trace = _close_trace(
                 definition=definition,
                 context=context,
+                project_id=trace_project_id,
                 started_at=started_at,
                 monotonic_start=monotonic_start,
                 trace_input=trace_input,
@@ -239,6 +269,7 @@ class ToolRegistry:
             trace = _close_trace(
                 definition=definition,
                 context=context,
+                project_id=trace_project_id,
                 started_at=started_at,
                 monotonic_start=monotonic_start,
                 trace_input=trace_input,
@@ -259,6 +290,7 @@ def _close_trace(
     *,
     definition: ToolDefinition,
     context: ToolContext,
+    project_id: str | None,
     started_at: datetime,
     monotonic_start: float,
     trace_input: dict[str, Any],
@@ -270,7 +302,7 @@ def _close_trace(
     latency_ms = max(0, round((time.perf_counter() - monotonic_start) * 1000))
     return ToolCallTrace(
         id=f"tc_{uuid4().hex}",
-        project_id=context.project_id,
+        project_id=project_id,
         origin=context.origin,
         tool_name=definition.name,
         input=trace_input,
@@ -292,6 +324,62 @@ def _declared_error_code(definition: ToolDefinition, code: str) -> str:
     if "internal_error" in definition.error_codes:
         return "internal_error"
     return code
+
+
+def _resolve_trace_project_id(
+    definition: ToolDefinition,
+    tool_input: BaseModel,
+    context: ToolContext,
+) -> tuple[str | None, TraceError | None]:
+    if definition.permissions.scope == "global":
+        return None, None
+
+    input_project_id = _model_project_id(tool_input)
+    if context.project_id is not None and input_project_id is not None:
+        if context.project_id != input_project_id:
+            return (
+                context.project_id,
+                TraceError(
+                    code=_declared_error_code(definition, "invalid_input"),
+                    message=(
+                        "project_id in tool input does not match the invocation context."
+                    ),
+                    retryable=False,
+                ),
+            )
+        return context.project_id, None
+
+    if input_project_id is not None:
+        return input_project_id, None
+    if context.project_id is not None:
+        return context.project_id, None
+
+    if definition.name == "create_project":
+        return None, None
+
+    return (
+        None,
+        TraceError(
+            code=_declared_error_code(definition, "invalid_input"),
+            message="project-scoped tool requires a project_id in input or context.",
+            retryable=False,
+        ),
+    )
+
+
+def _model_project_id(model: BaseModel) -> str | None:
+    value = getattr(model, "project_id", None)
+    return value if isinstance(value, str) and value else None
+
+
+def _best_effort_trace_project_id(
+    payload: dict[str, Any],
+    context: ToolContext,
+) -> str | None:
+    if context.project_id is not None:
+        return context.project_id
+    value = payload.get("project_id")
+    return value if isinstance(value, str) and value else None
 
 
 def _redact_model(model: BaseModel, keys: list[str]) -> dict[str, Any]:
