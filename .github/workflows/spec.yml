@@ -1,0 +1,22 @@
+# Claude drafts a spec + open-questions list when you add the `needs-spec` label to an issue
+# (before it's `agent-ready`). Claude = spec author + reviewer; Codex = implementer (execute.yml).
+name: spec
+on:
+  issues:
+    types: [labeled]
+permissions:
+  contents: read
+  issues: write
+jobs:
+  spec:
+    if: github.event.label.name == 'needs-spec'
+    runs-on: [self-hosted, macOS]
+    steps:
+      - uses: actions/checkout@v4
+      - name: claude drafts spec
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          REVIEW_MODEL: sonnet
+        run: |
+          bash scripts/spawn-spec-agent.sh "${{ github.event.issue.number }}"

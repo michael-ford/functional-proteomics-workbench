@@ -72,7 +72,38 @@ No required reviewers (auto-merge is the whole point).
 **Positioning note:** for the Nomic audience, the hero is the *strength of the gate*
 (CI + evals + two independent model reviewers, P0/P1 clean), not the absence of humans.
 
-## Labels, issue & PR templates
+## Issue lifecycle (spec → implement → review → merge)
 
-See `.github/ISSUE_TEMPLATE/` and `.github/pull_request_template.md`. Label taxonomy is
-defined in `HANDOFF.md` §27 and finalized under SPEC-008.
+Claude authors specs and reviews; Codex implements and reviews. The division:
+
+```
+issue opened
+  └─ you add `needs-spec`  ─▶ [spec.yml] Claude drafts a skeleton spec + a headline
+                                Open Questions / Blockers list; labels `spec-drafted`
+                                (+ `needs-decision` if it raised blockers)
+  └─ orchestrator session  ─▶ you + Claude burn through the open questions across all
+                                `needs-decision` issues, finalize the spec
+  └─ you add `agent-ready` ─▶ [execute.yml] Codex implements in a tmux worktree
+                                (`~/fpw-agent-workspaces/issue-N`, branch `agent/issue-N`),
+                                opens a PR
+  └─ PR                    ─▶ [review.yml] Claude + Codex review ─▶ auto-merge on green
+```
+
+Both agent workflows run on the self-hosted runner; the implementer is fire-and-forget
+(attach with `tmux attach -t fpw-agents`). The implementer opens its PR using the runner's
+ambient `gh` login (a real user) so the PR triggers review + auto-merge.
+
+## Labels
+
+Single implementation label (`agent-ready`), per owner decision — no `agent-claude` /
+`agent-codex` split; the default implementer is **Codex** (`IMPL_AGENT` in `execute.yml`).
+
+| Label | Meaning |
+|---|---|
+| `needs-spec` | Trigger Claude's spec-drafting pass on this issue |
+| `spec-drafted` | Claude has posted a spec + open-questions comment |
+| `needs-decision` | Open questions block this issue; resolve in an orchestrator session |
+| `agent-ready` | Spec finalized → Codex implements |
+| `contract-change` | PR may touch protected contract files (`packages/shared-schemas/**`, `docs/*` contracts, `.github/workflows/**`) |
+
+See `.github/ISSUE_TEMPLATE/` and `.github/pull_request_template.md`.

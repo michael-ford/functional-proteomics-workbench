@@ -1,0 +1,23 @@
+# Codex implements an issue when it's labeled `agent-ready`. Fire-and-forget: spawns the
+# implementer in tmux on the runner; the agent opens a PR that then flows through
+# review + auto-merge. (Claude authors the spec earlier — see spec.yml.)
+name: execute
+on:
+  issues:
+    types: [labeled]
+permissions:
+  contents: read
+jobs:
+  execute:
+    if: github.event.label.name == 'agent-ready'
+    runs-on: [self-hosted, macOS]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: spawn Codex implementer
+        env:
+          GH_REPO: ${{ github.repository }}
+          IMPL_AGENT: codex
+        run: |
+          bash scripts/spawn-impl-agent.sh "${{ github.event.issue.number }}"
