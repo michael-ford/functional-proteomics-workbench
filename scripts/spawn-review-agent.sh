@@ -33,6 +33,14 @@ RUNSH="${TMP}/${WINDOW}.run.sh"
 LOG="${TMP}/${WINDOW}.log"
 DONE="${TMP}/${WINDOW}.done"
 rm -f "$PROMPT" "$RUNSH" "$LOG" "$DONE"
+WINDOW_SPAWNED=0
+
+cleanup_review_window() {
+  if [[ "$WINDOW_SPAWNED" == "1" ]]; then
+    tmux kill-window -t "${SESSION}:${WINDOW}" 2>/dev/null || true
+  fi
+}
+trap cleanup_review_window EXIT
 
 # Map reviewer -> CLI binary.
 case "$REVIEWER" in
@@ -57,8 +65,13 @@ You are the **${REVIEWER}** code reviewer for PR #${PR} in ${REPO} (head ${HEAD_
 1. Read REVIEW.md at the repo root for the severity rubric and output format.
 2. Review the diff: run \`gh pr diff ${PR}\`. Read changed files for context (read-only).
 3. Post exactly ONE PR comment with your findings via \`gh pr comment ${PR} --body "..."\`,
-   formatted per REVIEW.md (a tally line, then \`### P0\` / \`### P1\` / \`### P2\` sections),
-   ending with the marker line: <!-- reviewer:${REVIEWER} sha:${HEAD_SHA} -->
+   formatted per REVIEW.md. Even when there are no findings, include:
+   - Reviewed files
+   - Checks run/inspected
+   - Pass rationale
+   - Residual risk
+   Then include \`### P0\` / \`### P1\` / \`### P2\` sections and end with the marker line:
+   <!-- reviewer:${REVIEWER} sha:${HEAD_SHA} -->
 4. Then print, as the FINAL line of your output, EXACTLY one of:
      REVIEW_VERDICT: PASS    (no P0 and no P1 findings)
      REVIEW_VERDICT: FAIL    (one or more P0 or P1 findings)
@@ -93,6 +106,7 @@ chmod +x "$RUNSH"
 tmux has-session -t "$SESSION" 2>/dev/null || tmux new-session -d -s "$SESSION" -n scratch
 tmux kill-window -t "${SESSION}:${WINDOW}" 2>/dev/null || true
 tmux new-window -t "${SESSION}:" -n "$WINDOW" -c "$WORKDIR"
+WINDOW_SPAWNED=1
 tmux kill-window -t "${SESSION}:scratch" 2>/dev/null || true
 tmux send-keys -t "${SESSION}:${WINDOW}" "bash '${RUNSH}'" Enter
 echo "Spawned ${REVIEWER} review in tmux ${SESSION}:${WINDOW}  (attach: tmux attach -t ${SESSION})"
