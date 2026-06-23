@@ -4,11 +4,12 @@
 setup:            ## install deps (TODO)
 	@echo "TODO: setup"
 test:             ## run all tests (TODO)
-	uv run --project packages/shared-schemas pytest
+	uv run --project packages/shared-schemas pytest packages/shared-schemas/tests
+	uv run --project services/api pytest services/api/tests
 lint:             ## lint (TODO)
-	@echo "TODO: lint (nothing to lint yet — passing)"
+	uv run --project services/api ruff check services/api/src services/api/tests
 typecheck:        ## typecheck (TODO)
-	@echo "TODO: typecheck (nothing to check yet — passing)"
+	uv run --project services/api pyright --project services/api services/api/src services/api/tests
 gen-types:        ## generate frontend TypeScript types from shared Pydantic schemas
 	uv run --project packages/shared-schemas python -m shared_schemas.export_schema --output packages/shared-schemas/schema/shared-schemas.schema.json
 	mkdir -p packages/shared-schemas/generated
@@ -18,7 +19,7 @@ eval:             ## run full eval suite (TODO)
 eval-smoke:       ## run deterministic CI-safe eval cases (TODO)
 	@echo "TODO: eval-smoke (no end-to-end pipeline yet — informational)"
 run-local:        ## run app locally (TODO)
-	@echo "TODO: run-local"
+	uv run --project services/api uvicorn fpw_api.app:app --reload
 ingest-demo-data: ## ingest Perturb-PBMC subset (TODO)
 	@echo "TODO: ingest-demo-data"
 build-corpus:     ## build entity-aware RAG corpus (TODO)
