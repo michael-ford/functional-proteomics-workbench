@@ -53,7 +53,7 @@ Workflows target `runs-on: [self-hosted, macOS]`. The `self-hosted` label is imp
 > **Do this BEFORE enabling auto-merge (step 4).** With auto-merge on but no required checks,
 > a PR could merge unreviewed.
 
-Start by requiring `ci` + `review (claude)`. Add `review (codex)` once Codex is live, and
+Require `ci` + `review (claude)` + `review (codex)` (all live as of 2026-06-23). Add
 `eval-smoke` at the eval-gate activation milestone (`docs/ROADMAP.md`).
 
 ```bash
@@ -64,7 +64,8 @@ gh api -X PUT repos/michael-ford/functional-proteomics-workbench/branches/main/p
     "strict": true,
     "checks": [
       { "context": "ci" },
-      { "context": "review (claude)" }
+      { "context": "review (claude)" },
+      { "context": "review (codex)" }
     ]
   },
   "enforce_admins": false,
