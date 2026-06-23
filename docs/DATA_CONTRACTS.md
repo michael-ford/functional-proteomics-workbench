@@ -252,9 +252,125 @@ Defined fully in `docs/TRACE_MODEL.md` (it is the spine of both the MCP and web 
 Every entity above that is *created or mutated by a tool* is produced inside a traced tool
 call; the trace references the affected `project_id` and any resulting artifact refs.
 
+## Demo dataset fixture contract (SPEC-006)
+
+The single seeded demo fixture that dataset validation, analysis, reporting, and evals all run
+against. Decided after DATA-001 selected the hero comparison (`docs/DEMO_DECISIONS.md`); this
+section is the frozen description of that fixture. Changes require `contract-change`.
+
+### Source & license
+- **Repo:** `https://github.com/nplexbio/nELISA-PBMC`
+- **File:** `figure 4/data_pgmc_umap.h5ad` (AnnData; 7,376 samples × 191 proteins, 35 obs cols).
+- **License:** data is **CC BY-NC 4.0**; code Apache-2.0. Non-commercial demo use only.
+- **Required citation:** Dagher, M., Ongo, G., Robichaud, N. et al. *nELISA: a high-throughput,
+  high-plex platform enables quantitative profiling of the inflammatory secretome.* Nat Methods
+  (2025). DOI `10.1038/s41592-025-02861-6`.
+
+### Hero comparison encoded by the fixture
+IL-10 vs matched no-cytokine control, under LPS stimulation (DATA-001 Candidate 1):
+- `stimulation = "LPS"`, `stimulus_concentration_ng_ml = 2000.0` (all rows)
+- `perturbagen ∈ {"IL-10", "control"}`; `cytokine_concentration_ng_ml = 50.0` for IL-10, `0.0`
+  for control
+- all 6 donors; design observed in DATA-001: ~1 IL-10 sample/donor + ~18 matched controls/donor
+
+### Layout & columns (long format)
+One row per `(sample, protein)`. `DatasetSchemaProfile.layout = "long"`.
+
+| column | dtype | units / allowed values | role |
+|---|---|---|---|
+| `sample_id` | string | stable id mapping back to the source H5AD obs row | metadata |
+| `donor` | categorical | `donor_1` … `donor_6` (exactly 6) | donor |
+| `stimulation` | categorical | `"LPS"` (only value in fixture) | stimulation |
+| `stimulus_concentration_ng_ml` | float | `2000.0` | metadata |
+| `perturbagen` | categorical | `"IL-10"` \| `"control"` (both present) | perturbagen |
+| `cytokine_concentration_ng_ml` | float | `50.0` (IL-10) \| `0.0` (control) | metadata |
+| `protein` | categorical | one of the curated panel (below) | protein |
+| `response_value` | float | normalized response, finite (no NaN/inf) | value |
+
+`value_type = "normalized_response"` — the public H5AD's normalized value, carried **verbatim**.
+v0.1 does **not** renormalize and does **not** synthesize pg/mL or fold-change; the analysis
+package derives donor-matched effect sizes from `response_value` (see STAT-001 / `run_comparison`).
+
+### Curated protein panel (v0.1)
+~21 inflammatory cytokines/chemokines, centered on the DATA-001 IL-10/LPS signal:
+`TNF alpha, IL-1 beta, IL-1 alpha, IL-6, IL-12 p40, IFN gamma, CCL1, CCL2, CCL22, CCL24,
+CCL5, CCL7, CCL8, CXCL1, CXCL10, CXCL16, G-CSF, GM-CSF, IL-1 RA RN, TNF RII, MMP-1`. The exact
+panel (canonical protein names matching the source object) is frozen in `provenance.json`
+(`selection.proteins`) when the fixture is generated.
+
+### Allowed transforms (direct subset only)
+Permitted, and the **only** permitted operations: row filter to the selection above;
+wide→long melt; column rename to the contract names; donor integer → `donor_N` label mapping.
+**Not** permitted: value recomputation, renormalization, imputation, outlier removal, or any
+synthetic/augmented rows. The fixture is an honest direct subset.
+
+### Provenance recording
+The fixture ships with a sidecar `provenance.json` next to the data artifacts:
+```python
+class DatasetProvenance(BaseModel):
+    source_repo: str                 # github URL
+    source_commit: str               # pinned commit SHA of the public repo
+    source_file: str                 # "figure 4/data_pgmc_umap.h5ad"
+    source_file_sha256: str          # hash of the exact source object pulled
+    source_value_field: str          # which AnnData field/layer response_value came from
+    license: str                     # "CC BY-NC 4.0 (data)"
+    citation: Citation               # reuses the Citation model (DOI/title/authors/year)
+    value_type: Literal["normalized_response"]
+    normalization_note: str          # "verbatim public H5AD normalized value; not renormalized"
+    selection: dict                  # donors, stimulation, concentrations, perturbagens, proteins
+    transforms_applied: list[str]    # the allowed transforms actually run
+    row_count: int
+    donor_counts: dict[str, int]     # rows per donor, for the matched-design check
+    generated_by: str                # extraction script path + version
+    extracted_at: datetime
+```
+
+### Storage refs (seeded `proj_demo`)
+- `raw_ref`: `project://proj_demo/datasets/raw/nelisa_pbmc_il10_lps_subset.csv` (as-extracted long CSV)
+- `normalized_ref`: `project://proj_demo/datasets/normalized/nelisa_pbmc_il10_lps_long.parquet`
+- provenance: `project://proj_demo/datasets/raw/provenance.json`
+
+(`source = "selected_public"`.) "normalized" here means the canonical long/typed parquet — the
+values are already normalized in the source; no further normalization is applied.
+
+### Validation the validator MUST assert (→ `DatasetValidation.status = "passed"`)
+1. all required columns present with the dtypes above;
+2. `donor` set == `{donor_1..donor_6}` (exactly 6 donors);
+3. `stimulation == "LPS"` and `stimulus_concentration_ng_ml == 2000.0` for every row;
+4. `perturbagen ⊆ {"IL-10","control"}` with **both** present;
+5. `cytokine_concentration_ng_ml == 50.0` where IL-10 else `0.0`;
+6. every `protein` is in the frozen panel, and all panel proteins are present;
+7. `response_value` finite — no NaN/inf/nulls;
+8. matched design: each donor has ≥1 IL-10 sample **and** ≥1 control sample;
+9. rectangular: `row_count == n_samples × n_proteins`.
+
+### Validation failures the fixture suite MUST exercise
+Ship tiny deliberately-broken variants so the validator's failure paths are tested. Each maps to
+a `ValidationIssue.code`:
+
+| variant | injected defect | `code` | severity |
+|---|---|---|---|
+| `missing_column` | drop `perturbagen` | `SCHEMA_MISSING_COLUMN` | error |
+| `unknown_protein` | a `protein` outside the panel | `PROTEIN_NOT_IN_PANEL` | error |
+| `nan_value` | a NaN in `response_value` | `NULL_VALUE` | error |
+| `wrong_stimulation` | a row with `stimulation != "LPS"` | `UNEXPECTED_CATEGORY` | error |
+| `unbalanced_design` | a donor missing its IL-10 sample | `MISSING_GROUP_FOR_DONOR` | error |
+
+These `code` values are the v0.1 vocabulary; additions require `contract-change`.
+
+### Reproducibility
+Generation is deterministic given the pinned `source_commit`: same input → byte-identical
+fixture (stable row order: sort by `donor`, `perturbagen`, `sample_id`, `protein`). The extraction
+script (ingestion lands in IMPL-007 #22, not here) records `source_file_sha256` and fails closed
+if the pinned source hash changes.
+
 ## Invariants (enforced in code, not by the model)
 - A `source-derived` Claim MUST reference ≥1 `EvidenceChunk`.
 - An `AnalysisResult.method_id` MUST be a supported method id.
 - An `AnalysisPlan` MUST exist before its `AnalysisResult`.
 - All artifact bytes are reached via `ArtifactRef` + the storage adapter — never raw paths
   from a tool argument.
+- A `source="selected_public"` Dataset MUST ship a `provenance.json` recording at least
+  `source_repo`, `source_commit`, and `source_file_sha256` (SPEC-006).
+- The demo fixture MUST be a direct subset: only the allowed transforms (row filter, melt,
+  rename, donor relabel) — no value recomputation, imputation, or synthetic rows (SPEC-006).
