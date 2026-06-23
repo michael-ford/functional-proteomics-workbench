@@ -54,7 +54,10 @@ Workflows target `runs-on: [self-hosted, macOS]`. The `self-hosted` label is imp
 > a PR could merge unreviewed.
 
 Require `ci` + `review (claude)` + `review (codex)` (all live as of 2026-06-23). Add
-`eval-smoke` at the eval-gate activation milestone (`docs/ROADMAP.md`).
+`eval-smoke` at the eval-gate activation milestone (`docs/ROADMAP.md`). Keep
+`review (claude)` required: the review harness waits for Claude when it can run, and treats
+temporary local Claude usage/quota-limit exits as advisory skipped checks so auto-merge is
+not blocked by subscription availability.
 
 ```bash
 gh api -X PUT repos/michael-ford/functional-proteomics-workbench/branches/main/protection \

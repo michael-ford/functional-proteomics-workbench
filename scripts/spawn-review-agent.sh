@@ -114,6 +114,17 @@ tail -n 25 "$LOG" 2>/dev/null || true
 echo "-----------------------------------------"
 
 if [[ "$AGENT_RC" != "0" ]]; then
+  if [[ "$REVIEWER" == "claude" ]]; then
+    LAST_LOG_LINE="$(sed '/^[[:space:]]*$/d' "$LOG" 2>/dev/null | tail -n 1 || true)"
+    case "$LAST_LOG_LINE" in
+      "You've hit your limit"*"resets"*)
+        echo "::warning::claude review skipped because the local Claude CLI hit a usage limit."
+        gh pr comment "$PR" --repo "$REPO" \
+          --body "🟡 **claude review skipped** — local Claude CLI hit a temporary usage limit on the runner. Required check is non-blocking for this availability failure only. <!-- reviewer:claude sha:${HEAD_SHA} skipped:usage-limit -->" || true
+        exit 0
+        ;;
+    esac
+  fi
   echo "::error::${REVIEWER} agent exited with code ${AGENT_RC}"
   exit 1
 fi
