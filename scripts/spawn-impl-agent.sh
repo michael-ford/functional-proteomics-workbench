@@ -25,10 +25,13 @@ WINDOW="issue-${ISSUE}"
 BRANCH="agent/issue-${ISSUE}"
 WT_ROOT="${HOME}/fpw-agent-workspaces"
 WORKDIR="${WT_ROOT}/issue-${ISSUE}"
-TMP="${RUNNER_TEMP:-/tmp}/fpw-impl"; mkdir -p "$TMP" "$WT_ROOT"
-PROMPT="${TMP}/issue-${ISSUE}.prompt"
-RUNSH="${TMP}/issue-${ISSUE}.run.sh"
-CONTEXT="${TMP}/issue-${ISSUE}.context.md"
+# Durable state dir — NOT RUNNER_TEMP, which is job-scoped and wiped when the workflow ends.
+# The implementer is fire-and-forget and reads these files AFTER the job exits, so they must
+# live somewhere the runner won't reclaim.
+STATE="${WT_ROOT}/.state/issue-${ISSUE}"; mkdir -p "$STATE" "$WT_ROOT"
+PROMPT="${STATE}/prompt"
+RUNSH="${STATE}/run.sh"
+CONTEXT="${STATE}/context.md"
 
 case "$IMPLEMENTER" in
   codex)  BIN=codex ;;
@@ -103,8 +106,11 @@ ${AGENT_INVOCATION}
 EOF
 chmod +x "$RUNSH"
 
-# Spawn in tmux, fire-and-forget. remain-on-exit keeps the window after the agent finishes so
-# it can be inspected (and so the pane_dead reap-guard above works on the next run).
+# Spawn in tmux, fire-and-forget. The agent survives job cleanup because it is a child of the
+# tmux SERVER (a daemon that `tmux new-session -d` double-forks and reparents to launchd/init),
+# not of the Actions job process tree — so the runner's end-of-job process reaping does not
+# reach it. remain-on-exit keeps the window after the agent finishes for inspection (and so the
+# pane_dead reap-guard above works on the next run).
 tmux has-session -t "$SESSION" 2>/dev/null || tmux new-session -d -s "$SESSION" -n scratch
 tmux new-window -t "${SESSION}:" -n "$WINDOW" -c "$WORKDIR"
 tmux set-option -w -t "${SESSION}:${WINDOW}" remain-on-exit on
