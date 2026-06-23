@@ -1,8 +1,11 @@
 # Runner Setup & Branch Protection (Phase 1)
 
-These are the one-time, admin/interactive steps the harness needs that **must be run by the
-repo owner** (they need an interactive token / repo-admin). Run them on the Mac that will host
-the runner. The CI/review/auto-merge workflows are already committed.
+> **Status: executed 2026-06-23.** Runner `fpw-mac-runner` is online; branch protection
+> requires `ci` + `review (claude)` + `review (codex)`; auto-merge is enabled; validated
+> end-to-end on PRs #1–#2. The steps below are kept as the reproduction runbook.
+
+These are the one-time, admin/interactive steps the harness needs. Run them on the Mac that
+hosts the runner. The CI/review/auto-merge workflows are already committed.
 
 ## 1. Register a self-hosted macOS runner (dedicated to this repo)
 
@@ -36,12 +39,14 @@ Workflows target `runs-on: [self-hosted, macOS]`. The `self-hosted` label is imp
 
 ## 2. Provision the review CLIs on the runner host
 
-- **Claude** — already installed (`claude` v2.1.186). Ensure it's logged in for the runner's
-  user (`claude` inherits `~/.claude`).
-- **Codex** — **not yet installed.** Until it is, the `review (codex)` job posts a
-  "skipped" note and passes non-blocking (`scripts/spawn-review-agent.sh`). To enable:
-  install the Codex CLI, `codex login`, then verify `codex exec` works, and add
-  `review (codex)` to required checks (step 4).
+- **Claude** — installed (`claude` v2.1.186), logged in (inherits `~/.claude`). ✅
+- **Codex** — installed via Homebrew (`codex` v0.142.0), logged in, `codex exec` verified. ✅
+  The review job runs it as `codex exec --skip-git-repo-check -s danger-full-access` (the
+  sandbox flag is required so the agent can call `gh`).
+
+> **launchd PATH gotcha (handled):** the runner service has a minimal PATH, so
+> `~/actions-runner-nomic/.path` is set to include `/opt/homebrew/bin` and
+> `~/.local/bin` (where `tmux`/`gh`/`codex`/`claude` live). Restart the service after editing.
 
 ## 3. Branch protection on `main` (required status checks, no human review)
 
