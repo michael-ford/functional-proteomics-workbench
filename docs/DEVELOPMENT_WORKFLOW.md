@@ -102,6 +102,10 @@ Both agent workflows run on the self-hosted runner; the implementer is fire-and-
 (attach with `tmux attach -t fpw-agents`). The implementer opens its PR using the runner's
 ambient `gh` login (a real user) so the PR triggers review + auto-merge.
 
+When an implementation PR from `agent/issue-N` is merged, `cleanup-agent.yml` runs on the
+self-hosted runner and removes the corresponding tmux window, worktree, local branch, and
+durable prompt/state directory. A manual `workflow_dispatch` path exists for cleanup replays.
+
 ## Labels
 
 Single implementation label (`agent-ready`), per owner decision — no `agent-claude` /
