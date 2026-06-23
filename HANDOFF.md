@@ -1554,7 +1554,7 @@ Should maintain unresolved decisions.
 
 Important instruction:
 
-«Do not silently resolve open questions in implementation PRs. If an implementation requires resolving an open question, label the issue "needs-human-decision".»
+«Do not silently resolve open questions in implementation PRs. If an implementation requires resolving an open question, label the issue "needs-decision".»
 
 ---
 
@@ -1736,7 +1736,7 @@ Recommended labels:
 agent-ready
 agent-codex
 agent-claude
-needs-human-decision
+needs-decision
 contract-change
 implementation
 spec
@@ -1758,7 +1758,7 @@ Label semantics:
 agent-ready:
   issue has enough context and acceptance criteria for an agent.
 
-needs-human-decision:
+needs-decision:
   issue is blocked on unresolved product/architecture decision.
 
 contract-change:
@@ -2480,4 +2480,3 @@ The next step is not broad implementation.
 The next step is:
 
 «Create the repo, add this handoff, run the spec sprint, build the CI/governance harness, then create implementation issues for agent-driven PR work.»
-

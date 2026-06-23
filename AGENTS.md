@@ -41,7 +41,7 @@ IMPL wave.)
 ## Handling open questions
 
 Do **not** silently resolve items in `docs/OPEN_QUESTIONS.md`. If a task requires
-resolving one, stop and surface it (label `needs-human-decision`).
+resolving one, stop and surface it (label `needs-decision`).
 
 ## Do-not-do list (from HANDOFF §41)
 

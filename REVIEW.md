@@ -57,8 +57,8 @@ The review job grades on the final `REVIEW_VERDICT` line. `FAIL` (or a missing v
 timeout) fails the job → branch protection blocks auto-merge. Both reviewers are required, so
 the stricter verdict wins.
 
-Exception: if the local Claude CLI exits before reviewing with the exact usage-limit message
-recognized by `scripts/spawn-review-agent.sh`, the harness posts a `reviewer:claude ... skipped`
+Exception: if the local Claude CLI exits before reviewing with a recognized usage/session
+limit message, the harness posts a `reviewer:claude ... skipped`
 comment and passes `review (claude)` as an availability skip. This is not a review verdict;
 it exists only to avoid blocking auto-merge on local subscription quota exhaustion. Codex
 review remains required and fail-closed.
