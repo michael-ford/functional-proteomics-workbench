@@ -4,9 +4,8 @@
 # public repo). Emits, for the PR's current head SHA:
 #   - each check's status
 #   - failing CI/eval logs (from the runner — trustworthy)
-#   - review findings from TRUSTED authors only: the `github-actions` bot (our reviewers; that
-#     identity cannot be spoofed) and maintainers (author_association OWNER/MEMBER/COLLABORATOR)
-# Untrusted public comments are excluded.
+#   - maintainer-authored comments only (bot comments are NOT trusted: review.yml runs review
+#     code from the PR head, so a PR could post arbitrary github-actions[bot] comments)
 #
 # Usage: build-pr-feedback.sh <pr_number> <out_file>
 set -euo pipefail
@@ -15,6 +14,7 @@ PR="${1:?usage: build-pr-feedback.sh <pr> <out_file>}"
 OUT="${2:?usage: build-pr-feedback.sh <pr> <out_file>}"
 REPO="${GH_REPO:-$(gh repo view --json nameWithOwner -q .nameWithOwner)}"
 HEAD_SHA="$(gh pr view "$PR" --repo "$REPO" --json headRefOid -q .headRefOid)"
+[ -n "$HEAD_SHA" ] || { echo "::error::could not resolve head SHA for PR $PR"; exit 1; }
 
 {
   echo "# PR #$PR trusted feedback (head $HEAD_SHA)"
@@ -43,18 +43,19 @@ for page in raw:
     comments.extend(page) if isinstance(page, list) else comments.append(page)
 TRUST = {"OWNER", "MEMBER", "COLLABORATOR"}
 def trusted(c):
+    # Maintainer-authored HUMAN comments only. Bot comments are NOT trusted: review.yml runs
+    # spawn-review-agent.sh from the PR head, so a PR could post arbitrary github-actions[bot]
+    # comments. Reviewer findings reach the agent only via the failing-CI logs above, or a
+    # maintainer relaying them.
     u = c.get("user") or {}
-    # our CI reviewers post as the github-actions bot — an identity a public user cannot forge
-    if u.get("login") in ("github-actions[bot]", "github-actions"):
-        return True
     return c.get("author_association") in TRUST and u.get("type") != "Bot"
-print("\n## Review findings (trusted authors, current head only)\n")
+print("\n## Maintainer comments (current head only; reviewer bot prose is NOT auto-trusted)\n")
 kept = [c for c in comments if trusted(c) and head in (c.get("body") or "")]
 for c in kept:
     u = (c.get("user") or {}).get("login")
     print(f"### {u} ({c.get('author_association')})\n\n{c.get('body') or ''}\n")
 if not kept:
-    print("_(no trusted review findings for the current head)_")
+    print("_(no maintainer comments for the current head)_")
 PY
 rm -f "$CJSON"
 echo "$OUT"
