@@ -6,6 +6,7 @@ setup:            ## install deps (TODO)
 test:             ## run all tests (TODO)
 	uv run --project packages/shared-schemas pytest packages/shared-schemas/tests
 	uv run --project services/api pytest services/api/tests
+	PYTHONPATH=. uv run --project packages/shared-schemas pytest --rootdir=. evals/tests
 lint:             ## lint (TODO)
 	uv run --project services/api ruff check services/api/src services/api/tests
 typecheck:        ## typecheck (TODO)
@@ -14,10 +15,10 @@ gen-types:        ## generate frontend TypeScript types from shared Pydantic sch
 	uv run --project packages/shared-schemas python -m shared_schemas.export_schema --output packages/shared-schemas/schema/shared-schemas.schema.json
 	mkdir -p packages/shared-schemas/generated
 	pnpm dlx json-schema-to-typescript -i packages/shared-schemas/schema/shared-schemas.schema.json -o packages/shared-schemas/generated/types.ts
-eval:             ## run full eval suite (TODO)
-	@echo "TODO: eval"
-eval-smoke:       ## run deterministic CI-safe eval cases (TODO)
-	@echo "TODO: eval-smoke (no end-to-end pipeline yet — informational)"
+eval:             ## run offline eval suite
+	python -m evals.runners --mode full --output evals/results/eval-latest.json
+eval-smoke:       ## run deterministic CI-safe eval cases
+	python -m evals.runners --mode smoke --output evals/results/eval-smoke-latest.json
 run-local:        ## run app locally (TODO)
 	uv run --project services/api uvicorn fpw_api.app:app --reload
 ingest-demo-data: ## ingest Perturb-PBMC subset (TODO)
