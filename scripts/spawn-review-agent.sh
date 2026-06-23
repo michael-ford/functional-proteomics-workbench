@@ -117,13 +117,20 @@ if [[ "$AGENT_RC" != "0" ]]; then
   echo "::error::${REVIEWER} agent exited with code ${AGENT_RC}"
   exit 1
 fi
-if grep -Eq 'REVIEW_VERDICT:[[:space:]]*FAIL' "$LOG"; then
-  echo "::error::${REVIEWER} found blocking (P0/P1) issues — gating merge."
+# Grade on the LAST verdict line only. The prompt itself names both PASS and FAIL, and verbose
+# agents (e.g. codex) echo the prompt to stdout — so grepping the whole log for FAIL yields
+# false failures. The agent is instructed to print the verdict as its final line.
+VERDICT_LINE="$(grep -E 'REVIEW_VERDICT:' "$LOG" | tail -n 1 || true)"
+if [[ -z "$VERDICT_LINE" ]]; then
+  echo "::error::${REVIEWER} produced no REVIEW_VERDICT line — failing closed."
   exit 1
-elif grep -Eq 'REVIEW_VERDICT:[[:space:]]*PASS' "$LOG"; then
-  echo "${REVIEWER}: PASS"
+elif printf '%s\n' "$VERDICT_LINE" | grep -Eq 'FAIL'; then
+  echo "::error::${REVIEWER} verdict FAIL (P0/P1 present) — gating merge.  [${VERDICT_LINE}]"
+  exit 1
+elif printf '%s\n' "$VERDICT_LINE" | grep -Eq 'PASS'; then
+  echo "${REVIEWER}: PASS  [${VERDICT_LINE}]"
   exit 0
 else
-  echo "::error::${REVIEWER} produced no REVIEW_VERDICT line — failing closed."
+  echo "::error::${REVIEWER} unparseable verdict — failing closed.  [${VERDICT_LINE}]"
   exit 1
 fi
