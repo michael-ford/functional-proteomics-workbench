@@ -12,8 +12,8 @@ are drafted (`docs/DATA_CONTRACTS.md`, `docs/MCP_TOOLS.md`, `docs/TRACE_MODEL.md
 ## Phase 0 — bootstrap ✅
 - ✅ Public repo (`michael-ford/functional-proteomics-workbench`)
 - ✅ Skeleton + governance docs (DEVELOPMENT_WORKFLOW, OPEN_QUESTIONS, AGENTS, README)
-- ⬜ New self-hosted runner registration (deferred until Phase 1 check names exist)
-- ⬜ Branch protection (deferred — needs `ci`/`claude-review`/`codex-review` to exist)
+- ✅ Self-hosted runner `fpw-mac-runner` registered + online
+- ✅ Branch protection requires `ci` + `review (claude)` + `review (codex)`; auto-merge on
 
 ## Spec sprint (in-session) 🟡
 - ✅ SPEC-001 repo constitution / stack decisions (R7–R14)
@@ -32,12 +32,12 @@ are drafted (`docs/DATA_CONTRACTS.md`, `docs/MCP_TOOLS.md`, `docs/TRACE_MODEL.md
 - 🔬 **STAT-001** stats best practices → finalize the supported method menu
 - 🔬 Corpus source list (depends on the hero question)
 
-## Phase 1 — the harness ⬜
-- ⬜ `ci.yml` (lint/test/typecheck; `eval-smoke` path-conditional, non-blocking until gate
+## Phase 1 — the harness ✅
+- ✅ `ci.yml` (lint/test/typecheck; `eval-smoke` path-conditional, non-blocking until gate
   activation)
-- ⬜ `review.yml` + `scripts/spawn-review-agent.sh` (Claude + Codex in tmux)
-- ⬜ check-run gate + watchdog; GitHub native auto-merge
-- ⬜ register runner + set branch protection
+- ✅ `review.yml` + `scripts/spawn-review-agent.sh` (Claude + Codex in tmux, verdict-gated)
+- ✅ GitHub native auto-merge; validated end-to-end on PRs #1–#2
+- ✅ runner registered + branch protection set
 
 ## Phase 2+ — implementation waves (HANDOFF §29.3, §30)
 IMPL-001 scaffold · IMPL-002 shared schemas pkg · IMPL-003 FastAPI skeleton ·
