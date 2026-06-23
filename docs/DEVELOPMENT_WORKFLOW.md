@@ -15,12 +15,17 @@ PR opened / synchronized / ready_for_review
   ├─ claude-review → claude CLI session (tmux, self-hosted)    (check-run: claude-review)
   └─ codex-review  → codex  CLI session (tmux, self-hosted)    (check-run: codex-review)
         │
-        ▼  branch protection requires: ci + claude-review + codex-review all green
+        ▼  branch protection requires: ci + review (claude) + review (codex) all green
         ▼
   GitHub native auto-merge (squash) → merges with NO human click
 ```
 
 **All PRs auto-merge on green.** There is no required human approval.
+
+Claude remains a required check so auto-merge waits for it when the CLI can run. If the local
+Claude CLI exits with a temporary usage/quota-limit message, the harness records an advisory
+"skipped" comment and passes `review (claude)` for that availability failure only. Real Claude
+P0/P1 review findings still fail the required check.
 
 ## Runner
 
@@ -47,8 +52,12 @@ Each reviewer:
 2. Reviews `gh pr diff` (read-only tools: `Bash(gh:*),Read,Glob,Grep`).
 3. Posts a review with `### P0` / `### P1` / `### P2` findings and a tally, tagged with a
    marker (e.g. `<!-- reviewer:claude -->`).
-4. **As its final action, creates a GitHub check-run** (`claude-review` / `codex-review`)
-   with conclusion `success` if no P0/P1, else `failure`.
+4. Emits `REVIEW_VERDICT: PASS` if no P0/P1, else `REVIEW_VERDICT: FAIL`; the workflow job
+   maps that verdict onto `review (claude)` / `review (codex)`.
+
+If Claude is temporarily unavailable because the runner's local CLI has hit a usage/quota
+limit, `review (claude)` becomes an advisory skip and succeeds. Codex review remains required
+and fail-closed.
 
 ### The gating wrinkle
 
