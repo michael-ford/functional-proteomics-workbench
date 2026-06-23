@@ -61,14 +61,14 @@ and fail-closed.
 
 ### The gating wrinkle
 
-tmux spawns are fire-and-forget (the workflow does not wait for the agent to finish). A
-**watchdog job** with a timeout fails the corresponding check-run if a reviewer never
-reports, so a dead agent blocks merge rather than silently passing.
+The reviewer CLI runs inside tmux for observability, but the workflow waits for it to finish.
+If a reviewer times out, exits without a verdict, or emits an unparseable verdict, the job
+fails closed. The only fail-open path is the explicit Claude usage-limit skip described above.
 
 ## Branch protection (set after Phase 1, once check names exist)
 
-Require status checks: `ci`, `claude-review`, `codex-review`. Enable "Allow auto-merge".
-No required reviewers (auto-merge is the whole point).
+Require status checks: `ci`, `review (claude)`, `review (codex)`. Enable "Allow auto-merge".
+No required human reviewers (auto-merge is the whole point).
 
 ## Governance change (vs HANDOFF)
 
