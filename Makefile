@@ -1,15 +1,27 @@
 # Functional Proteomics Workbench — developer entrypoints (stubs; filled during IMPL wave)
-.PHONY: setup test lint typecheck gen-types eval eval-smoke run-local demo-reset ingest-demo-data build-corpus seed-demo-project
+.PHONY: setup test lint typecheck gen-types eval eval-smoke run-local run-web demo-reset ingest-demo-data build-corpus seed-demo-project
 
-setup:            ## install deps (TODO)
-	@echo "TODO: setup"
+PNPM_STAMP := node_modules/.modules.yaml
+
+$(PNPM_STAMP): package.json pnpm-lock.yaml pnpm-workspace.yaml apps/web/package.json
+	pnpm install --frozen-lockfile
+
+setup:            ## install deps
+	pnpm install --frozen-lockfile
 test:             ## run all tests (TODO)
 	uv run --project packages/shared-schemas pytest packages/shared-schemas/tests
 	uv run --project services/api pytest services/api/tests
-lint:             ## lint (TODO)
+	$(MAKE) $(PNPM_STAMP)
+	pnpm test
+lint:             ## lint
 	uv run --project services/api ruff check services/api/src services/api/tests
-typecheck:        ## typecheck (TODO)
+	$(MAKE) $(PNPM_STAMP)
+	pnpm lint
+typecheck:        ## typecheck
 	uv run --project services/api pyright --project services/api services/api/src services/api/tests
+	$(MAKE) $(PNPM_STAMP)
+	pnpm typecheck
+	pnpm build
 gen-types:        ## generate frontend TypeScript types from shared Pydantic schemas
 	uv run --project packages/shared-schemas python -m shared_schemas.export_schema --output packages/shared-schemas/schema/shared-schemas.schema.json
 	mkdir -p packages/shared-schemas/generated
@@ -18,8 +30,10 @@ eval:             ## run full eval suite (TODO)
 	@echo "TODO: eval"
 eval-smoke:       ## run deterministic CI-safe eval cases (TODO)
 	@echo "TODO: eval-smoke (no end-to-end pipeline yet — informational)"
-run-local:        ## run app locally (TODO)
+run-local:        ## run API locally
 	uv run --project services/api uvicorn fpw_api.app:app --reload
+run-web:          ## run web app locally
+	pnpm dev:web
 ingest-demo-data: ## ingest Perturb-PBMC subset (TODO)
 	@echo "TODO: ingest-demo-data"
 build-corpus:     ## build entity-aware RAG corpus (TODO)

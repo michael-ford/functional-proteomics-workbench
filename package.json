@@ -1,0 +1,11 @@
+{
+  "name": "functional-proteomics-workbench",
+  "private": true,
+  "scripts": {
+    "build": "pnpm --filter @fpw/web build",
+    "dev:web": "pnpm --filter @fpw/web dev",
+    "lint": "pnpm --filter @fpw/web lint",
+    "test": "pnpm --filter @fpw/web test",
+    "typecheck": "pnpm --filter @fpw/web typecheck"
+  }
+}
