@@ -1,0 +1,1257 @@
+{
+  "$defs": {
+    "AnalysisPlan": {
+      "additionalProperties": false,
+      "properties": {
+        "assumptions": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Assumptions",
+          "type": "array"
+        },
+        "comparison": {
+          "$ref": "#/$defs/ComparisonSpec"
+        },
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        },
+        "dataset_id": {
+          "title": "Dataset Id",
+          "type": "string"
+        },
+        "donor_handling": {
+          "title": "Donor Handling",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "limitations": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Limitations",
+          "type": "array"
+        },
+        "method_id": {
+          "title": "Method Id",
+          "type": "string"
+        },
+        "multiple_testing": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Multiple Testing"
+        },
+        "project_id": {
+          "title": "Project Id",
+          "type": "string"
+        },
+        "rationale": {
+          "title": "Rationale",
+          "type": "string"
+        },
+        "replicate_handling": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Replicate Handling"
+        },
+        "schema_version": {
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "unsupported_assumptions": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Unsupported Assumptions",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "schema_version",
+        "project_id",
+        "dataset_id",
+        "method_id",
+        "comparison",
+        "rationale",
+        "assumptions",
+        "donor_handling",
+        "limitations",
+        "created_at"
+      ],
+      "title": "AnalysisPlan",
+      "type": "object"
+    },
+    "AnalysisResult": {
+      "additionalProperties": false,
+      "properties": {
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        },
+        "donor_consistency": {
+          "items": {
+            "$ref": "#/$defs/DonorConsistencyRow"
+          },
+          "title": "Donor Consistency",
+          "type": "array"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "method_id": {
+          "title": "Method Id",
+          "type": "string"
+        },
+        "plan_id": {
+          "title": "Plan Id",
+          "type": "string"
+        },
+        "plot_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Plot Id"
+        },
+        "project_id": {
+          "title": "Project Id",
+          "type": "string"
+        },
+        "ranking": {
+          "$ref": "#/$defs/ProteinRanking"
+        },
+        "schema_version": {
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "table_ref": {
+          "$ref": "#/$defs/ArtifactRef"
+        }
+      },
+      "required": [
+        "id",
+        "schema_version",
+        "project_id",
+        "plan_id",
+        "method_id",
+        "ranking",
+        "table_ref",
+        "created_at"
+      ],
+      "title": "AnalysisResult",
+      "type": "object"
+    },
+    "ArtifactRef": {
+      "additionalProperties": false,
+      "properties": {
+        "bytes": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Bytes"
+        },
+        "media_type": {
+          "title": "Media Type",
+          "type": "string"
+        },
+        "sha256": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sha256"
+        },
+        "uri": {
+          "title": "Uri",
+          "type": "string"
+        }
+      },
+      "required": [
+        "uri",
+        "media_type"
+      ],
+      "title": "ArtifactRef",
+      "type": "object"
+    },
+    "Citation": {
+      "additionalProperties": false,
+      "properties": {
+        "authors": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Authors"
+        },
+        "doi": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Doi"
+        },
+        "paper_title": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Paper Title"
+        },
+        "url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Url"
+        },
+        "year": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Year"
+        }
+      },
+      "title": "Citation",
+      "type": "object"
+    },
+    "Claim": {
+      "additionalProperties": false,
+      "properties": {
+        "evidence_chunk_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Evidence Chunk Ids",
+          "type": "array"
+        },
+        "kind": {
+          "enum": [
+            "data-derived",
+            "source-derived",
+            "interpretive",
+            "limitation"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "text",
+        "kind"
+      ],
+      "title": "Claim",
+      "type": "object"
+    },
+    "ColumnProfile": {
+      "additionalProperties": false,
+      "properties": {
+        "dtype": {
+          "enum": [
+            "string",
+            "float",
+            "int",
+            "categorical"
+          ],
+          "title": "Dtype",
+          "type": "string"
+        },
+        "examples": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Examples",
+          "type": "array"
+        },
+        "n_unique": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "N Unique"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "role": {
+          "enum": [
+            "donor",
+            "stimulation",
+            "perturbagen",
+            "protein",
+            "value",
+            "metadata",
+            "unknown"
+          ],
+          "title": "Role",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "dtype",
+        "role"
+      ],
+      "title": "ColumnProfile",
+      "type": "object"
+    },
+    "ComparisonSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "group_a": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Group A",
+          "type": "object"
+        },
+        "group_b": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Group B",
+          "type": "object"
+        },
+        "paired_by": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Paired By"
+        },
+        "proteins": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Proteins"
+        },
+        "stimulation_context": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Stimulation Context"
+        }
+      },
+      "required": [
+        "group_a",
+        "group_b"
+      ],
+      "title": "ComparisonSpec",
+      "type": "object"
+    },
+    "Dataset": {
+      "additionalProperties": false,
+      "properties": {
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "normalized_ref": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ArtifactRef"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "project_id": {
+          "title": "Project Id",
+          "type": "string"
+        },
+        "raw_ref": {
+          "$ref": "#/$defs/ArtifactRef"
+        },
+        "schema_version": {
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "source": {
+          "enum": [
+            "uploaded",
+            "selected_public"
+          ],
+          "title": "Source",
+          "type": "string"
+        },
+        "validation": {
+          "$ref": "#/$defs/DatasetValidation"
+        }
+      },
+      "required": [
+        "id",
+        "project_id",
+        "schema_version",
+        "name",
+        "source",
+        "raw_ref",
+        "validation",
+        "created_at"
+      ],
+      "title": "Dataset",
+      "type": "object"
+    },
+    "DatasetSchemaProfile": {
+      "additionalProperties": false,
+      "properties": {
+        "columns": {
+          "items": {
+            "$ref": "#/$defs/ColumnProfile"
+          },
+          "title": "Columns",
+          "type": "array"
+        },
+        "dataset_id": {
+          "title": "Dataset Id",
+          "type": "string"
+        },
+        "detected_axes": {
+          "$ref": "#/$defs/ExperimentAxes"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "layout": {
+          "enum": [
+            "long",
+            "wide"
+          ],
+          "title": "Layout",
+          "type": "string"
+        },
+        "schema_version": {
+          "title": "Schema Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "schema_version",
+        "dataset_id",
+        "layout",
+        "columns",
+        "detected_axes"
+      ],
+      "title": "DatasetSchemaProfile",
+      "type": "object"
+    },
+    "DatasetValidation": {
+      "additionalProperties": false,
+      "properties": {
+        "issues": {
+          "items": {
+            "$ref": "#/$defs/ValidationIssue"
+          },
+          "title": "Issues",
+          "type": "array"
+        },
+        "row_count": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Row Count"
+        },
+        "status": {
+          "enum": [
+            "pending",
+            "passed",
+            "failed"
+          ],
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "status"
+      ],
+      "title": "DatasetValidation",
+      "type": "object"
+    },
+    "DonorConsistencyRow": {
+      "additionalProperties": false,
+      "properties": {
+        "agrees_with_consensus": {
+          "title": "Agrees With Consensus",
+          "type": "boolean"
+        },
+        "donor": {
+          "title": "Donor",
+          "type": "string"
+        },
+        "note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Note"
+        }
+      },
+      "required": [
+        "donor",
+        "agrees_with_consensus"
+      ],
+      "title": "DonorConsistencyRow",
+      "type": "object"
+    },
+    "EvidenceAttachment": {
+      "additionalProperties": false,
+      "properties": {
+        "chunk_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Chunk Ids",
+          "type": "array"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Note"
+        },
+        "project_id": {
+          "title": "Project Id",
+          "type": "string"
+        },
+        "schema_version": {
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "supports_report_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Supports Report Id"
+        }
+      },
+      "required": [
+        "id",
+        "schema_version",
+        "project_id",
+        "chunk_ids"
+      ],
+      "title": "EvidenceAttachment",
+      "type": "object"
+    },
+    "EvidenceChunk": {
+      "additionalProperties": false,
+      "properties": {
+        "assay_context": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Assay Context",
+          "type": "array"
+        },
+        "citation": {
+          "$ref": "#/$defs/Citation"
+        },
+        "embedding_status": {
+          "default": "pending",
+          "enum": [
+            "pending",
+            "embedded"
+          ],
+          "title": "Embedding Status",
+          "type": "string"
+        },
+        "entities": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Entities",
+          "type": "array"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "schema_version": {
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "section": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Section"
+        },
+        "source_id": {
+          "title": "Source Id",
+          "type": "string"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "schema_version",
+        "source_id",
+        "text",
+        "citation"
+      ],
+      "title": "EvidenceChunk",
+      "type": "object"
+    },
+    "EvidenceSource": {
+      "additionalProperties": false,
+      "properties": {
+        "doi": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Doi"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "license_note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "License Note"
+        },
+        "schema_version": {
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "source_type": {
+          "enum": [
+            "paper",
+            "docs",
+            "github",
+            "webpage",
+            "supplement"
+          ],
+          "title": "Source Type",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Url"
+        }
+      },
+      "required": [
+        "id",
+        "schema_version",
+        "title",
+        "source_type"
+      ],
+      "title": "EvidenceSource",
+      "type": "object"
+    },
+    "ExperimentAxes": {
+      "additionalProperties": false,
+      "properties": {
+        "donor": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Donor"
+        },
+        "perturbagen": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Perturbagen"
+        },
+        "protein": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Protein"
+        },
+        "stimulation": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Stimulation"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Value"
+        }
+      },
+      "required": [
+        "donor",
+        "stimulation",
+        "perturbagen",
+        "protein",
+        "value"
+      ],
+      "title": "ExperimentAxes",
+      "type": "object"
+    },
+    "PlotArtifact": {
+      "additionalProperties": false,
+      "properties": {
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "image_ref": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ArtifactRef"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "plot_type": {
+          "enum": [
+            "ranked_effect_bar",
+            "volcano",
+            "donor_consistency"
+          ],
+          "title": "Plot Type",
+          "type": "string"
+        },
+        "project_id": {
+          "title": "Project Id",
+          "type": "string"
+        },
+        "result_id": {
+          "title": "Result Id",
+          "type": "string"
+        },
+        "schema_version": {
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "spec_ref": {
+          "$ref": "#/$defs/ArtifactRef"
+        }
+      },
+      "required": [
+        "id",
+        "schema_version",
+        "project_id",
+        "result_id",
+        "plot_type",
+        "spec_ref",
+        "created_at"
+      ],
+      "title": "PlotArtifact",
+      "type": "object"
+    },
+    "Project": {
+      "additionalProperties": false,
+      "properties": {
+        "context_md": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Context Md"
+        },
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "schema_version": {
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "created",
+            "dataset_pending",
+            "validated",
+            "analyzed",
+            "reported"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "updated_at": {
+          "format": "date-time",
+          "title": "Updated At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "schema_version",
+        "title",
+        "status",
+        "created_at",
+        "updated_at"
+      ],
+      "title": "Project",
+      "type": "object"
+    },
+    "ProteinRanking": {
+      "additionalProperties": false,
+      "properties": {
+        "correction": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Correction"
+        },
+        "metric": {
+          "title": "Metric",
+          "type": "string"
+        },
+        "rows": {
+          "items": {
+            "$ref": "#/$defs/RankedProtein"
+          },
+          "title": "Rows",
+          "type": "array"
+        }
+      },
+      "required": [
+        "rows",
+        "metric"
+      ],
+      "title": "ProteinRanking",
+      "type": "object"
+    },
+    "RankedProtein": {
+      "additionalProperties": false,
+      "properties": {
+        "direction": {
+          "enum": [
+            "up",
+            "down"
+          ],
+          "title": "Direction",
+          "type": "string"
+        },
+        "donor_consistency": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Donor Consistency"
+        },
+        "effect_size": {
+          "title": "Effect Size",
+          "type": "number"
+        },
+        "p_value": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "P Value"
+        },
+        "protein": {
+          "title": "Protein",
+          "type": "string"
+        },
+        "q_value": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Q Value"
+        }
+      },
+      "required": [
+        "protein",
+        "effect_size",
+        "direction"
+      ],
+      "title": "RankedProtein",
+      "type": "object"
+    },
+    "ReportArtifact": {
+      "additionalProperties": false,
+      "properties": {
+        "claims": {
+          "items": {
+            "$ref": "#/$defs/Claim"
+          },
+          "title": "Claims",
+          "type": "array"
+        },
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "markdown_ref": {
+          "$ref": "#/$defs/ArtifactRef"
+        },
+        "project_id": {
+          "title": "Project Id",
+          "type": "string"
+        },
+        "schema_version": {
+          "title": "Schema Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "schema_version",
+        "project_id",
+        "markdown_ref",
+        "claims",
+        "created_at"
+      ],
+      "title": "ReportArtifact",
+      "type": "object"
+    },
+    "ValidationIssue": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "title": "Code",
+          "type": "string"
+        },
+        "column": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Column"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        },
+        "severity": {
+          "enum": [
+            "error",
+            "warning"
+          ],
+          "title": "Severity",
+          "type": "string"
+        }
+      },
+      "required": [
+        "severity",
+        "code",
+        "message"
+      ],
+      "title": "ValidationIssue",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Generated JSON Schema for functional proteomics shared contracts.",
+  "properties": {
+    "AnalysisPlan": {
+      "$ref": "#/$defs/AnalysisPlan"
+    },
+    "AnalysisResult": {
+      "$ref": "#/$defs/AnalysisResult"
+    },
+    "ArtifactRef": {
+      "$ref": "#/$defs/ArtifactRef"
+    },
+    "Citation": {
+      "$ref": "#/$defs/Citation"
+    },
+    "Claim": {
+      "$ref": "#/$defs/Claim"
+    },
+    "ColumnProfile": {
+      "$ref": "#/$defs/ColumnProfile"
+    },
+    "ComparisonSpec": {
+      "$ref": "#/$defs/ComparisonSpec"
+    },
+    "Dataset": {
+      "$ref": "#/$defs/Dataset"
+    },
+    "DatasetSchemaProfile": {
+      "$ref": "#/$defs/DatasetSchemaProfile"
+    },
+    "DatasetValidation": {
+      "$ref": "#/$defs/DatasetValidation"
+    },
+    "DonorConsistencyRow": {
+      "$ref": "#/$defs/DonorConsistencyRow"
+    },
+    "EvidenceAttachment": {
+      "$ref": "#/$defs/EvidenceAttachment"
+    },
+    "EvidenceChunk": {
+      "$ref": "#/$defs/EvidenceChunk"
+    },
+    "EvidenceSource": {
+      "$ref": "#/$defs/EvidenceSource"
+    },
+    "ExperimentAxes": {
+      "$ref": "#/$defs/ExperimentAxes"
+    },
+    "PlotArtifact": {
+      "$ref": "#/$defs/PlotArtifact"
+    },
+    "Project": {
+      "$ref": "#/$defs/Project"
+    },
+    "ProteinRanking": {
+      "$ref": "#/$defs/ProteinRanking"
+    },
+    "RankedProtein": {
+      "$ref": "#/$defs/RankedProtein"
+    },
+    "ReportArtifact": {
+      "$ref": "#/$defs/ReportArtifact"
+    },
+    "ValidationIssue": {
+      "$ref": "#/$defs/ValidationIssue"
+    }
+  },
+  "title": "SharedSchemas",
+  "type": "object"
+}

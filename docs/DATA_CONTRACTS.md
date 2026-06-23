@@ -100,6 +100,7 @@ class ValidationIssue(BaseModel):
 ```python
 class DatasetSchemaProfile(BaseModel):
     id: str                       # sp_*
+    schema_version: str
     dataset_id: str
     layout: Literal["long", "wide"]
     columns: list["ColumnProfile"]
@@ -124,6 +125,7 @@ class ExperimentAxes(BaseModel):
 ```python
 class AnalysisPlan(BaseModel):
     id: str                       # plan_*
+    schema_version: str
     project_id: str
     dataset_id: str
     method_id: str                # must be a supported method (see docs/MCP_TOOLS.md → run_comparison)
@@ -149,6 +151,7 @@ class ComparisonSpec(BaseModel):
 ```python
 class AnalysisResult(BaseModel):
     id: str                       # res_*
+    schema_version: str
     project_id: str
     plan_id: str
     method_id: str
@@ -181,6 +184,7 @@ class DonorConsistencyRow(BaseModel):
 ```python
 class PlotArtifact(BaseModel):
     id: str                       # plot_*
+    schema_version: str
     project_id: str
     result_id: str
     plot_type: Literal["ranked_effect_bar", "volcano", "donor_consistency"]
@@ -193,6 +197,7 @@ class PlotArtifact(BaseModel):
 ```python
 class EvidenceSource(BaseModel):
     id: str                       # src_*
+    schema_version: str
     title: str
     source_type: Literal["paper", "docs", "github", "webpage", "supplement"]
     url: str | None = None
@@ -201,6 +206,7 @@ class EvidenceSource(BaseModel):
 
 class EvidenceChunk(BaseModel):
     id: str                       # chunk_*
+    schema_version: str
     source_id: str
     text: str
     section: str | None = None
@@ -218,6 +224,7 @@ class Citation(BaseModel):
 
 class EvidenceAttachment(BaseModel):
     id: str                       # evd_*
+    schema_version: str
     project_id: str
     chunk_ids: list[str]
     supports_report_id: str | None = None
@@ -228,6 +235,7 @@ class EvidenceAttachment(BaseModel):
 ```python
 class ReportArtifact(BaseModel):
     id: str                       # rep_*
+    schema_version: str
     project_id: str
     markdown_ref: ArtifactRef
     claims: list["Claim"]

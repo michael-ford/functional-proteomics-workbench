@@ -1,14 +1,18 @@
 # Functional Proteomics Workbench — developer entrypoints (stubs; filled during IMPL wave)
-.PHONY: setup test lint typecheck eval eval-smoke run-local demo-reset ingest-demo-data build-corpus seed-demo-project
+.PHONY: setup test lint typecheck gen-types eval eval-smoke run-local demo-reset ingest-demo-data build-corpus seed-demo-project
 
 setup:            ## install deps (TODO)
 	@echo "TODO: setup"
 test:             ## run all tests (TODO)
-	@echo "TODO: test (no tests yet — passing)"
+	uv run --project packages/shared-schemas pytest
 lint:             ## lint (TODO)
 	@echo "TODO: lint (nothing to lint yet — passing)"
 typecheck:        ## typecheck (TODO)
 	@echo "TODO: typecheck (nothing to check yet — passing)"
+gen-types:        ## generate frontend TypeScript types from shared Pydantic schemas
+	uv run --project packages/shared-schemas python -m shared_schemas.export_schema --output packages/shared-schemas/schema/shared-schemas.schema.json
+	mkdir -p packages/shared-schemas/generated
+	pnpm dlx json-schema-to-typescript -i packages/shared-schemas/schema/shared-schemas.schema.json -o packages/shared-schemas/generated/types.ts
 eval:             ## run full eval suite (TODO)
 	@echo "TODO: eval"
 eval-smoke:       ## run deterministic CI-safe eval cases (TODO)
