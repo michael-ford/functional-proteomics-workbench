@@ -1,0 +1,39 @@
+# Dual-agent PR review on the self-hosted macOS runner. Each reviewer is a CLI session
+# (Claude / Codex) spawned in tmux, inheriting local subscription auth — no model API keys
+# in CI. The job's pass/fail IS the merge gate (a P0/P1 finding fails the job).
+# See docs/DEVELOPMENT_WORKFLOW.md.
+name: review
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+permissions:
+  contents: read
+  pull-requests: write
+  checks: write
+concurrency:
+  group: review-pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+jobs:
+  review:
+    if: github.event.pull_request.draft == false
+    runs-on: [self-hosted, macOS]
+    strategy:
+      fail-fast: false
+      matrix:
+        reviewer: [claude, codex]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+      - name: ${{ matrix.reviewer }} review
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          REVIEW_MODEL: sonnet
+          REVIEW_TIMEOUT_SECS: "900"
+        run: |
+          bash scripts/spawn-review-agent.sh \
+            "${{ matrix.reviewer }}" \
+            "${{ github.event.pull_request.number }}" \
+            "${{ github.event.pull_request.head.sha }}"

@@ -1,0 +1,24 @@
+# Path-conditional eval-smoke. Becomes a *required* check (branch protection) only after
+# the end-to-end hero workflow runs (see docs/ROADMAP.md → eval-gate activation milestone).
+# Until then it runs informationally.
+name: eval-smoke
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths:
+      - 'packages/analysis/**'
+      - 'packages/corpus/**'
+      - 'services/**'
+      - 'agent_policies/**'
+      - 'evals/**'
+      - 'packages/shared-schemas/**'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  eval-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: deterministic eval-smoke (mocked model, fixture data)
+        run: make eval-smoke

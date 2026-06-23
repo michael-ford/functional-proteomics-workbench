@@ -1,12 +1,18 @@
 # Functional Proteomics Workbench — developer entrypoints (stubs; filled during IMPL wave)
-.PHONY: setup test eval run-local demo-reset ingest-demo-data build-corpus seed-demo-project
+.PHONY: setup test lint typecheck eval eval-smoke run-local demo-reset ingest-demo-data build-corpus seed-demo-project
 
 setup:            ## install deps (TODO)
 	@echo "TODO: setup"
 test:             ## run all tests (TODO)
-	@echo "TODO: test"
-eval:             ## run eval suite (TODO)
+	@echo "TODO: test (no tests yet — passing)"
+lint:             ## lint (TODO)
+	@echo "TODO: lint (nothing to lint yet — passing)"
+typecheck:        ## typecheck (TODO)
+	@echo "TODO: typecheck (nothing to check yet — passing)"
+eval:             ## run full eval suite (TODO)
 	@echo "TODO: eval"
+eval-smoke:       ## run deterministic CI-safe eval cases (TODO)
+	@echo "TODO: eval-smoke (no end-to-end pipeline yet — informational)"
 run-local:        ## run app locally (TODO)
 	@echo "TODO: run-local"
 ingest-demo-data: ## ingest Perturb-PBMC subset (TODO)
