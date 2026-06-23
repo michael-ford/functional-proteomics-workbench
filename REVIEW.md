@@ -28,6 +28,11 @@ gate is **fail-closed**, so a false-positive P1 costs the author a round trip �
   traced (`docs/TRACE_MODEL.md`); a `source-derived` report claim must cite evidence.
 - **Simplification** — verifiable duplication, dead code, or needless complexity. Flag P1
   only when concrete (a real duplicate / dead branch), else P2.
+- **Reviewability / file size** — flag changed non-generated source files that are becoming
+  difficult to audit or maintain. As a rule of thumb, call out files over ~500 lines when the
+  PR adds meaningful logic to them, or over ~800 lines even without obvious new complexity.
+  Default to P2; escalate to P1 only when file size creates a concrete correctness,
+  testability, traceability, or ownership risk.
 - **Product/UX** — for UI changes: loading/empty/error states, no untraced fake tool output,
   fixture data clearly marked.
 
