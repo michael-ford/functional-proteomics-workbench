@@ -27,6 +27,12 @@ Claude CLI exits with a temporary usage/quota-limit message, the harness records
 "skipped" comment and passes `review (claude)` for that availability failure only. Real Claude
 P0/P1 review findings still fail the required check.
 
+Branch protection does not require branches to be up to date before merge (`strict=false`).
+A green PR that is merely behind `main` can auto-merge without a rebase. Real git conflicts
+are handled by the agent loop: implementers keep monitoring until their PR state is `MERGED`,
+and the scheduled `merge-shepherd` workflow re-spawns an implementer for stale
+`agent/issue-N` PRs whose auto-merge is blocked by `DIRTY` / conflicting merge state.
+
 ## Runner
 
 - **Self-hosted macOS runner**, registered to this repo (`michael-ford/<repo>`).
@@ -99,11 +105,19 @@ issue opened
                                 (`~/fpw-agent-workspaces/issue-N`, branch `agent/issue-N`),
                                 opens a PR
   └─ PR                    ─▶ [review.yml] Claude + Codex review ─▶ auto-merge on green
+                                (implementer waits until MERGED)
 ```
 
 Both agent workflows run on the self-hosted runner; the implementer is fire-and-forget
 (attach with `tmux attach -t fpw-agents`). The implementer opens its PR using the runner's
 ambient `gh` login (a real user) so the PR triggers review + auto-merge.
+
+If an implementation PR becomes genuinely conflicting after the original run exits,
+`merge-shepherd.yml` runs about every 15 minutes, skips live tmux windows and recently
+updated PRs, then reuses `scripts/spawn-impl-agent.sh --resolve-existing` against the existing
+remote branch. It caps automated conflict-resolution respawns per issue in
+`~/fpw-agent-workspaces/.state/issue-N/` and posts a human-needed PR comment when the cap is
+exhausted.
 
 When an implementation PR from `agent/issue-N` is merged, `cleanup-agent.yml` runs on the
 self-hosted runner and removes the corresponding tmux window, worktree, local branch, and

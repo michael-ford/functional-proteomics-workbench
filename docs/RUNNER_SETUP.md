@@ -1,8 +1,9 @@
 # Runner Setup & Branch Protection (Phase 1)
 
 > **Status: executed 2026-06-23.** Runner `fpw-mac-runner` is online; branch protection
-> requires `ci` + `review (claude)` + `review (codex)`; auto-merge is enabled; validated
-> end-to-end on PRs #1–#2. The steps below are kept as the reproduction runbook.
+> requires `ci` + `review (claude)` + `review (codex)`; auto-merge is enabled with
+> require-up-to-date disabled (`strict=false`); validated end-to-end on PRs #1–#2. The steps
+> below are kept as the reproduction runbook.
 
 These are the one-time, admin/interactive steps the harness needs. Run them on the Mac that
 hosts the runner. The CI/review/auto-merge workflows are already committed.
@@ -53,7 +54,8 @@ Workflows target `runs-on: [self-hosted, macOS]`. The `self-hosted` label is imp
 > **Do this BEFORE enabling auto-merge (step 4).** With auto-merge on but no required checks,
 > a PR could merge unreviewed.
 
-Require `ci` + `review (claude)` + `review (codex)` (all live as of 2026-06-23). Add
+Require `ci` + `review (claude)` + `review (codex)` (all live as of 2026-06-23), with
+`strict=false` so green PRs that are merely behind `main` can auto-merge without a rebase. Add
 `eval-smoke` at the eval-gate activation milestone (`docs/ROADMAP.md`). Keep
 `review (claude)` required: the review harness waits for Claude when it can run, and treats
 temporary local Claude usage/quota-limit exits as advisory skipped checks so auto-merge is
@@ -64,7 +66,7 @@ gh api -X PUT repos/michael-ford/functional-proteomics-workbench/branches/main/p
   --input - <<'JSON'
 {
   "required_status_checks": {
-    "strict": true,
+    "strict": false,
     "checks": [
       { "context": "ci" },
       { "context": "review (claude)" },
@@ -82,8 +84,9 @@ JSON
 ```
 
 > `required_pull_request_reviews: null` = **no human approval required** — auto-merge is the
-> intended path (`docs/DEVELOPMENT_WORKFLOW.md`). `strict: true` requires branches be up to
-> date before merge.
+> intended path (`docs/DEVELOPMENT_WORKFLOW.md`). `strict: false` allows green branches that
+> are merely behind `main` to merge; genuine conflicts are handled by the implementer's
+> wait-until-merged loop and the scheduled merge shepherd.
 
 ## 4. Enable auto-merge on the repo (after branch protection)
 
