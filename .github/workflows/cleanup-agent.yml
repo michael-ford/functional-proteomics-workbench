@@ -1,0 +1,36 @@
+# Clean up local runner state after an auto-merged implementation PR.
+name: cleanup-agent
+on:
+  pull_request:
+    types: [closed]
+  workflow_dispatch:
+    inputs:
+      head_ref:
+        description: "Agent branch to clean, e.g. agent/issue-18"
+        required: true
+        type: string
+      pr_number:
+        description: "Optional PR number for logging"
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  cleanup:
+    if: >-
+      ${{
+        github.event_name == 'workflow_dispatch' ||
+        (github.event.pull_request.merged == true &&
+         startsWith(github.event.pull_request.head.ref, 'agent/issue-'))
+      }}
+    runs-on: [self-hosted, macOS]
+    steps:
+      - uses: actions/checkout@v4
+      - name: clean agent tmux window and worktree
+        env:
+          HEAD_REF: ${{ github.event_name == 'workflow_dispatch' && inputs.head_ref || github.event.pull_request.head.ref }}
+          PR_NUMBER: ${{ github.event_name == 'workflow_dispatch' && inputs.pr_number || github.event.pull_request.number }}
+        run: |
+          bash scripts/cleanup-agent-workspace.sh "$HEAD_REF" "$PR_NUMBER"
