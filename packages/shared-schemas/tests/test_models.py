@@ -32,6 +32,22 @@ def test_dataset_contract_validates_nested_artifact_refs(utc_now, ulid) -> None:
     assert dataset.validation.issues == []
 
 
+@pytest.mark.parametrize(
+    "uri",
+    [
+        "file:///etc/passwd",
+        "https://example.com/raw.csv",
+        "http://example.com/raw.csv",
+        "s3://bucket/raw.csv",
+        "project://",
+        "project://proj_demo/raw data.csv",
+    ],
+)
+def test_artifact_ref_rejects_non_project_storage_uris(uri) -> None:
+    with pytest.raises(ValidationError):
+        ArtifactRef(uri=uri, media_type="text/csv")
+
+
 def test_id_prefixes_are_validated(utc_now, ulid) -> None:
     with pytest.raises(ValidationError, match="expected ID matching plan_<ULID>"):
         AnalysisPlan(

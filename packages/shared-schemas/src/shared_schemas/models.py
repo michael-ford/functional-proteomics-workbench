@@ -10,6 +10,9 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 from shared_schemas.ids import EntityPrefix, validate_prefixed_ulid
 
 
+PROJECT_ARTIFACT_URI_PATTERN = r"^project://\S+$"
+
+
 class ContractModel(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -22,7 +25,7 @@ class ContractModel(BaseModel):
 
 
 class ArtifactRef(ContractModel):
-    uri: str
+    uri: str = Field(pattern=PROJECT_ARTIFACT_URI_PATTERN)
     media_type: str
     bytes: int | None = Field(default=None, ge=0)
     sha256: str | None = None
@@ -30,8 +33,10 @@ class ArtifactRef(ContractModel):
     @field_validator("uri")
     @classmethod
     def _validate_uri(cls, value: str) -> str:
-        if "://" not in value:
-            raise ValueError("artifact URI must be storage-adapter URI, e.g. project://...")
+        if not value.startswith("project://") or value == "project://":
+            raise ValueError("artifact URI must be project:// storage-adapter URI")
+        if any(char.isspace() for char in value):
+            raise ValueError("artifact URI must not contain whitespace")
         return value
 
 

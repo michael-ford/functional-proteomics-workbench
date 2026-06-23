@@ -201,6 +201,7 @@
           "title": "Sha256"
         },
         "uri": {
+          "pattern": "^project://\\S+$",
           "title": "Uri",
           "type": "string"
         }
