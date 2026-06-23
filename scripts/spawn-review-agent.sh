@@ -73,7 +73,9 @@ case "$REVIEWER" in
     AGENT_INVOCATION="claude -p \"\$(cat '${PROMPT}')\" --model '${MODEL}' --allowedTools 'Bash(gh:*),Read,Glob,Grep' --permission-mode acceptEdits"
     ;;
   codex)
-    AGENT_INVOCATION="codex exec --skip-git-repo-check \"\$(cat '${PROMPT}')\""
+    # danger-full-access: the review runs on the (externally-sandboxed) runner host and needs
+    # network + exec so the agent can call `gh`. read-only/workspace-write would block gh.
+    AGENT_INVOCATION="codex exec --skip-git-repo-check -s danger-full-access \"\$(cat '${PROMPT}')\""
     ;;
 esac
 
