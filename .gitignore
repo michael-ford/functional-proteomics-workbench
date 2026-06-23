@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.env
+.env.*
+!.env.example
+# Node
+node_modules/
+.next/
+dist/
+# Actions runner
+_work/
+actions-runner*/
+# OS / editor
+.DS_Store
+*.log
+# Data artifacts (keep manifests, not bulk data)
+demo_data/raw/*
+demo_data/processed/*
+!demo_data/**/.gitkeep

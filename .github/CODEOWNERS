@@ -1,0 +1,13 @@
+# Auto-merge is enabled repo-wide; CODEOWNERS is advisory, marking contract-sensitive files.
+# See docs/DEVELOPMENT_WORKFLOW.md.
+docs/ARCHITECTURE.md      @michael-ford
+docs/DATA_CONTRACTS.md    @michael-ford
+docs/MCP_TOOLS.md         @michael-ford
+docs/TRACE_MODEL.md       @michael-ford
+docs/EVALS.md             @michael-ford
+docs/SECURITY.md          @michael-ford
+packages/shared-schemas/  @michael-ford
+services/mcp/             @michael-ford
+evals/cases/              @michael-ford
+.github/workflows/        @michael-ford
+AGENTS.md                 @michael-ford
