@@ -93,14 +93,12 @@ jobs:
               if not pr.get("autoMergeRequest"):
                   continue
               merge_state = pr.get("mergeStateStatus") or ""
+              failed_checks = failed_required_checks(pr)
               reason = ""
-              failed_checks = []
               if merge_state in dirty_states:
                   reason = "merge-conflict"
-              elif merge_state == "BLOCKED":
-                  failed_checks = failed_required_checks(pr)
-                  if failed_checks:
-                      reason = "failed-required-check:" + ",".join(failed_checks)
+              elif failed_checks:
+                  reason = "failed-required-check:" + ",".join(failed_checks)
               if not reason:
                   continue
               print(
