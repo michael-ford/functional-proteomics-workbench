@@ -12,8 +12,8 @@ How work flows through this repo: CI, dual-agent review, and auto-merge.
 ```
 PR opened / synchronized / ready_for_review
   ├─ ci            → lint, typecheck, tests, eval-smoke        (status check)
-  ├─ claude-review → claude CLI session (tmux, self-hosted)    (check-run: claude-review)
-  └─ codex-review  → codex  CLI session (tmux, self-hosted)    (check-run: codex-review)
+  ├─ review (claude) → claude CLI session (tmux, self-hosted)  (required check)
+  └─ review (codex)  → codex  CLI session (tmux, self-hosted)  (required check)
         │
         ▼  branch protection requires: ci + review (claude) + review (codex) all green
         ▼
