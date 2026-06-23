@@ -1,4 +1,4 @@
-# Re-spawn implementer agents for auto-merge PRs that are stalled on real git conflicts.
+# Re-spawn implementer agents for auto-merge PRs stalled by conflicts or failed required checks.
 name: merge-shepherd
 
 on:
@@ -23,12 +23,13 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: re-spawn stale conflicting agent PRs
+      - name: re-spawn stale stalled agent PRs
         env:
           GH_REPO: ${{ github.repository }}
           IMPL_AGENT: codex
           MAX_ATTEMPTS: "3"
           QUIET_SECS: "600"
+          REQUIRED_CHECKS: "ci,review (claude),review (codex)"
         run: |
           set -euo pipefail
 
@@ -41,41 +42,87 @@ jobs:
           trap 'rm -f "$prs_json" "$candidates"' EXIT
 
           gh pr list --repo "$GH_REPO" --state open --limit 100 \
-            --json number,headRefName,mergeStateStatus,autoMergeRequest,updatedAt \
+            --json number,headRefName,mergeStateStatus,autoMergeRequest,updatedAt,statusCheckRollup \
             > "$prs_json"
 
           python3 - "$prs_json" > "$candidates" <<'PY'
           import json
+          import os
           import sys
 
           with open(sys.argv[1]) as fh:
               prs = json.load(fh)
 
           dirty_states = {"DIRTY", "CONFLICTING"}
+          required = {
+              name.strip()
+              for name in os.environ.get("REQUIRED_CHECKS", "").split(",")
+              if name.strip()
+          }
+          failed_conclusions = {
+              "ACTION_REQUIRED",
+              "CANCELLED",
+              "FAILURE",
+              "FAILED",
+              "STARTUP_FAILURE",
+              "TIMED_OUT",
+          }
+          failed_states = {"ERROR", "FAILURE"}
+
+          def check_name(check):
+              return (
+                  check.get("name")
+                  or check.get("context")
+                  or check.get("workflowName")
+                  or ""
+              )
+
+          def failed_required_checks(pr):
+              failed = []
+              for check in pr.get("statusCheckRollup") or []:
+                  name = check_name(check)
+                  if name not in required:
+                      continue
+                  conclusion = (check.get("conclusion") or "").upper()
+                  state = (check.get("state") or check.get("status") or "").upper()
+                  if conclusion in failed_conclusions or state in failed_states:
+                      failed.append(name)
+              return failed
+
           for pr in prs:
               if not pr.get("autoMergeRequest"):
                   continue
-              if pr.get("mergeStateStatus") not in dirty_states:
+              merge_state = pr.get("mergeStateStatus") or ""
+              reason = ""
+              failed_checks = []
+              if merge_state in dirty_states:
+                  reason = "merge-conflict"
+              elif merge_state == "BLOCKED":
+                  failed_checks = failed_required_checks(pr)
+                  if failed_checks:
+                      reason = "failed-required-check:" + ",".join(failed_checks)
+              if not reason:
                   continue
               print(
                   "\t".join(
                       [
                           str(pr["number"]),
                           pr.get("headRefName") or "",
-                          pr.get("mergeStateStatus") or "",
+                          merge_state,
                           pr.get("updatedAt") or "",
+                          reason,
                       ]
                   )
               )
           PY
 
           if [ ! -s "$candidates" ]; then
-            echo "no stale conflicting auto-merge PRs found"
+            echo "no stale conflicting or failed-check auto-merge PRs found"
             exit 0
           fi
 
           now="$(date -u +%s)"
-          while IFS=$'\t' read -r pr head_ref merge_state updated_at; do
+          while IFS=$'\t' read -r pr head_ref merge_state updated_at reason; do
             if [[ ! "$head_ref" =~ ^agent/issue-([0-9]+)$ ]]; then
               echo "PR #${pr}: skipping non-agent branch ${head_ref}"
               continue
@@ -123,7 +170,7 @@ jobs:
               echo "PR #${pr}: attempt cap reached (${attempts}); human needed"
               if [ ! -f "$commented_file" ]; then
                 gh pr comment "$pr" --repo "$GH_REPO" --body \
-                  "Merge shepherd has reached ${attempts} automated conflict-resolution respawns for this PR and it is still ${merge_state}. A human needs to resolve the remaining merge conflict or reset the branch."
+                  "Merge shepherd has reached ${attempts} automated respawns for this PR and it is still ${merge_state} (${reason}). A human needs to resolve the remaining merge conflict or failed required check."
                 date -u +"%Y-%m-%dT%H:%M:%SZ" > "$commented_file"
               fi
               continue
@@ -132,6 +179,6 @@ jobs:
             next_attempt="$((attempts + 1))"
             echo "$next_attempt" > "$attempts_file"
             date -u +"%Y-%m-%dT%H:%M:%SZ" > "${state_dir}/merge-shepherd-last-spawn"
-            echo "PR #${pr}: spawning conflict resolver for issue #${issue} (attempt ${next_attempt}/${MAX_ATTEMPTS})"
+            echo "PR #${pr}: spawning resolver for issue #${issue} (${reason}; attempt ${next_attempt}/${MAX_ATTEMPTS})"
             bash scripts/spawn-impl-agent.sh "$issue" --resolve-existing
           done < "$candidates"

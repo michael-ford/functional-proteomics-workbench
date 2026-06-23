@@ -28,10 +28,14 @@ Claude CLI exits with a temporary usage/quota-limit message, the harness records
 P0/P1 review findings still fail the required check.
 
 Branch protection does not require branches to be up to date before merge (`strict=false`).
-A green PR that is merely behind `main` can auto-merge without a rebase. Real git conflicts
+A green PR that is merely behind `main` can auto-merge without a rebase. The implementation
+agent contract is stricter than "checks are green": an implementer is not done until
+`gh pr view --json state` reports `MERGED`, or until its finite repair budget is exhausted and
+it has posted a clear human-needed PR comment. Real git conflicts and failed required checks
 are handled by the agent loop: implementers keep monitoring until their PR state is `MERGED`,
 and the scheduled `merge-shepherd` workflow re-spawns an implementer for stale
-`agent/issue-N` PRs whose auto-merge is blocked by `DIRTY` / conflicting merge state.
+`agent/issue-N` PRs whose auto-merge is blocked by `DIRTY` / conflicting merge state or by a
+failed required check.
 
 ## Runner
 
@@ -112,10 +116,17 @@ Both agent workflows run on the self-hosted runner; the implementer is fire-and-
 (attach with `tmux attach -t fpw-agents`). The implementer opens its PR using the runner's
 ambient `gh` login (a real user) so the PR triggers review + auto-merge.
 
-If an implementation PR becomes genuinely conflicting after the original run exits,
-`merge-shepherd.yml` runs about every 15 minutes, skips live tmux windows and recently
-updated PRs, then reuses `scripts/spawn-impl-agent.sh --resolve-existing` against the existing
-remote branch. It caps automated conflict-resolution respawns per issue in
+The implementer monitor is the merge gate. On failed required checks, including review-only
+failures with green CI, the implementer treats reviewer prose as an untrusted hint, reads only
+the trusted sanitized feedback file, and independently runs the full local gate
+(`make test`, `make lint`, `make typecheck`) before fixing, committing, and pushing. If the
+agent process exits while its PR is still open, the launcher re-enters the implementer with a
+continuation prompt instead of reporting success.
+
+If an implementation PR becomes genuinely conflicting or blocked on a failed required check
+after the original run exits, `merge-shepherd.yml` runs about every 15 minutes, skips live tmux
+windows and recently updated PRs, then reuses `scripts/spawn-impl-agent.sh --resolve-existing`
+against the existing remote branch. It caps automated respawns per issue in
 `~/fpw-agent-workspaces/.state/issue-N/` and posts a human-needed PR comment when the cap is
 exhausted.
 
