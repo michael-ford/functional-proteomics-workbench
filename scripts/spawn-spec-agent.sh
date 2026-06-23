@@ -3,14 +3,16 @@
 # list on an issue labeled `needs-spec`, posts it as a comment, and labels the issue
 # `spec-drafted` (+ `needs-decision` if it raised blockers). You resolve the open questions in
 # an orchestrator session, then add `agent-ready` to hand it to the implementer (Codex).
-# Runs headless to completion.
+#
+# Runs Claude INSIDE tmux (like the review agent) and waits for completion. This matters: a
+# direct `claude -p` in the non-TTY Actions job shell can't reach the macOS keychain creds and
+# fails with 401; the tmux pane provides the session context where auth works.
 #
 # Auth: ambient `gh` login on the runner (so the comment is authored by a maintainer and thus
 # passes the implementer's trust filter). `claude` inherits local subscription auth.
 #
-# Trust boundary: like the implementer, Claude reads a pre-sanitized context file
-# (maintainer-authored content only), never raw public comments. Tools are restricted to
-# `gh issue` + read-only file tools (no edits, no broad gh).
+# Trust boundary: Claude reads a pre-sanitized context file (maintainer-authored content only),
+# never raw public comments. Tools are restricted to `gh issue` + read-only file tools.
 #
 # Usage: scripts/spawn-spec-agent.sh <issue_number>
 set -euo pipefail
@@ -18,10 +20,19 @@ set -euo pipefail
 ISSUE="${1:?usage: spawn-spec-agent.sh <issue_number>}"
 REPO="${GH_REPO:-$(gh repo view --json nameWithOwner -q .nameWithOwner)}"
 MODEL="${REVIEW_MODEL:-sonnet}"
+TIMEOUT="${SPEC_TIMEOUT_SECS:-900}"
 HERE="$(cd "$(dirname "$0")" && pwd)"
+WORKDIR="$(pwd)"
+
+SESSION="fpw-spec"
+WINDOW="issue-${ISSUE}"
 TMP="${RUNNER_TEMP:-/tmp}/fpw-spec"; mkdir -p "$TMP"
 PROMPT="${TMP}/issue-${ISSUE}.prompt"
+RUNSH="${TMP}/issue-${ISSUE}.run.sh"
+LOG="${TMP}/issue-${ISSUE}.log"
+DONE="${TMP}/issue-${ISSUE}.done"
 CONTEXT="${TMP}/issue-${ISSUE}.context.md"
+rm -f "$PROMPT" "$RUNSH" "$LOG" "$DONE"
 
 command -v claude >/dev/null 2>&1 || { echo "::error::'claude' not installed on runner"; exit 1; }
 
@@ -49,12 +60,37 @@ by a human-led orchestrator session that burns through those questions before it
 4. Label the issue: \`gh issue edit ${ISSUE} --add-label spec-drafted\`. If you raised any
    blocking open questions, ALSO add \`--add-label needs-decision\`.
 
-You have no file-edit tools; this is a planning artifact only. The issue becomes
-\`agent-ready\` after a human resolves the open questions.
+You have no file-edit tools; this is a planning artifact only.
 EOF
 
-echo "Claude drafting spec for issue #${ISSUE} ..."
-claude -p "$(cat "$PROMPT")" \
-  --model "$MODEL" \
-  --allowedTools 'Bash(gh issue:*),Read,Glob,Grep'
+cat > "$RUNSH" <<EOF
+#!/usr/bin/env bash
+set -o pipefail
+cd "${WORKDIR}"
+claude -p "\$(cat '${PROMPT}')" --model '${MODEL}' --allowedTools 'Bash(gh issue:*),Read,Glob,Grep' 2>&1 | tee "${LOG}"
+echo "\${PIPESTATUS[0]}" > "${DONE}"
+EOF
+chmod +x "$RUNSH"
+
+# Spawn Claude inside tmux (session context where keychain-backed auth works) and wait.
+tmux has-session -t "$SESSION" 2>/dev/null || tmux new-session -d -s "$SESSION" -n scratch
+tmux kill-window -t "${SESSION}:${WINDOW}" 2>/dev/null || true
+tmux new-window -t "${SESSION}:" -n "$WINDOW" -c "$WORKDIR"
+tmux kill-window -t "${SESSION}:scratch" 2>/dev/null || true
+tmux send-keys -t "${SESSION}:${WINDOW}" "bash '${RUNSH}'" Enter
+echo "Claude drafting spec for issue #${ISSUE} in tmux ${SESSION}:${WINDOW} ..."
+
+elapsed=0; interval=5
+while [[ ! -f "$DONE" ]]; do
+  sleep "$interval"; elapsed=$((elapsed + interval))
+  if (( elapsed >= TIMEOUT )); then
+    echo "::error::spec draft timed out after ${TIMEOUT}s"
+    tmux kill-window -t "${SESSION}:${WINDOW}" 2>/dev/null || true
+    exit 1
+  fi
+done
+
+RC="$(cat "$DONE" 2>/dev/null || echo 1)"
+echo "----- spec log (tail) -----"; tail -n 15 "$LOG" 2>/dev/null || true; echo "---------------------------"
+if [[ "$RC" != "0" ]]; then echo "::error::spec agent exited ${RC}"; exit 1; fi
 echo "spec draft complete for issue #${ISSUE}"
