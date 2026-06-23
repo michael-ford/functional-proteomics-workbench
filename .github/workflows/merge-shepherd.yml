@@ -27,7 +27,7 @@ jobs:
         env:
           GH_REPO: ${{ github.repository }}
           IMPL_AGENT: codex
-          MAX_ATTEMPTS: "3"
+          MAX_ATTEMPTS: "5"
           QUIET_SECS: "600"
           REQUIRED_CHECKS: "ci,review (claude),review (codex)"
         run: |
