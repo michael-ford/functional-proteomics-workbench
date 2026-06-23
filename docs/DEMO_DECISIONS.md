@@ -135,17 +135,24 @@ comparison.
   why ranked tables, evidence, and traces matter.
 - Caveat: biology is more nuanced than Candidate 1 and must stay descriptive.
 
-## Current Recommendation To Review
+## DATA-001 Selected Hero Comparison (DECIDED 2026-06-23)
 
-Research-agent ranking:
+**SELECTED: Candidate 1 — IL-10 vs matched no-cytokine control under LPS 2000 ng/mL.**
 
-1. IL-10 vs matched no-cytokine control under LPS 2000 ng/mL: best for visual clarity and fast
-   demo comprehension.
-2. IFN beta vs matched no-cytokine control under PolyIC 400 ng/mL: best for multiplex
-   fingerprint and Nomic-scientist narrative.
-3. IL-15 vs matched no-cytokine control under PolyIC 400 ng/mL: best for a clean
-   cytokine-induction module centered on IFN gamma.
+Chosen for the strongest visual clarity and fastest demo comprehension: broad,
+donor-consistent decreases across an LPS inflammatory secretome (TNF alpha, IL-1 beta,
+IL-1 alpha, CCL1, IL-12 p40, IFN gamma, CCL22, CCL24, G-CSF, IL-6, GM-CSF). The report must
+stay conservative — describe IL-10-associated dampening of the LPS inflammatory response, and
+avoid any mechanistic claim.
 
-Use the public H5AD as the likely source for SPEC-006 fixture design and extract a long-format
-direct subset with explicit metadata columns plus 20-30 selected proteins. Preserve provenance
-back to the public source and citation.
+This selection is now the input for:
+- SPEC-006 demo dataset fixture contract (issue #15),
+- IMPL-009 bounded analysis package (issue #24),
+- CORPUS-001 source list — selected-stimulation (LPS), selected-perturbagen (IL-10), and
+  selected-top-protein biology buckets resolve against this comparison (issue #14, #25).
+
+Runner-up order retained for reference: (2) IFN beta under PolyIC, (3) IL-15 under PolyIC.
+
+Use the public H5AD as the source for SPEC-006 fixture design and extract a long-format direct
+subset with explicit metadata columns plus 20-30 selected proteins. Preserve provenance back
+to the public source and citation.
