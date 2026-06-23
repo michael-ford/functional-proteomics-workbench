@@ -1,7 +1,7 @@
 # Open Questions
 
 > **Rule (from HANDOFF §23.11):** Do not silently resolve open questions in implementation
-> PRs. If implementation requires resolving one, label the issue `needs-human-decision`.
+> PRs. If implementation requires resolving one, label the issue `needs-decision`.
 
 This file tracks unresolved decisions and records resolutions with rationale.
 
@@ -25,37 +25,47 @@ This file tracks unresolved decisions and records resolutions with rationale.
 | R12 | Artifact storage | **Postgres state + local FS (dev) / Railway volume (deploy)** behind storage adapter | Simplest path to a working demo |
 | R13 | Trace storage | **Postgres tables (source of truth) + JSONL export** | Queryable dashboard/replay + file-like inspectability |
 | R14 | v0.1 contract scope | **Trimmed core (~12 entities)**; chat→TRACE_MODEL, eval→EVALS, rest deferred | Keep contracts stable but small |
+| R15 | Primary demo persona | **Nomic internal scientist** | Best fits MCP/web shared state, traceability, evals, and Nomic-specific internal workflow |
+| R16 | Demo shape | **Hybrid**: biological analysis as the story, traces/evals as proof | Keeps domain relevance while foregrounding the agent-native engineering harness |
+| R17 | v0.1 data flow | **Select a curated public Perturb-PBMC subset inside the app**; do not prioritize generic upload | Reduces scope and matches the public-data demo constraint |
+| R18 | Biological claim level | **Conservative**: donor-consistent protein changes plus source-grounded evidence | Avoids mechanism claims and overinterpretation |
+| R19 | Analysis direction | Include p-values if STAT-001 validates a defensible test; pair with effect size and donor consistency | p-values matter, but assumptions and multiple-testing handling must be explicit |
+| R20 | Corpus direction | Deterministic indexed corpus: Nomic/Perturb-PBMC plus small curated public biology sources | Avoids live-search nondeterminism while supporting evidence-backed reports |
+| R21 | Eval direction | Evals primarily prove agent workflow correctness; real model evals run for agent/tool/prompt changes | Keeps CI deterministic while still testing agent behavior when it changes |
 
-See `docs/DEVELOPMENT_WORKFLOW.md` for the pipeline and `docs/DATA_CONTRACTS.md` /
-`docs/TRACE_MODEL.md` / `docs/MCP_TOOLS.md` / `docs/ARCHITECTURE.md` for the contracts drafted
-in this session.
+See `docs/DEVELOPMENT_WORKFLOW.md` for the pipeline; `docs/DATA_CONTRACTS.md` /
+`docs/TRACE_MODEL.md` / `docs/MCP_TOOLS.md` / `docs/ARCHITECTURE.md` for contracts; and
+`docs/DEMO_DECISIONS.md` for current demo-story decisions and DATA-001 candidate comparisons.
 
 ---
 
 ## Still open
 
 ### Product / user story
-- Final primary persona: Nomic internal scientist vs field application scientist vs customer translational scientist.
 - Final hero biological question (not selected — depends on data exploration).
 - Final screen-recording script (deferred until data subset + hero question chosen).
 
 ### Data
-- Exact Perturb-PBMC subset; stimulation context; perturbagen/control comparison; protein panel.
-- Data format & preprocessing state; direct subset vs transformed direct subset.
+- Final Perturb-PBMC subset choice from the DATA-001 candidates; exact stimulation context,
+  perturbagen/control comparison, and protein panel.
+- Data format & preprocessing state for the selected public H5AD-derived fixture; direct
+  long-format subset vs any allowed transformed direct subset.
 - → handoff issue **DATA-001** (explore + propose 3 candidate hero comparisons).
 
 ### Statistics
-- Exact v0.1 method menu; normalization assumptions; donor-consistency metric; paired vs unpaired; whether p-values are central; multiple-testing method; best-practice source list.
+- Exact v0.1 method menu; normalization assumptions; donor-consistency metric; paired vs
+  unpaired; p-value test; multiple-testing method; best-practice source list.
 - → handoff issue **STAT-001**.
 
 ### RAG / corpus
-- Exact source list; entity-extraction method; whether external biology refs / figure captions / supplements are included; chunking parameters; retrieval-eval design.
+- Exact source list; entity-extraction method; exact figure/caption inclusion threshold;
+  chunking parameters; retrieval-eval design.
 
 ### Architecture
-- Package managers (Python: uv? — owner default is uv; Node: pnpm/npm); SQLAlchemy vs SQLModel; MCP server process layout (separate service vs mounted in API); storage backend & object storage; schema-generation approach (Pydantic→TS vs OpenAPI); Kimi integration details.
+- Kimi/OpenRouter integration details and fallback behavior.
 
 ### Evals
-- Exact eval-case schema; which evals run in CI; which require real model calls; score threshold gating merge; how reports are displayed.
+- Exact first eval cases and report display details.
 
 ### Autoresearch
 - Include live autoresearch only if it visibly improves a metric; otherwise ship policy files + eval dashboard + documented loop and defer the live loop.
