@@ -2,6 +2,7 @@
 __pycache__/
 *.py[cod]
 .venv/
+.pytest_cache/
 .env
 .env.*
 !.env.example
@@ -20,3 +21,7 @@ actions-runner*/
 demo_data/raw/*
 demo_data/processed/*
 !demo_data/**/.gitkeep
+
+# Eval report artifacts
+evals/results/*
+!evals/results/.gitkeep
