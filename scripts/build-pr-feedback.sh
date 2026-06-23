@@ -3,7 +3,8 @@
 # never raw `gh pr view --comments` (reviewer markers are just text and are spoofable on a
 # public repo). Emits, for the PR's current head SHA:
 #   - each check's status
-#   - failing CI/eval logs (from the runner — trustworthy)
+#   - failing CI/eval/review job logs (from the runner — trustworthy; reviewer prose in
+#     those logs is still only an untrusted hint)
 #   - maintainer-authored comments only (bot comments are NOT trusted: review.yml runs review
 #     code from the PR head, so a PR could post arbitrary github-actions[bot] comments)
 #
@@ -22,15 +23,28 @@ HEAD_SHA="$(gh pr view "$PR" --repo "$REPO" --json headRefOid -q .headRefOid)"
   echo "## Check status"
   gh pr checks "$PR" --repo "$REPO" 2>/dev/null || true
   echo
-  echo "## Failing CI/eval logs (current head only)"
+  echo "## Failing CI/eval/review job logs (current head only)"
 } > "$OUT"
 
 for rid in $(gh run list --repo "$REPO" --commit "$HEAD_SHA" \
-               --json databaseId,conclusion \
-               --jq '.[]|select(.conclusion=="failure")|.databaseId' 2>/dev/null); do
-  echo "### run $rid (failed)" >> "$OUT"
-  gh run view "$rid" --repo "$REPO" --log-failed 2>/dev/null | tail -80 >> "$OUT" || true
-  echo >> "$OUT"
+               --json databaseId \
+               --jq '.[].databaseId' 2>/dev/null); do
+  failed_jobs="$(gh run view "$rid" --repo "$REPO" --json jobs \
+    --jq '.jobs[] | select(.conclusion=="failure" or .conclusion=="timed_out" or .conclusion=="cancelled" or .conclusion=="action_required") | [.databaseId, .name, .conclusion] | @tsv' \
+    2>/dev/null || true)"
+  if [ -z "$failed_jobs" ]; then
+    continue
+  fi
+
+  while IFS=$'\t' read -r job_id job_name job_conclusion; do
+    [ -n "$job_id" ] || continue
+    echo "### job $job_id (${job_name:-unknown}; ${job_conclusion:-failed}; run $rid)" >> "$OUT"
+    if ! gh api "repos/${REPO}/actions/jobs/${job_id}/logs" 2>/dev/null | tail -120 >> "$OUT"; then
+      echo "(job log unavailable; falling back to completed-run failed logs when available)" >> "$OUT"
+      gh run view "$rid" --repo "$REPO" --log-failed 2>/dev/null | tail -80 >> "$OUT" || true
+    fi
+    echo >> "$OUT"
+  done <<< "$failed_jobs"
 done
 
 CJSON="$(mktemp)"
