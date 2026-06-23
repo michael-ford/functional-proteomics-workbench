@@ -50,8 +50,9 @@ Codex cloud toggle. Rationale:
 Each reviewer:
 1. Reads `REVIEW.md` (the shared severity rubric).
 2. Reviews `gh pr diff` (read-only tools: `Bash(gh:*),Read,Glob,Grep`).
-3. Posts a review with `### P0` / `### P1` / `### P2` findings and a tally, tagged with a
-   marker (e.g. `<!-- reviewer:claude -->`).
+3. Posts a review with a tally, audit trail (`Reviewed files`, `Checks run/inspected`,
+   `Pass rationale`, `Residual risk`), `### P0` / `### P1` / `### P2` findings, and a marker
+   (e.g. `<!-- reviewer:claude -->`).
 4. Emits `REVIEW_VERDICT: PASS` if no P0/P1, else `REVIEW_VERDICT: FAIL`; the workflow job
    maps that verdict onto `review (claude)` / `review (codex)`.
 
@@ -64,6 +65,8 @@ and fail-closed.
 The reviewer CLI runs inside tmux for observability, but the workflow waits for it to finish.
 If a reviewer times out, exits without a verdict, or emits an unparseable verdict, the job
 fails closed. The only fail-open path is the explicit Claude usage-limit skip described above.
+After the job captures the log and verdict, the harness removes that per-review tmux window so
+completed review panes do not accumulate on the runner.
 
 ## Branch protection (set after Phase 1, once check names exist)
 

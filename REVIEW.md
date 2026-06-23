@@ -43,10 +43,17 @@ gate is **fail-closed**, so a false-positive P1 costs the author a round trip â€
 Cap **P2** at **5 per review**. Beyond that, write `+ N similar` in the tally line.
 
 ## Output format
-Post one PR comment that starts with a tally (`0 P0, 1 P1, 2 P2`), then findings sorted by
-severity using the exact headings `### P0`, `### P1`, `### P2` (each with a one-line title and
-a `file:line` cite). End with the marker: `<!-- reviewer:NAME sha:HEADSHA -->`. If nothing
-blocks, lead with `No blocking issues.`
+Post one PR comment that starts with a tally (`0 P0, 1 P1, 2 P2`), then a short audit trail:
+
+- `Reviewed files:` changed files or globs actually inspected.
+- `Checks run/inspected:` commands, CI jobs, or explicit `not run` notes.
+- `Pass rationale:` one concise sentence explaining why there are no blocking findings, or
+  what the review focused on before listing findings.
+- `Residual risk:` remaining test gaps, assumptions, or `None noted`.
+
+Then list findings sorted by severity using the exact headings `### P0`, `### P1`, `### P2`
+(each with a one-line title and a `file:line` cite). End with the marker:
+`<!-- reviewer:NAME sha:HEADSHA -->`. If nothing blocks, lead with `No blocking issues.`
 
 Then print, as the **final line of stdout**, exactly one of:
 - `REVIEW_VERDICT: PASS` â€” no P0 and no P1
