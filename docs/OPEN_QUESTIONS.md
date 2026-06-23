@@ -17,8 +17,18 @@ This file tracks unresolved decisions and records resolutions with rationale.
 | R4 | Review agents | **Claude + Codex**, both as local **CLI sessions in tmux** on a self-hosted Mac runner | Inherits local subscription auth → no API-key secrets; unified spawn script |
 | R5 | Runner | Self-hosted macOS, **fresh registration** for this repo | bestguy runners are bound to another repo; cannot reuse |
 | R6 | Spec sprint method | **In-session interview** for critical specs; hand off data/stats/corpus specs to runners | Faster than round-tripping 8 issues |
+| R7 | Package managers | **uv** (Python) + **pnpm** (JS) | uv locked by global rule; pnpm = standard JS monorepo manager |
+| R8 | ORM / model layer | **SQLModel** | One class = DB table + API schema; fits Pydantic-first contracts |
+| R9 | Schema source of truth | **Pydantic-first → generate TS** | Single source of truth in `packages/shared-schemas` |
+| R10 | MCP server layout | **Mounted in the FastAPI process** | Web/MCP parity by construction; one Railway deployable |
+| R11 | Agent / web-chat LLM | **OpenRouter → Kimi** (thin swappable adapter, mock in CI) | Easiest to implement; OpenAI-compatible API. Needs `OPENROUTER_API_KEY` |
+| R12 | Artifact storage | **Postgres state + local FS (dev) / Railway volume (deploy)** behind storage adapter | Simplest path to a working demo |
+| R13 | Trace storage | **Postgres tables (source of truth) + JSONL export** | Queryable dashboard/replay + file-like inspectability |
+| R14 | v0.1 contract scope | **Trimmed core (~12 entities)**; chat→TRACE_MODEL, eval→EVALS, rest deferred | Keep contracts stable but small |
 
-See `docs/DEVELOPMENT_WORKFLOW.md` for the full pipeline.
+See `docs/DEVELOPMENT_WORKFLOW.md` for the pipeline and `docs/DATA_CONTRACTS.md` /
+`docs/TRACE_MODEL.md` / `docs/MCP_TOOLS.md` / `docs/ARCHITECTURE.md` for the contracts drafted
+in this session.
 
 ---
 
