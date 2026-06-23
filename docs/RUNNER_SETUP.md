@@ -43,14 +43,10 @@ Workflows target `runs-on: [self-hosted, macOS]`. The `self-hosted` label is imp
   install the Codex CLI, `codex login`, then verify `codex exec` works, and add
   `review (codex)` to required checks (step 4).
 
-## 3. Enable auto-merge on the repo
+## 3. Branch protection on `main` (required status checks, no human review)
 
-```bash
-gh api -X PATCH repos/michael-ford/functional-proteomics-workbench \
-  -F allow_auto_merge=true -F delete_branch_on_merge=true -F allow_squash_merge=true
-```
-
-## 4. Branch protection on `main` (required status checks, no human review)
+> **Do this BEFORE enabling auto-merge (step 4).** With auto-merge on but no required checks,
+> a PR could merge unreviewed.
 
 Start by requiring `ci` + `review (claude)`. Add `review (codex)` once Codex is live, and
 `eval-smoke` at the eval-gate activation milestone (`docs/ROADMAP.md`).
@@ -79,6 +75,13 @@ JSON
 > `required_pull_request_reviews: null` = **no human approval required** — auto-merge is the
 > intended path (`docs/DEVELOPMENT_WORKFLOW.md`). `strict: true` requires branches be up to
 > date before merge.
+
+## 4. Enable auto-merge on the repo (after branch protection)
+
+```bash
+gh api -X PATCH repos/michael-ford/functional-proteomics-workbench \
+  -F allow_auto_merge=true -F delete_branch_on_merge=true -F allow_squash_merge=true
+```
 
 ## 5. Validate on a throwaway PR
 
