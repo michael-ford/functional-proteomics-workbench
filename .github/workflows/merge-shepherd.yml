@@ -1,0 +1,137 @@
+# Re-spawn implementer agents for auto-merge PRs that are stalled on real git conflicts.
+name: merge-shepherd
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+concurrency:
+  group: merge-shepherd
+  cancel-in-progress: false
+
+jobs:
+  shepherd:
+    runs-on: [self-hosted, macOS]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: re-spawn stale conflicting agent PRs
+        env:
+          GH_REPO: ${{ github.repository }}
+          IMPL_AGENT: codex
+          MAX_ATTEMPTS: "3"
+          QUIET_SECS: "600"
+        run: |
+          set -euo pipefail
+
+          SESSION="${AGENT_TMUX_SESSION:-fpw-agents}"
+          WT_ROOT="${FPW_AGENT_WORKTREE_ROOT:-${HOME}/fpw-agent-workspaces}"
+          mkdir -p "${WT_ROOT}/.state"
+
+          prs_json="$(mktemp)"
+          candidates="$(mktemp)"
+          trap 'rm -f "$prs_json" "$candidates"' EXIT
+
+          gh pr list --repo "$GH_REPO" --state open --limit 100 \
+            --json number,headRefName,mergeStateStatus,autoMergeRequest,updatedAt \
+            > "$prs_json"
+
+          python3 - "$prs_json" > "$candidates" <<'PY'
+          import json
+          import sys
+
+          with open(sys.argv[1]) as fh:
+              prs = json.load(fh)
+
+          dirty_states = {"DIRTY", "CONFLICTING"}
+          for pr in prs:
+              if not pr.get("autoMergeRequest"):
+                  continue
+              if pr.get("mergeStateStatus") not in dirty_states:
+                  continue
+              print(
+                  "\t".join(
+                      [
+                          str(pr["number"]),
+                          pr.get("headRefName") or "",
+                          pr.get("mergeStateStatus") or "",
+                          pr.get("updatedAt") or "",
+                      ]
+                  )
+              )
+          PY
+
+          if [ ! -s "$candidates" ]; then
+            echo "no stale conflicting auto-merge PRs found"
+            exit 0
+          fi
+
+          now="$(date -u +%s)"
+          while IFS=$'\t' read -r pr head_ref merge_state updated_at; do
+            if [[ ! "$head_ref" =~ ^agent/issue-([0-9]+)$ ]]; then
+              echo "PR #${pr}: skipping non-agent branch ${head_ref}"
+              continue
+            fi
+            issue="${BASH_REMATCH[1]}"
+            window="issue-${issue}"
+            state_dir="${WT_ROOT}/.state/issue-${issue}"
+            attempts_file="${state_dir}/merge-shepherd-attempts"
+            commented_file="${state_dir}/merge-shepherd-human-commented"
+            mkdir -p "$state_dir"
+
+            if tmux has-session -t "$SESSION" 2>/dev/null \
+               && tmux list-windows -t "$SESSION" -F '#W' 2>/dev/null | grep -qx "$window"; then
+              if [ "$(tmux list-panes -t "${SESSION}:${window}" -F '#{pane_dead}' | head -1)" != "1" ]; then
+                echo "PR #${pr}: ${SESSION}:${window} is live; skipping"
+                continue
+              fi
+            fi
+
+            updated_epoch="$(python3 - "$updated_at" <<'PY'
+          from datetime import datetime, timezone
+          import sys
+
+          value = sys.argv[1]
+          if not value:
+              print(0)
+              raise SystemExit
+          dt = datetime.fromisoformat(value.replace("Z", "+00:00"))
+          print(int(dt.astimezone(timezone.utc).timestamp()))
+          PY
+          )"
+            age="$((now - updated_epoch))"
+            if [ "$age" -lt "${QUIET_SECS}" ]; then
+              echo "PR #${pr}: updated ${age}s ago; waiting for in-flight work to settle"
+              continue
+            fi
+
+            attempts="0"
+            if [ -f "$attempts_file" ]; then
+              attempts="$(tr -dc '0-9' < "$attempts_file" | head -c 6)"
+              attempts="${attempts:-0}"
+            fi
+
+            if [ "$attempts" -ge "${MAX_ATTEMPTS}" ]; then
+              echo "PR #${pr}: attempt cap reached (${attempts}); human needed"
+              if [ ! -f "$commented_file" ]; then
+                gh pr comment "$pr" --repo "$GH_REPO" --body \
+                  "Merge shepherd has reached ${attempts} automated conflict-resolution respawns for this PR and it is still ${merge_state}. A human needs to resolve the remaining merge conflict or reset the branch."
+                date -u +"%Y-%m-%dT%H:%M:%SZ" > "$commented_file"
+              fi
+              continue
+            fi
+
+            next_attempt="$((attempts + 1))"
+            echo "$next_attempt" > "$attempts_file"
+            date -u +"%Y-%m-%dT%H:%M:%SZ" > "${state_dir}/merge-shepherd-last-spawn"
+            echo "PR #${pr}: spawning conflict resolver for issue #${issue} (attempt ${next_attempt}/${MAX_ATTEMPTS})"
+            bash scripts/spawn-impl-agent.sh "$issue" --resolve-existing
+          done < "$candidates"
