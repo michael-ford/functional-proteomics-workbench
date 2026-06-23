@@ -22,15 +22,15 @@ are drafted (`docs/DATA_CONTRACTS.md`, `docs/MCP_TOOLS.md`, `docs/TRACE_MODEL.md
 - ✅ SPEC-004 trace & eval replay model
 - ✅ SPEC-005 MVP tool list + first-pass schemas
 - ✅ SPEC-007 CI / governance / security (DEVELOPMENT_WORKFLOW, SECURITY)
-- 🟡 EVALS spec (eval-case schema + gating policy) ✅ drafted
+- ✅ EVALS spec (eval-case schema + gating policy) drafted
 - 🔬 SPEC-006 demo dataset fixture contract (depends on DATA-001)
-- 🔬 SPEC-008 labels/templates — templates done; label taxonomy to finalize
+- 🟡 SPEC-008 labels/templates — templates done; label taxonomy mostly in place
 
 ## Handed-off research (async runners) 🔬
-- 🔬 **DATA-001** explore Perturb-PBMC → propose 3 hero comparisons (gates hero question,
-  subset, plot choice)
-- 🔬 **STAT-001** stats best practices → finalize the supported method menu
-- 🔬 Corpus source list (depends on the hero question)
+- ✅ **DATA-001** first-pass exploration complete → 3 hero comparisons proposed; Mike still
+  needs to choose the final comparison before SPEC-006.
+- 🔬 **STAT-001** stats best practices → finalize the supported method menu.
+- 🟡 Corpus direction set; exact source list still depends on the hero question.
 
 ## Phase 1 — the harness ✅
 - ✅ `ci.yml` (lint/test/typecheck; `eval-smoke` path-conditional, non-blocking until gate
@@ -45,8 +45,10 @@ IMPL-004 ToolRegistry skeleton · IMPL-005 trace models · IMPL-006 Next.js shel
 IMPL-007 seeded demo project · IMPL-008 eval runner skeleton → web chat → dashboard →
 eval page → deployment → polish + screen recording.
 
-Agents can parallelize on frontend shell / backend skeleton / analysis / corpus / eval
-runner / docs **only after** shared schemas + tool registry + trace are implemented.
+Foundational agents can start on FastAPI skeleton, Next.js shell, ToolRegistry skeleton, trace
+models, and eval runner once issue decisions are reflected in docs. Data fixture, analysis,
+corpus, dashboard/report, and deployment remain blocked until DATA-001 final selection,
+STAT-001, CORPUS-001, and SPEC-006 are resolved.
 
 ## Eval-gate activation milestone
 `eval-smoke` becomes a **required** check once the end-to-end hero workflow runs against the
