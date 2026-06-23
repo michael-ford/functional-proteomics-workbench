@@ -39,6 +39,15 @@
   subscription auth on the self-hosted runner — so **no model API keys live in repo secrets**
   for review (`docs/DEVELOPMENT_WORKFLOW.md`).
 
+## Agent execution trust boundary (CI)
+The implementer agent (Codex on `agent-ready`) runs with full host access + ambient `gh`
+credentials, so it must not ingest untrusted input. On this public repo anyone can comment on
+an issue. Mitigation (`scripts/spawn-impl-agent.sh`): the agent reads only a **pre-sanitized
+context file** containing the issue body + comments authored by maintainers
+(`author_association` ∈ OWNER/MEMBER/COLLABORATOR, non-bot); arbitrary public comments are
+excluded, and the agent is instructed not to fetch raw comments. The `agent-ready` label is a
+human gate on *triggering*; the trust filter is the gate on *content*.
+
 ## Uploaded-data cautions
 - Do not upload sensitive data; demo data may be reset (`make demo-reset`).
 - No privacy/compliance guarantees are made or implied.
