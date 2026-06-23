@@ -39,6 +39,17 @@
   subscription auth on the self-hosted runner — so **no model API keys live in repo secrets**
   for review (`docs/DEVELOPMENT_WORKFLOW.md`).
 
+## Agent execution trust boundary (CI)
+Both the spec agent (Claude on `needs-spec`) and the implementer (Codex on `agent-ready`) run
+with host access, so they must not ingest untrusted input. On this public repo anyone can
+comment on an issue. Mitigation (`scripts/build-issue-context.sh`, shared by both): the agent
+reads only a **pre-sanitized context file** containing the issue body *(only when the opener
+is a maintainer)* + comments authored by maintainers (`author_association` ∈
+OWNER/MEMBER/COLLABORATOR, non-bot). Arbitrary public content is excluded, the file is read
+(never shell-evaluated), and the agent is told not to fetch raw comments. The spec agent's
+tools are further restricted to `gh issue` + read-only file tools. The `agent-ready` label is
+a human gate on *triggering*; the trust filter is the gate on *content*.
+
 ## Uploaded-data cautions
 - Do not upload sensitive data; demo data may be reset (`make demo-reset`).
 - No privacy/compliance guarantees are made or implied.
