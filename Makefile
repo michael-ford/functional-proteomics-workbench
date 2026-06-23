@@ -1,17 +1,25 @@
 # Functional Proteomics Workbench — developer entrypoints (stubs; filled during IMPL wave)
 .PHONY: setup test lint typecheck gen-types eval eval-smoke run-local run-web demo-reset ingest-demo-data build-corpus seed-demo-project
 
+PNPM_STAMP := node_modules/.modules.yaml
+
+$(PNPM_STAMP): package.json pnpm-lock.yaml pnpm-workspace.yaml apps/web/package.json
+	pnpm install --frozen-lockfile
+
 setup:            ## install deps
-	pnpm install
+	pnpm install --frozen-lockfile
 test:             ## run all tests (TODO)
 	uv run --project packages/shared-schemas pytest packages/shared-schemas/tests
 	uv run --project services/api pytest services/api/tests
+	$(MAKE) $(PNPM_STAMP)
 	pnpm test
 lint:             ## lint
 	uv run --project services/api ruff check services/api/src services/api/tests
+	$(MAKE) $(PNPM_STAMP)
 	pnpm lint
 typecheck:        ## typecheck
 	uv run --project services/api pyright --project services/api services/api/src services/api/tests
+	$(MAKE) $(PNPM_STAMP)
 	pnpm typecheck
 	pnpm build
 gen-types:        ## generate frontend TypeScript types from shared Pydantic schemas
