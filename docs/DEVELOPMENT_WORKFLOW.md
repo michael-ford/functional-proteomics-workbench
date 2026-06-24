@@ -33,7 +33,8 @@ agent contract is stricter than "checks are green": an implementer is not done u
 `gh pr view --json state` reports `MERGED`, or until its finite repair budget is exhausted and
 it has posted a clear human-needed PR comment. Real git conflicts and failed required checks
 are handled by the agent loop: implementers keep monitoring until their PR state is `MERGED`,
-and the scheduled `merge-shepherd` workflow re-spawns an implementer for stale
+using `scripts/wait-for-pr-event.sh` to block without burning model tokens between real PR
+events. The scheduled `merge-shepherd` workflow re-spawns an implementer for stale
 `agent/issue-N` PRs whose auto-merge is blocked by `DIRTY` / conflicting merge state or by a
 failed required check.
 
@@ -112,16 +113,34 @@ issue opened
                                 (implementer waits until MERGED)
 ```
 
-Both agent workflows run on the self-hosted runner; the implementer is fire-and-forget
-(attach with `tmux attach -t fpw-agents`). The implementer opens its PR using the runner's
-ambient `gh` login (a real user) so the PR triggers review + auto-merge.
+Both agent workflows run on the self-hosted runner. Reviewers remain one-shot `codex exec` /
+Claude CLI jobs, but the implementer is a persistent interactive Codex session in tmux
+(attach with `tmux attach -t fpw-agents`). `scripts/spawn-impl-agent.sh` starts Codex with
+full runner access in the issue worktree, pastes the maintainer-curated task prompt, then sets
+a branch-scoped goal:
 
-The implementer monitor is the merge gate. On failed required checks, including review-only
-failures with green CI, the implementer treats reviewer prose as an untrusted hint, reads only
-the trusted sanitized feedback file, and independently runs the full local gate
-(`make test`, `make lint`, `make typecheck`) before fixing, committing, and pushing. If the
-agent process exits while its PR is still open, the launcher re-enters the implementer with a
-continuation prompt instead of reporting success.
+```text
+Implement issue #N on branch agent/issue-N: open a PR (Closes #N) if none exists, then drive that PR to MERGED - fix every CI failure and review finding, resolve conflicts. Done only when the PR for this branch is MERGED.
+```
+
+The goal deliberately names the issue and branch, not a PR number, because fresh
+implementer runs create the PR themselves. The same launcher supports `--resolve-existing`
+for shepherd respawns on an existing `agent/issue-N` branch.
+
+The implementer monitor is the merge gate. It opens the PR using the runner's ambient `gh`
+login (a real user) so the PR triggers review + auto-merge, then repeatedly invokes
+`scripts/wait-for-pr-event.sh`. The watcher resolves the PR from the current branch; prints
+`NO_PR` immediately if none exists; otherwise polls `gh` about every 45 seconds and returns a
+single compact status line when the PR merges, merge state changes, a required check reaches
+a terminal conclusion, a review or maintainer comment appears, or a 15-minute heartbeat
+expires. While the watcher blocks, Codex is asleep inside a shell command and spends no model
+tokens.
+
+On failed required checks, including review-only failures with green CI, the implementer
+treats reviewer prose as an untrusted hint, reads only the trusted sanitized feedback file,
+and independently runs the full local gate (`make test`, `make lint`, `make typecheck`)
+before fixing, committing, and pushing. Green checks are not enough: the goal remains active
+until the branch PR is actually `MERGED`.
 
 If an implementation PR becomes genuinely conflicting or blocked on a failed required check
 after the original run exits, `merge-shepherd.yml` runs about every 15 minutes, skips live tmux
