@@ -11,7 +11,7 @@ setup:            ## install deps
 test:             ## run all tests (TODO)
 	uv run --project packages/shared-schemas pytest packages/shared-schemas/tests
 	uv run --project services/api pytest services/api/tests
-	PYTHONPATH=$(CURDIR) uv run --project packages/shared-schemas pytest --rootdir=. evals/tests
+	PYTHONPATH=$(CURDIR) uv run --project packages/shared-schemas pytest --rootdir=. evals/tests scripts/tests
 	$(MAKE) $(PNPM_STAMP)
 	pnpm test
 lint:             ## lint
