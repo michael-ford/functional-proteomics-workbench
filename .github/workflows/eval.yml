@@ -20,5 +20,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
       - name: deterministic eval-smoke (mocked model, fixture data)
         run: make eval-smoke
