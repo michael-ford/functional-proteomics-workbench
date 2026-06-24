@@ -10,15 +10,18 @@ setup:            ## install deps
 	pnpm install --frozen-lockfile
 test:             ## run all tests (TODO)
 	uv run --project packages/shared-schemas pytest packages/shared-schemas/tests
+	uv run --project packages/analysis pytest packages/analysis/tests
 	uv run --project services/api pytest services/api/tests
 	PYTHONPATH=$(CURDIR) uv run --project packages/shared-schemas pytest --rootdir=. evals/tests scripts/tests
 	$(MAKE) $(PNPM_STAMP)
 	pnpm test
 lint:             ## lint
+	uv run --project packages/analysis ruff check packages/analysis/src packages/analysis/tests
 	uv run --project services/api ruff check services/api/src services/api/tests
 	$(MAKE) $(PNPM_STAMP)
 	pnpm lint
 typecheck:        ## typecheck
+	uv run --project packages/analysis pyright --project packages/analysis packages/analysis/src packages/analysis/tests
 	uv run --project services/api pyright --project services/api services/api/src services/api/tests
 	$(MAKE) $(PNPM_STAMP)
 	pnpm typecheck

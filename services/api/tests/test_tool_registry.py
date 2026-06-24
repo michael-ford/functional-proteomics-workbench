@@ -1,4 +1,5 @@
 import asyncio
+import csv
 from typing import Literal
 
 import pytest
@@ -18,6 +19,7 @@ from fpw_api.tools import (
     invoke_for_mcp,
     invoke_for_web_chat,
 )
+from fpw_api.tools.mvp import DEMO_DATASET_ID
 
 MVP_TOOL_NAMES = {
     "create_project",
@@ -283,6 +285,118 @@ def test_web_and_mcp_adapters_call_the_same_registered_handler() -> None:
     assert web_output.surface == "web_chat"
     assert mcp_output.surface == "mcp"
     assert [trace.origin.surface for trace in sink.traces] == ["web_chat", "mcp"]
+
+
+def test_analysis_tools_create_traced_plan_result_and_ranking_artifact(tmp_path) -> None:
+    registry = create_default_tool_registry()
+    sink = InMemoryTraceSink()
+    context = ToolContext(
+        origin=TraceOrigin(surface="api", client="pytest"),
+        trace_sink=sink,
+        project_id="proj_demo",
+        state={"state_root": tmp_path},
+    )
+    comparison = {
+        "group_a": {"perturbagen": "IL-10"},
+        "group_b": {"perturbagen": "control"},
+        "stimulation_context": "LPS",
+        "paired_by": "donor",
+    }
+
+    plan_result = asyncio.run(
+        registry.invoke(
+            "define_comparison",
+            {
+                "project_id": "proj_demo",
+                "dataset_id": DEMO_DATASET_ID,
+                "comparison": comparison,
+            },
+            context,
+        )
+    )
+    assert plan_result.error is None
+    assert plan_result.output is not None
+    plan = plan_result.output.model_dump(mode="json")
+    assert plan["method_id"] == "donor_aware_paired_difference"
+    assert "Matched donors" in plan["donor_handling"]
+    assert plan["limitations"]
+
+    comparison_result = asyncio.run(
+        registry.invoke(
+            "run_comparison",
+            {"project_id": "proj_demo", "plan_id": plan["id"]},
+            context,
+        )
+    )
+
+    assert comparison_result.error is None
+    assert comparison_result.output is not None
+    result = comparison_result.output.model_dump(mode="json")
+    assert result["ranking"]["rows"][0]["protein"] == "TNF alpha"
+    assert result["ranking"]["rows"][0]["q_value"] == pytest.approx(0.036458333333333336)
+    assert len(result["donor_consistency"]) == 6
+    assert "Matched donors" in result["donor_handling"]
+    assert result["limitations"]
+    table_uri = result["table_ref"]["uri"]
+    assert table_uri.startswith("project://proj_demo/analysis/results/res_")
+    table_path = (
+        tmp_path / "projects" / "proj_demo" / "analysis" / "results" / f"{result['id']}.csv"
+    )
+    with table_path.open(newline="", encoding="utf-8") as handle:
+        table_rows = list(csv.DictReader(handle))
+    assert table_rows[0]["protein"] == "TNF alpha"
+    assert table_rows[0]["donor_count"] == "6"
+
+    ranking_result = asyncio.run(
+        registry.invoke(
+            "rank_proteins",
+            {"project_id": "proj_demo", "result_id": result["id"]},
+            context,
+        )
+    )
+    assert ranking_result.error is None
+    assert ranking_result.output is not None
+    assert ranking_result.output.model_dump(mode="json") == result["ranking"]
+    assert [trace.tool_name for trace in sink.traces[-3:]] == [
+        "define_comparison",
+        "run_comparison",
+        "rank_proteins",
+    ]
+    assert all(trace.status == "ok" for trace in sink.traces[-3:])
+    assert all(trace.project_id == "proj_demo" for trace in sink.traces[-3:])
+
+
+def test_define_comparison_rejects_unsupported_unpaired_assumption() -> None:
+    registry = create_default_tool_registry()
+    sink = InMemoryTraceSink()
+
+    result = asyncio.run(
+        registry.invoke(
+            "define_comparison",
+            {
+                "project_id": "proj_demo",
+                "dataset_id": DEMO_DATASET_ID,
+                "comparison": {
+                    "group_a": {"perturbagen": "IL-10"},
+                    "group_b": {"perturbagen": "control"},
+                    "stimulation_context": "LPS",
+                    "paired_by": "sample_id",
+                },
+            },
+            ToolContext(
+                origin=TraceOrigin(surface="api", client="pytest"),
+                trace_sink=sink,
+                project_id="proj_demo",
+            ),
+        )
+    )
+
+    assert result.output is None
+    assert result.error is not None
+    assert result.error.code == "invalid_input"
+    assert "paired_by='donor'" in result.error.message
+    assert sink.traces[-1].tool_name == "define_comparison"
+    assert sink.traces[-1].status == "error"
 
 
 def _probe_definition(handler) -> ToolDefinition:

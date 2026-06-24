@@ -5,12 +5,14 @@ description = "FastAPI backend service for the functional proteomics workbench"
 requires-python = ">=3.11"
 dependencies = [
     "fastapi>=0.115,<1",
+    "functional-proteomics-analysis",
     "functional-proteomics-shared-schemas",
     "sqlmodel>=0.0.22,<1",
     "uvicorn[standard]>=0.34,<1",
 ]
 
 [tool.uv.sources]
+functional-proteomics-analysis = { path = "../../packages/analysis", editable = true }
 functional-proteomics-shared-schemas = { path = "../../packages/shared-schemas", editable = true }
 
 [dependency-groups]
