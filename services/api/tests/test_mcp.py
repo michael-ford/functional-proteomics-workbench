@@ -51,8 +51,8 @@ def test_mcp_startup_smoke(monkeypatch) -> None:
     assert health.json() == {"status": "ok", "service": "functional-proteomics-mcp"}
     assert initialized.status_code == 200
     assert initialized.json()["result"]["capabilities"] == {"tools": {"listChanged": False}}
-    assert notification.status_code == 200
-    assert notification.json() == {"jsonrpc": "2.0", "id": None, "result": {}}
+    assert notification.status_code == 202
+    assert notification.content == b""
 
 
 def test_mcp_requires_configured_demo_token(monkeypatch) -> None:

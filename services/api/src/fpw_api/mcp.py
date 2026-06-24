@@ -5,7 +5,7 @@ from __future__ import annotations
 import os
 from typing import Any, Literal
 
-from fastapi import APIRouter, Depends, Header, HTTPException, Request, status
+from fastapi import APIRouter, Depends, Header, HTTPException, Request, Response, status
 from pydantic import BaseModel, ConfigDict, Field
 
 from fpw_api.tools import InMemoryTraceSink, ToolRegistry, TraceSink, invoke_for_mcp
@@ -33,12 +33,12 @@ def create_mcp_router() -> APIRouter:
     async def health() -> dict[str, str]:
         return {"status": "ok", "service": "functional-proteomics-mcp"}
 
-    @router.post("")
+    @router.post("", response_model=None)
     async def handle_json_rpc(
         payload: JsonRpcRequest,
         request: Request,
         _: None = Depends(_require_demo_token),
-    ) -> dict[str, Any]:
+    ) -> dict[str, Any] | Response:
         registry = _registry_from_app(request)
         trace_sink = _trace_sink_from_app(request)
 
@@ -56,7 +56,7 @@ def create_mcp_router() -> APIRouter:
             )
 
         if payload.method == "notifications/initialized":
-            return _success(payload.id, {})
+            return Response(status_code=status.HTTP_202_ACCEPTED)
 
         if payload.method == "tools/list":
             return _success(payload.id, {"tools": _tool_schemas(registry)})
