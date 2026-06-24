@@ -45,6 +45,33 @@ case "$IMPLEMENTER" in
 esac
 command -v "$BIN" >/dev/null 2>&1 || { echo "::error::'$BIN' not installed on runner"; exit 1; }
 
+trust_codex_project() {
+  local project_path="$1"
+  local config="${CODEX_HOME:-${HOME}/.codex}/config.toml"
+  local lock_dir="${config}.lock"
+  local lock_waits=0
+  mkdir -p "$(dirname "$config")"
+
+  while ! mkdir "$lock_dir" 2>/dev/null; do
+    lock_waits=$((lock_waits + 1))
+    if [ "$lock_waits" -ge 100 ]; then
+      echo "::error::timed out waiting for Codex config lock: $lock_dir"
+      return 1
+    fi
+    sleep 0.1
+  done
+  if [ -f "$config" ] && grep -Fqx "[projects.\"${project_path}\"]" "$config"; then
+    rmdir "$lock_dir" 2>/dev/null || true
+    return
+  fi
+
+  {
+    printf '\n[projects."%s"]\n' "$project_path"
+    printf 'trust_level = "trusted"\n'
+  } >> "$config"
+  rmdir "$lock_dir" 2>/dev/null || true
+}
+
 case "$MODE" in
   new|--new) MODE="new" ;;
   resolve-existing|--resolve-existing) MODE="resolve-existing" ;;
@@ -101,6 +128,8 @@ fi
 # agent's push/PR uses ambient `gh` creds (and thus triggers downstream workflows).
 git -C "$WORKDIR" config --unset-all "http.https://github.com/.extraheader" 2>/dev/null || true
 git -C "$WORKDIR" remote set-url origin "$ORIGIN_URL"
+trust_codex_project "$CONTROL_REPO"
+trust_codex_project "$WORKDIR"
 echo "worktree: $WORKDIR on $BRANCH"
 
 # Trust-filtered context (maintainer-authored content only).
@@ -222,8 +251,9 @@ sleep "$settle_secs"
 
 prompt_buffer="fpw-impl-${ISSUE}-prompt"
 goal_buffer="fpw-impl-${ISSUE}-goal"
-tmux send-keys -t "$PANE" "/goal "
-tmux load-buffer -b "$goal_buffer" "$GOAL"
+goal_command="${STATE}/goal-command"
+printf '/goal %s\n' "$(cat "$GOAL")" > "$goal_command"
+tmux load-buffer -b "$goal_buffer" "$goal_command"
 tmux paste-buffer -d -b "$goal_buffer" -t "$PANE"
 tmux send-keys -t "$PANE" Enter
 
