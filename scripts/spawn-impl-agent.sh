@@ -170,7 +170,7 @@ cat > "$RUNSH" <<EOF
 #!/usr/bin/env bash
 set -euo pipefail
 cd "${WORKDIR}"
-exec codex --skip-git-repo-check -a never -s danger-full-access
+exec codex -a never -s danger-full-access
 EOF
 chmod +x "$RUNSH"
 
