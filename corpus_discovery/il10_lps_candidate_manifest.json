@@ -1,0 +1,388 @@
+{
+  "buckets": [
+    {
+      "cap": 2,
+      "name": "nELISA assay context",
+      "query": "Nomic nELISA PBMC proteomics perturbation",
+      "required_terms": [
+        "nELISA",
+        "PBMC"
+      ],
+      "semantic_terms": [
+        "high-throughput",
+        "high-plex",
+        "protein profiling",
+        "inflammatory secretome",
+        "PBMC",
+        "perturbation screen",
+        "cytokine responses",
+        "donor"
+      ]
+    },
+    {
+      "cap": 3,
+      "name": "selected perturbagen biology",
+      "query": "IL-10 inhibits LPS induced cytokine production human monocytes",
+      "required_terms": [
+        "IL-10"
+      ],
+      "semantic_terms": [
+        "anti-inflammatory",
+        "cytokine",
+        "monocyte",
+        "macrophage",
+        "NF kappa B",
+        "IL-12",
+        "TNF alpha",
+        "IFN gamma",
+        "inhibits"
+      ]
+    },
+    {
+      "cap": 3,
+      "name": "PBMC perturbation design",
+      "query": "LPS stimulated human PBMC cytokine production perturbation screen",
+      "required_terms": [
+        "PBMC",
+        "LPS"
+      ],
+      "semantic_terms": [
+        "human PBMC",
+        "peripheral blood mononuclear cells",
+        "LPS stimulated",
+        "cytokine production",
+        "whole blood",
+        "monocytes",
+        "TNF alpha",
+        "IL-1 beta",
+        "IL-6"
+      ]
+    }
+  ],
+  "candidates": [
+    {
+      "authors": "Annalisa D'Andrea; Miguel Aste-Amezaga; Nicholas M. Valiante; Xiaojing Ma; Marek Kubin; Giorgio Trinchieri",
+      "best_bucket": "selected perturbagen biology",
+      "citation_velocity": 41.21,
+      "citations": 1401,
+      "doi": "10.1084/jem.178.3.1041",
+      "matched_buckets": [
+        "selected perturbagen biology"
+      ],
+      "matched_entities": [
+        "IL-10",
+        "interleukin 10",
+        "LPS",
+        "lipopolysaccharide",
+        "peripheral blood mononuclear cells",
+        "TNF alpha",
+        "TNF-alpha",
+        "IL-12",
+        "IFN gamma"
+      ],
+      "matched_terms": [
+        "cytokine",
+        "monocyte",
+        "macrophage",
+        "IL-12",
+        "TNF alpha",
+        "IFN gamma",
+        "inhibits"
+      ],
+      "paper_id": "W2115954882",
+      "pdf_url": "https://rupress.org/jem/article-pdf/178/3/1041/1675111/1041.pdf",
+      "pmids": [],
+      "publication_type": "primary",
+      "rank": 1,
+      "scores": {
+        "impact": 0.8524,
+        "impact_details": {
+          "citation_score": 1.0,
+          "citation_velocity": 41.21,
+          "publication_type_score": 1.0,
+          "recency_score": 0.25,
+          "velocity_score": 0.5495,
+          "venue_score": 0.9
+        },
+        "relevance": 0.7972,
+        "total": 0.822
+      },
+      "source": "openalex",
+      "sources": [
+        "openalex"
+      ],
+      "title": "Interleukin 10 (IL-10) inhibits human lymphocyte interferon gamma-production by suppressing natural killer cell stimulatory factor/IL-12 synthesis in accessory cells.",
+      "url": "https://doi.org/10.1084/jem.178.3.1041",
+      "venue": "Journal of Experimental Medicine",
+      "why_relevant": "Best match for 'selected perturbagen biology' via entities (IL-10, interleukin 10, LPS, lipopolysaccharide, peripheral blood mononuclear cells, TNF alpha) and topic terms (cytokine, monocyte, macrophage, IL-12, TNF alpha, IFN gamma).",
+      "year": 1993
+    },
+    {
+      "authors": "Peng Wang; Ping Wu; Marvin I. Siegel; Robert W. Egan; M. Motasim Billah",
+      "best_bucket": "selected perturbagen biology",
+      "citation_velocity": 22.19,
+      "citations": 710,
+      "doi": "10.1074/jbc.270.16.9558",
+      "matched_buckets": [
+        "selected perturbagen biology"
+      ],
+      "matched_entities": [
+        "IL-10",
+        "LPS",
+        "lipopolysaccharide",
+        "TNF alpha",
+        "TNF-alpha",
+        "IL-1 beta",
+        "IL-6"
+      ],
+      "matched_terms": [
+        "cytokine",
+        "monocyte",
+        "NF kappa B",
+        "TNF alpha",
+        "inhibits"
+      ],
+      "paper_id": "W1634459475",
+      "pdf_url": "http://www.jbc.org/article/S0021925817491708/pdf",
+      "pmids": [],
+      "publication_type": "primary",
+      "rank": 2,
+      "scores": {
+        "impact": 0.7495,
+        "impact_details": {
+          "citation_score": 0.9506,
+          "citation_velocity": 22.19,
+          "publication_type_score": 1.0,
+          "recency_score": 0.25,
+          "velocity_score": 0.2959,
+          "venue_score": 0.75
+        },
+        "relevance": 0.6444,
+        "total": 0.6917
+      },
+      "source": "openalex",
+      "sources": [
+        "openalex"
+      ],
+      "title": "Interleukin (IL)-10 Inhibits Nuclear Factor kB (NFkB) Activation in Human Monocytes",
+      "url": "https://doi.org/10.1074/jbc.270.16.9558",
+      "venue": "Journal of Biological Chemistry",
+      "why_relevant": "Best match for 'selected perturbagen biology' via entities (IL-10, LPS, lipopolysaccharide, TNF alpha, TNF-alpha, IL-1 beta) and topic terms (cytokine, monocyte, NF kappa B, TNF alpha, inhibits).",
+      "year": 1995
+    },
+    {
+      "authors": "D De Groote; P.F. Zangerle; Y. Gevaert; Marie France Fassotte; Yves Beguin; F. Noizat-Pirenne; Jacques Pirenne; R. Gathy; M. Lopez; I. Dehart; D. Igot; M. Baudrihaye; Dominique L. Delacroix; P Franchimont",
+      "best_bucket": "PBMC perturbation design",
+      "citation_velocity": 13.51,
+      "citations": 473,
+      "doi": "10.1016/1043-4666(92)90062-v",
+      "matched_buckets": [
+        "PBMC perturbation design"
+      ],
+      "matched_entities": [
+        "PBMC",
+        "TNF alpha",
+        "TNF-alpha",
+        "IL-1 beta",
+        "IL-6",
+        "IFN gamma",
+        "GM-CSF"
+      ],
+      "matched_terms": [
+        "whole blood",
+        "TNF alpha",
+        "IL-1 beta",
+        "IL-6"
+      ],
+      "paper_id": "W2295367859",
+      "pdf_url": "",
+      "pmids": [],
+      "publication_type": "primary",
+      "rank": 3,
+      "scores": {
+        "impact": 0.6599,
+        "impact_details": {
+          "citation_score": 0.8919,
+          "citation_velocity": 13.51,
+          "publication_type_score": 1.0,
+          "recency_score": 0.25,
+          "velocity_score": 0.1801,
+          "venue_score": 0.55
+        },
+        "relevance": 0.5306,
+        "total": 0.5888
+      },
+      "source": "openalex",
+      "sources": [
+        "openalex"
+      ],
+      "title": "Direct stimulation of cytokines (IL-1 beta, TNF-alpha, IL-6, IL-2, IFN-gamma and GM-CSF) in whole blood. I. Comparison with isolated PBMC stimulation",
+      "url": "https://doi.org/10.1016/1043-4666(92)90062-v",
+      "venue": "Cytokine",
+      "why_relevant": "Best match for 'PBMC perturbation design' via entities (PBMC, TNF alpha, TNF-alpha, IL-1 beta, IL-6, IFN gamma) and topic terms (whole blood, TNF alpha, IL-1 beta, IL-6).",
+      "year": 1992
+    },
+    {
+      "authors": "Jan Bertil Eggesbo; Ingvar Hjermann; Per Kristian Lund; Gun Britt Joo; Reidun Ovstebo; Peter Kierulf",
+      "best_bucket": "PBMC perturbation design",
+      "citation_velocity": 0.94,
+      "citations": 31,
+      "doi": "10.1016/1043-4666(94)90080-9",
+      "matched_buckets": [
+        "PBMC perturbation design"
+      ],
+      "matched_entities": [
+        "LPS",
+        "PBMC",
+        "TNF alpha",
+        "TNF-alpha",
+        "IL-1 beta",
+        "IL-6"
+      ],
+      "matched_terms": [
+        "whole blood",
+        "TNF alpha",
+        "IL-1 beta",
+        "IL-6"
+      ],
+      "paper_id": "10.1016/1043-4666(94)90080-9",
+      "pdf_url": "",
+      "pmids": [],
+      "publication_type": "primary",
+      "rank": 4,
+      "scores": {
+        "impact": 0.4508,
+        "impact_details": {
+          "citation_score": 0.5017,
+          "citation_velocity": 0.94,
+          "publication_type_score": 1.0,
+          "recency_score": 0.25,
+          "velocity_score": 0.0125,
+          "venue_score": 0.55
+        },
+        "relevance": 0.6056,
+        "total": 0.5359
+      },
+      "source": "crossref",
+      "sources": [
+        "crossref"
+      ],
+      "title": "LPS-induced release of IL-1 beta, IL-6, IL-8, TNF-alpha and sCD14 in whole blood and PBMC from persons with high or low levels of HDL-lipoprotein",
+      "url": "https://doi.org/10.1016/1043-4666(94)90080-9",
+      "venue": "Cytokine",
+      "why_relevant": "Best match for 'PBMC perturbation design' via entities (LPS, PBMC, TNF alpha, TNF-alpha, IL-1 beta, IL-6) and topic terms (whole blood, TNF alpha, IL-1 beta, IL-6).",
+      "year": 1994
+    },
+    {
+      "authors": "Milad Dagher; Grant Ongo; Nathaniel Robichaud; Jinglin Kong; Woojong Rho; Ivan Teahulos; Arya Tavakoli; Samantha Bovaird; Shahem Merjaneh; Andrew Tan; Kiran Edwardson; Christelle Scheepers; Andy Ng; Andy Hajjar; Baly Sow; Michael Vrouvides; Andy Lee; Philippe DeCorwin-Martin; Shafqat Rasool; Jian-Yuan Huang; Timothy Erps; Spencer Coffin; Narges Rashidi; Yu Han; Srinivas Niranj Chandrasekaran; Lisa Miller; Maria Kost-Alimova; Adam Skepner; Shantanu Singh; Anne E. Carpenter; Jeffrey D. Munzar; David Juncker",
+      "best_bucket": "nELISA assay context",
+      "citation_velocity": 5.5,
+      "citations": 11,
+      "doi": "10.1038/s41592-025-02861-6",
+      "matched_buckets": [
+        "nELISA assay context"
+      ],
+      "matched_entities": [
+        "peripheral blood mononuclear cells",
+        "nELISA"
+      ],
+      "matched_terms": [
+        "high-throughput",
+        "high-plex",
+        "inflammatory secretome",
+        "cytokine responses"
+      ],
+      "paper_id": "W4416004829",
+      "pdf_url": "https://www.nature.com/articles/s41592-025-02861-6.pdf",
+      "pmids": [],
+      "publication_type": "primary",
+      "rank": 5,
+      "scores": {
+        "impact": 0.5165,
+        "impact_details": {
+          "citation_score": 0.3597,
+          "citation_velocity": 5.5,
+          "publication_type_score": 1.0,
+          "recency_score": 1.0,
+          "velocity_score": 0.0733,
+          "venue_score": 0.95
+        },
+        "relevance": 0.425,
+        "total": 0.4662
+      },
+      "source": "openalex",
+      "sources": [
+        "openalex"
+      ],
+      "title": "nELISA: a high-throughput, high-plex platform enables quantitative profiling of the inflammatory secretome",
+      "url": "https://doi.org/10.1038/s41592-025-02861-6",
+      "venue": "Nature Methods",
+      "why_relevant": "Best match for 'nELISA assay context' via entities (peripheral blood mononuclear cells, nELISA) and topic terms (high-throughput, high-plex, inflammatory secretome, cytokine responses).",
+      "year": 2025
+    }
+  ],
+  "generated_at": "2026-06-24T00:00:00Z",
+  "hero_comparison": {
+    "assay": "nELISA",
+    "cell_type": "PBMC",
+    "perturbagen": "IL-10",
+    "stimulation": "LPS",
+    "top_proteins": [
+      "TNF alpha",
+      "IL-1 beta",
+      "IL-1 alpha",
+      "CCL1",
+      "IL-12 p40",
+      "IFN gamma",
+      "CCL22",
+      "CCL24",
+      "G-CSF",
+      "IL-6",
+      "GM-CSF"
+    ]
+  },
+  "manifest_id": "corpus_candidates_il10_lps_v0",
+  "mode": "offline-cache",
+  "paper_search_sources": [
+    "pubmed",
+    "europepmc",
+    "semantic",
+    "openalex",
+    "crossref",
+    "biorxiv"
+  ],
+  "ranking_policy": {
+    "definition_of_high_impact_mainstay": "A paper must pass min_impact_score, min_relevance_score, and min_citations. When require_doi is true, DOI-less records are excluded before capping. The impact score combines citation count, citation velocity, venue tier, publication type, and recency; relevance must directly match configured hero entities and bucket semantic terms.",
+    "impact_components": {
+      "citation_count": 0.45,
+      "citation_velocity": 0.2,
+      "publication_type": 0.1,
+      "recency": 0.05,
+      "venue": 0.2
+    },
+    "impact_weight": 0.45,
+    "relevance_components": {
+      "bucket_semantic_terms": 0.35,
+      "hero_entities": 0.35,
+      "required_terms": 0.2,
+      "title_match": 0.1
+    },
+    "relevance_weight": 0.55,
+    "summary": "Candidates are deduplicated by DOI, PMID, then normalized title; filtered by explicit impact/relevance/citation thresholds; and capped per topic bucket.",
+    "thresholds": {
+      "min_citations": 10,
+      "min_impact_score": 0.45,
+      "min_relevance_score": 0.42,
+      "require_doi": true
+    }
+  },
+  "schema_version": "0.1.0",
+  "source_cache": {
+    "cache_dir": "/Users/mikeford/fpw-agent-workspaces/issue-39/corpus_discovery/cache/il10_lps",
+    "sha256": {
+      "PBMC perturbation design": "a3a7c8158be8a2f61401f2d29fdbb7630fd095220acba71c2fe582be5d09403e",
+      "nELISA assay context": "f0e5e2fd214b16f2eda8d332f4a729978ed751e17941f6059ebe221f11d38f2f",
+      "selected perturbagen biology": "5ef19ab806bcca518a6f9f06f39ca99c19fda8512937e07dc7de34d9ea09a7f8"
+    }
+  }
+}

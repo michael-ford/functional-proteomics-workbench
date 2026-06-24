@@ -1,0 +1,147 @@
+{
+  "manifest_id": "corpus_candidates_il10_lps_v0",
+  "as_of": "2026-06-24T00:00:00Z",
+  "sources": [
+    "pubmed",
+    "europepmc",
+    "semantic",
+    "openalex",
+    "crossref",
+    "biorxiv"
+  ],
+  "search": {
+    "max_per_source": 5,
+    "year_filter": "1990-2026"
+  },
+  "hero_comparison": {
+    "perturbagen": "IL-10",
+    "stimulation": "LPS",
+    "cell_type": "PBMC",
+    "assay": "nELISA",
+    "top_proteins": [
+      "TNF alpha",
+      "IL-1 beta",
+      "IL-1 alpha",
+      "CCL1",
+      "IL-12 p40",
+      "IFN gamma",
+      "CCL22",
+      "CCL24",
+      "G-CSF",
+      "IL-6",
+      "GM-CSF"
+    ]
+  },
+  "hero_entities": [
+    "IL-10",
+    "interleukin 10",
+    "LPS",
+    "lipopolysaccharide",
+    "PBMC",
+    "peripheral blood mononuclear cells",
+    "nELISA",
+    "TNF alpha",
+    "TNF-alpha",
+    "IL-1 beta",
+    "IL-6",
+    "IL-12",
+    "IFN gamma",
+    "GM-CSF"
+  ],
+  "ranking": {
+    "impact_weight": 0.45,
+    "relevance_weight": 0.55,
+    "max_candidates_per_bucket": 3,
+    "thresholds": {
+      "min_impact_score": 0.45,
+      "min_relevance_score": 0.42,
+      "min_citations": 10,
+      "require_doi": true
+    },
+    "impact_components": {
+      "citation_count": 0.45,
+      "citation_velocity": 0.2,
+      "venue": 0.2,
+      "publication_type": 0.1,
+      "recency": 0.05
+    },
+    "relevance_components": {
+      "hero_entities": 0.35,
+      "bucket_semantic_terms": 0.35,
+      "required_terms": 0.2,
+      "title_match": 0.1
+    },
+    "venue_tiers": {
+      "nature methods": 0.95,
+      "journal of experimental medicine": 0.9,
+      "journal of biological chemistry": 0.75,
+      "journal of immunology": 0.8,
+      "nature reviews immunology": 0.95,
+      "cytokine": 0.55,
+      "frontiers in immunology": 0.55
+    }
+  },
+  "buckets": [
+    {
+      "name": "nELISA assay context",
+      "query": "Nomic nELISA PBMC proteomics perturbation",
+      "cache_file": "nelisa_assay_context.json",
+      "cap": 2,
+      "required_terms": [
+        "nELISA",
+        "PBMC"
+      ],
+      "semantic_terms": [
+        "high-throughput",
+        "high-plex",
+        "protein profiling",
+        "inflammatory secretome",
+        "PBMC",
+        "perturbation screen",
+        "cytokine responses",
+        "donor"
+      ]
+    },
+    {
+      "name": "selected perturbagen biology",
+      "query": "IL-10 inhibits LPS induced cytokine production human monocytes",
+      "cache_file": "selected_perturbagen_biology.json",
+      "cap": 3,
+      "required_terms": [
+        "IL-10"
+      ],
+      "semantic_terms": [
+        "anti-inflammatory",
+        "cytokine",
+        "monocyte",
+        "macrophage",
+        "NF kappa B",
+        "IL-12",
+        "TNF alpha",
+        "IFN gamma",
+        "inhibits"
+      ]
+    },
+    {
+      "name": "PBMC perturbation design",
+      "query": "LPS stimulated human PBMC cytokine production perturbation screen",
+      "cache_file": "pbmc_perturbation_design.json",
+      "cap": 3,
+      "required_terms": [
+        "PBMC",
+        "LPS"
+      ],
+      "semantic_terms": [
+        "human PBMC",
+        "peripheral blood mononuclear cells",
+        "LPS stimulated",
+        "cytokine production",
+        "whole blood",
+        "monocytes",
+        "TNF alpha",
+        "IL-1 beta",
+        "IL-6"
+      ]
+    }
+  ]
+}

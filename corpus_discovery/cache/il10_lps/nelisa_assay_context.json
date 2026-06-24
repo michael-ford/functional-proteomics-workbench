@@ -1,0 +1,89 @@
+{
+  "query": "Nomic nELISA PBMC proteomics perturbation",
+  "sources_used": [
+    "openalex",
+    "crossref",
+    "pubmed",
+    "europepmc",
+    "semantic"
+  ],
+  "source_results": {
+    "openalex": 2,
+    "crossref": 5,
+    "pubmed": 0,
+    "europepmc": 1,
+    "semantic": 1
+  },
+  "errors": {},
+  "total": 4,
+  "papers": [
+    {
+      "paper_id": "W4366332498",
+      "title": "nELISA: A high-throughput, high-plex platform enables quantitative profiling of the inflammatory secretome",
+      "authors": "Milad Dagher; Grant Ongo; Nathaniel Robichaud; Jinglin Kong; Woojong Rho; Ivan Teahulos; Arya Tavakoli; Samantha Bovaird; Shahem Merjaneh; Andrew Tan; Kiran Edwardson; Christelle Scheepers; Andy Ng; Andy Hajjar; Baly Sow; Michael Vrouvides; Andy Lee; Philippe DeCorwin-Martin; Shafqat Rasool; Jiamin Huang; Timothy Erps; Spencer Coffin; Yu Han; Srinivas Niranj Chandrasekaran; Lisa Miller; Maria Kost-Alimova; Adam Skepner; Shantanu Singh; Anne E. Carpenter; Jeffrey D. Munzar; David Juncker",
+      "abstract": "We present the nELISA, a high-throughput, high-fidelity, and high-plex protein profiling platform. DNA oligonucleotides are used to pre-assemble antibody pairs on spectrally encoded microparticles and perform displacement-mediated detection. Spatial separation between non-cognate antibodies prevents the rise of reagent-driven cross-reactivity, while read-out is performed cost-efficiently and at high-throughput using flow cytometry. nELISA can measure both protein concentration and their post-translational modifications. We assembled an inflammatory panel of 191 targets that were multiplexed without cross-reactivity nor impact on performance vs 1-plex signals, with sensitivities as low as 0.1 pg/mL and measurements spanning 7 orders of magnitude. We then performed a large-scale inflammatory-secretome perturbation screen of peripheral blood mononuclear cells (PBMCs), with cytokines as both perturbagens and readouts, measuring 7,392 samples and generating ~1.4M protein data points in under a week; a significant advance in throughput compared to other highly multiplexed immunoassays. We uncovered 447 significant cytokine responses, including multiple putatively novel ones, that were conserved across donors and stimulation conditions. We validate nELISA for phenotypic screening, where its capacity to faithfully report hundreds of proteins make it a powerful tool across multiple stages of drug discovery.",
+      "doi": "10.1101/2023.04.17.535914",
+      "published_date": "2023-04-18T00:00:00",
+      "pdf_url": "https://www.biorxiv.org/content/biorxiv/early/2023/04/18/2023.04.17.535914.full.pdf",
+      "url": "https://doi.org/10.1101/2023.04.17.535914",
+      "source": "openalex",
+      "updated_date": "",
+      "categories": "Profiling (computer programming); Computational biology; Throughput; Computer science; Biology",
+      "keywords": "",
+      "citations": 30,
+      "references": "",
+      "extra": ""
+    },
+    {
+      "paper_id": "W4416004829",
+      "title": "nELISA: a high-throughput, high-plex platform enables quantitative profiling of the inflammatory secretome",
+      "authors": "Milad Dagher; Grant Ongo; Nathaniel Robichaud; Jinglin Kong; Woojong Rho; Ivan Teahulos; Arya Tavakoli; Samantha Bovaird; Shahem Merjaneh; Andrew Tan; Kiran Edwardson; Christelle Scheepers; Andy Ng; Andy Hajjar; Baly Sow; Michael Vrouvides; Andy Lee; Philippe DeCorwin-Martin; Shafqat Rasool; Jian-Yuan Huang; Timothy Erps; Spencer Coffin; Narges Rashidi; Yu Han; Srinivas Niranj Chandrasekaran; Lisa Miller; Maria Kost-Alimova; Adam Skepner; Shantanu Singh; Anne E. Carpenter; Jeffrey D. Munzar; David Juncker",
+      "abstract": "Existing high-plex protein measurement tools compromise on quantification, precision and cost efficiency. Here, to address this, we present nELISA, a platform that combines a DNA-mediated, bead-based sandwich immunoassay with advanced multicolor bead barcoding. Antibody pairs are preassembled on target-specific, barcoded beads, which ensures spatial separation between noncognate assays. Detection antibodies are tethered via flexible single-stranded DNA to enable efficient ternary sandwich formation. Detection is achieved through toehold-mediated strand displacement, where fluorescently labeled DNA oligos simultaneously untether and label detection antibodies. nELISA delivers sub-picogram-per-milliliter sensitivity across seven orders of magnitude. Using a 191-plex inflammation panel, we profiled cytokine responses in 7,392 peripheral blood mononuclear cell samples, generating ~1.4 million protein measurements and revealing over 440 robust cytokine responses, including previously unreported effects. nELISA thus provides a simple, scalable and cost-efficient solution for large-scale, high-fidelity phenotypic screening.",
+      "doi": "10.1038/s41592-025-02861-6",
+      "published_date": "2025-11-01T00:00:00",
+      "pdf_url": "https://www.nature.com/articles/s41592-025-02861-6.pdf",
+      "url": "https://doi.org/10.1038/s41592-025-02861-6",
+      "source": "openalex",
+      "updated_date": "",
+      "categories": "Computational biology; Immunoassay; Oligonucleotide; Cytokine; Antibody",
+      "keywords": "",
+      "citations": 11,
+      "references": "",
+      "extra": "{'container_title': 'Nature Methods'}"
+    },
+    {
+      "paper_id": "10.1136/jitc-2024-sitc2024.1106",
+      "title": "1106 nELISA high-throughput proteomics captures immune secretomes for high-resolution phenotypic screens",
+      "authors": "Nathaniel Robichaud; Kevin Hernandez; Nathan Chang; Milad Dagher",
+      "abstract": "",
+      "doi": "10.1136/jitc-2024-sitc2024.1106",
+      "published_date": "2024-11-01T00:00:00",
+      "pdf_url": "",
+      "url": "https://doi.org/10.1136/jitc-2024-sitc2024.1106",
+      "source": "crossref",
+      "updated_date": "",
+      "categories": "proceedings-article",
+      "keywords": "",
+      "citations": 0,
+      "references": "",
+      "extra": "{'publisher': 'BMJ Publishing Group Ltd', 'container_title': 'Regular and Young Investigator Award Abstracts', 'crossref_type': 'proceedings-article'}"
+    },
+    {
+      "paper_id": "10.1007/978-94-015-0788-2_6",
+      "title": "Nomic Statements (I): Scientific Laws",
+      "authors": "Salvator Cannavo",
+      "abstract": "",
+      "doi": "10.1007/978-94-015-0788-2_6",
+      "published_date": "1974-01-01T00:00:00",
+      "pdf_url": "",
+      "url": "https://doi.org/10.1007/978-94-015-0788-2_6",
+      "source": "crossref",
+      "updated_date": "",
+      "categories": "book-chapter",
+      "keywords": "",
+      "citations": 0,
+      "references": "",
+      "extra": "{'publisher': 'Springer Netherlands', 'container_title': 'Nomic Inference', 'crossref_type': 'book-chapter'}"
+    }
+  ]
+}
