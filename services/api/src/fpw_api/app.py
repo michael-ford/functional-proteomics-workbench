@@ -3,6 +3,8 @@ from typing import Literal
 from fastapi import FastAPI
 from pydantic import BaseModel, Field
 
+from fpw_api.tools import ToolRegistry, create_default_tool_registry
+
 
 class HealthResponse(BaseModel):
     status: Literal["ok"]
@@ -15,13 +17,14 @@ class ReadinessResponse(BaseModel):
     checks: dict[str, Literal["ok"]] = Field(default_factory=lambda: {"app": "ok"})
 
 
-def create_app() -> FastAPI:
+def create_app(tool_registry: ToolRegistry | None = None) -> FastAPI:
     application = FastAPI(
         title="Functional Proteomics Workbench API",
         version="0.1.0",
         docs_url="/docs",
         redoc_url="/redoc",
     )
+    application.state.tool_registry = tool_registry or create_default_tool_registry()
 
     @application.get("/health", response_model=HealthResponse, tags=["operational"])
     async def health() -> HealthResponse:

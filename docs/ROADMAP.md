@@ -27,8 +27,8 @@ are drafted (`docs/DATA_CONTRACTS.md`, `docs/MCP_TOOLS.md`, `docs/TRACE_MODEL.md
 - 🟡 SPEC-008 labels/templates — templates done; label taxonomy mostly in place
 
 ## Handed-off research (async runners) 🔬
-- ✅ **DATA-001** first-pass exploration complete → 3 hero comparisons proposed; Mike still
-  needs to choose the final comparison before SPEC-006.
+- ✅ **DATA-001** complete and **decided**: hero comparison = **IL-10 vs matched no-cytokine
+  control under LPS 2000 ng/mL** (see `docs/DEMO_DECISIONS.md`). Unblocks SPEC-006.
 - 🔬 **STAT-001** stats best practices → finalize the supported method menu.
 - 🟡 Corpus direction set; exact source list still depends on the hero question.
 

@@ -32,6 +32,7 @@ This file tracks unresolved decisions and records resolutions with rationale.
 | R19 | Analysis direction | Include p-values if STAT-001 validates a defensible test; pair with effect size and donor consistency | p-values matter, but assumptions and multiple-testing handling must be explicit |
 | R20 | Corpus direction | Deterministic indexed corpus: Nomic/Perturb-PBMC plus small curated public biology sources | Avoids live-search nondeterminism while supporting evidence-backed reports |
 | R21 | Eval direction | Evals primarily prove agent workflow correctness; real model evals run for agent/tool/prompt changes | Keeps CI deterministic while still testing agent behavior when it changes |
+| R22 | DATA-001 hero comparison | **IL-10 vs matched no-cytokine control under LPS 2000 ng/mL** | Clearest donor-consistent visual signal; conservative anti-inflammatory interpretation (see `docs/DEMO_DECISIONS.md`, issue #12) |
 
 See `docs/DEVELOPMENT_WORKFLOW.md` for the pipeline; `docs/DATA_CONTRACTS.md` /
 `docs/TRACE_MODEL.md` / `docs/MCP_TOOLS.md` / `docs/ARCHITECTURE.md` for contracts; and
@@ -42,15 +43,12 @@ See `docs/DEVELOPMENT_WORKFLOW.md` for the pipeline; `docs/DATA_CONTRACTS.md` /
 ## Still open
 
 ### Product / user story
-- Final hero biological question (not selected — depends on data exploration).
-- Final screen-recording script (deferred until data subset + hero question chosen).
+- Final screen-recording script (data subset + hero question now chosen; script finalized near demo).
 
 ### Data
-- Final Perturb-PBMC subset choice from the DATA-001 candidates; exact stimulation context,
-  perturbagen/control comparison, and protein panel.
-- Data format & preprocessing state for the selected public H5AD-derived fixture; direct
-  long-format subset vs any allowed transformed direct subset.
-- → handoff issue **DATA-001** (explore + propose 3 candidate hero comparisons).
+- ✅ Hero comparison + Perturb-PBMC subset chosen → **R22** / DATA-001 (issue #12).
+- Exact fixture columns, units, preprocessing state, provenance, and validation contract →
+  being finalized in **SPEC-006** (#15).
 
 ### Statistics
 - Exact v0.1 method menu; normalization assumptions; donor-consistency metric; paired vs
