@@ -33,7 +33,7 @@ class EvalRunnerTests(unittest.TestCase):
             for result in report["results"]
             if result["case_id"] == "case_corpus_retrieval_smoke"
         )
-        self.assertEqual(corpus_result["trace_step_ids"], [])
+        self.assertEqual(len(corpus_result["trace_step_ids"]), 3)
         self.assertTrue(
             any(check["kind"] == "citation_support" for check in corpus_result["checks"])
         )
