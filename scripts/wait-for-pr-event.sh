@@ -43,7 +43,13 @@ if [ -z "$REPO" ]; then
 fi
 
 fetch_pr() {
-  gh pr view --repo "$REPO" --json number,state,mergeStateStatus,statusCheckRollup,latestReviews,comments 2>/dev/null || true
+  local branch
+  branch="$(git branch --show-current 2>/dev/null || true)"
+  if [ -n "$branch" ]; then
+    gh pr view "$branch" --repo "$REPO" --json number,state,mergeStateStatus,statusCheckRollup,latestReviews,comments 2>/dev/null || true
+  else
+    gh pr view --json number,state,mergeStateStatus,statusCheckRollup,latestReviews,comments 2>/dev/null || true
+  fi
 }
 
 normalize() {

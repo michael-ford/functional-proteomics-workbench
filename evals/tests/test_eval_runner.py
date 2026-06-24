@@ -33,7 +33,13 @@ class EvalRunnerTests(unittest.TestCase):
             for result in report["results"]
             if result["case_id"] == "case_corpus_retrieval_smoke"
         )
-        self.assertEqual(len(corpus_result["trace_step_ids"]), 3)
+        self.assertEqual(corpus_result["trace_step_ids"], [])
+        self.assertTrue(
+            any(check["kind"] == "citation_support" for check in corpus_result["checks"])
+        )
+        self.assertTrue(
+            any(check["kind"] == "entity_grounding" for check in corpus_result["checks"])
+        )
 
     def test_report_schema_documents_eval_run_shape(self) -> None:
         self.assertEqual(

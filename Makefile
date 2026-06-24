@@ -13,7 +13,7 @@ test:             ## run all tests (TODO)
 	uv run --project packages/analysis pytest packages/analysis/tests
 	uv run --project packages/corpus pytest packages/corpus/tests
 	uv run --project services/api pytest services/api/tests
-	PYTHONPATH=$(CURDIR) uv run --project services/api pytest --rootdir=. evals/tests scripts/tests
+	PYTHONPATH=$(CURDIR)/packages/corpus/src:$(CURDIR) uv run --project packages/shared-schemas pytest --rootdir=. evals/tests scripts/tests
 	$(MAKE) $(PNPM_STAMP)
 	pnpm test
 lint:             ## lint
@@ -34,9 +34,9 @@ gen-types:        ## generate frontend TypeScript types from shared Pydantic sch
 	mkdir -p packages/shared-schemas/generated
 	pnpm dlx json-schema-to-typescript -i packages/shared-schemas/schema/shared-schemas.schema.json -o packages/shared-schemas/generated/types.ts
 eval:             ## run offline eval suite
-	PYTHONPATH=$(CURDIR) uv run --project services/api python -m evals.runners --mode full --output evals/results/eval-latest.json
+	PYTHONPATH=$(CURDIR)/packages/corpus/src:$(CURDIR) python -m evals.runners --mode full --output evals/results/eval-latest.json
 eval-smoke:       ## run deterministic CI-safe eval cases
-	PYTHONPATH=$(CURDIR) uv run --project services/api python -m evals.runners --mode smoke --output evals/results/eval-smoke-latest.json
+	PYTHONPATH=$(CURDIR)/packages/corpus/src:$(CURDIR) python -m evals.runners --mode smoke --output evals/results/eval-smoke-latest.json
 run-local:        ## run API locally
 	uv run --project services/api uvicorn fpw_api.app:app --reload
 run-web:          ## run web app locally
