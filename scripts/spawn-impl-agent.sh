@@ -185,10 +185,10 @@ tmux set-option -w -t "${SESSION}:${WINDOW}" remain-on-exit on
 tmux kill-window -t "${SESSION}:scratch" 2>/dev/null || true
 tmux send-keys -t "${SESSION}:${WINDOW}" "bash '${RUNSH}'" Enter
 
-PANE="${SESSION}:${WINDOW}.0"
+PANE="$(tmux list-panes -t "${SESSION}:${WINDOW}" -F '#{pane_id}' | head -1)"
 ready_secs="${CODEX_TUI_READY_SECS:-8}"
 settle_secs="${CODEX_TUI_SETTLE_SECS:-2}"
-after_prompt_secs="${CODEX_GOAL_SEND_DELAY_SECS:-2}"
+after_goal_secs="${CODEX_PROMPT_SEND_DELAY_SECS:-2}"
 deadline=$(( $(date +%s) + ready_secs ))
 while [ "$(date +%s)" -lt "$deadline" ]; do
   pane_text="$(tmux capture-pane -p -t "$PANE" 2>/dev/null || true)"
@@ -201,14 +201,14 @@ sleep "$settle_secs"
 
 prompt_buffer="fpw-impl-${ISSUE}-prompt"
 goal_buffer="fpw-impl-${ISSUE}-goal"
-tmux load-buffer -b "$prompt_buffer" "$PROMPT"
-tmux paste-buffer -d -b "$prompt_buffer" -t "$PANE"
-tmux send-keys -t "$PANE" Enter
-
-sleep "$after_prompt_secs"
 tmux send-keys -t "$PANE" "/goal "
 tmux load-buffer -b "$goal_buffer" "$GOAL"
 tmux paste-buffer -d -b "$goal_buffer" -t "$PANE"
+tmux send-keys -t "$PANE" Enter
+
+sleep "$after_goal_secs"
+tmux load-buffer -b "$prompt_buffer" "$PROMPT"
+tmux paste-buffer -d -b "$prompt_buffer" -t "$PANE"
 tmux send-keys -t "$PANE" Enter
 
 echo "Spawned interactive ${IMPLEMENTER} implementer in tmux ${SESSION}:${WINDOW} (attach: tmux attach -t ${SESSION})"
