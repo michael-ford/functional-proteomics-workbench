@@ -23,14 +23,14 @@ are drafted (`docs/DATA_CONTRACTS.md`, `docs/MCP_TOOLS.md`, `docs/TRACE_MODEL.md
 - ✅ SPEC-005 MVP tool list + first-pass schemas
 - ✅ SPEC-007 CI / governance / security (DEVELOPMENT_WORKFLOW, SECURITY)
 - ✅ EVALS spec (eval-case schema + gating policy) drafted
-- 🔬 SPEC-006 demo dataset fixture contract (depends on DATA-001)
+- ✅ SPEC-006 demo dataset fixture contract
 - 🟡 SPEC-008 labels/templates — templates done; label taxonomy mostly in place
 
 ## Handed-off research (async runners) 🔬
 - ✅ **DATA-001** complete and **decided**: hero comparison = **IL-10 vs matched no-cytokine
   control under LPS 2000 ng/mL** (see `docs/DEMO_DECISIONS.md`). Unblocks SPEC-006.
 - 🔬 **STAT-001** stats best practices → finalize the supported method menu.
-- 🟡 Corpus direction set; exact source list still depends on the hero question.
+- 🟡 Corpus direction set; exact source list depends on CORPUS-002 ranked source candidates.
 
 ## Phase 1 — the harness ✅
 - ✅ `ci.yml` (lint/test/typecheck; `eval-smoke` path-conditional, non-blocking until gate
@@ -45,10 +45,14 @@ IMPL-004 ToolRegistry skeleton · IMPL-005 trace models · IMPL-006 Next.js shel
 IMPL-007 seeded demo project · IMPL-008 eval runner skeleton → web chat → dashboard →
 eval page → deployment → polish + screen recording.
 
-Foundational agents can start on FastAPI skeleton, Next.js shell, ToolRegistry skeleton, trace
-models, and eval runner once issue decisions are reflected in docs. Data fixture, analysis,
-corpus, dashboard/report, and deployment remain blocked until DATA-001 final selection,
-STAT-001, CORPUS-001, and SPEC-006 are resolved.
+Completed foundational pieces: IMPL-002 shared schemas, IMPL-003 FastAPI skeleton, IMPL-004
+ToolRegistry skeleton, IMPL-005 trace models, IMPL-006 Next.js shell, IMPL-008 eval runner
+skeleton, and the agent lifecycle hardening work through IMPL-017.
+
+Next unblocked implementation work: IMPL-007 seeded demo project / dataset fixture and
+IMPL-011 MCP server wiring. Analysis remains blocked on STAT-001; corpus ingestion remains
+blocked on CORPUS-002 → CORPUS-001; dashboard/report/deployment remain downstream of the
+fixture, analysis, corpus, and web/MCP tool paths.
 
 ## Eval-gate activation milestone
 `eval-smoke` becomes a **required** check once the end-to-end hero workflow runs against the
