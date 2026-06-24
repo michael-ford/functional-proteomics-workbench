@@ -8,9 +8,9 @@ from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import Any, Literal, Protocol
-from uuid import uuid4
 
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
+from shared_schemas import EntityPrefix, new_id
 
 ToolSurface = Literal["web_chat", "mcp", "eval", "api"]
 ToolStatus = Literal["ok", "error"]
@@ -301,7 +301,7 @@ def _close_trace(
     ended_at = datetime.now(UTC)
     latency_ms = max(0, round((time.perf_counter() - monotonic_start) * 1000))
     return ToolCallTrace(
-        id=f"tc_{uuid4().hex}",
+        id=new_id(EntityPrefix.TOOL_CALL_TRACE),
         project_id=project_id,
         origin=context.origin,
         tool_name=definition.name,

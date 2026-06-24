@@ -3,7 +3,9 @@ from typing import Literal
 from fastapi import FastAPI
 from pydantic import BaseModel, Field
 
+from fpw_api.mcp import create_mcp_router
 from fpw_api.tools import ToolRegistry, create_default_tool_registry
+from fpw_api.tools.registry import InMemoryTraceSink, TraceSink
 
 
 class HealthResponse(BaseModel):
@@ -17,7 +19,10 @@ class ReadinessResponse(BaseModel):
     checks: dict[str, Literal["ok"]] = Field(default_factory=lambda: {"app": "ok"})
 
 
-def create_app(tool_registry: ToolRegistry | None = None) -> FastAPI:
+def create_app(
+    tool_registry: ToolRegistry | None = None,
+    trace_sink: TraceSink | None = None,
+) -> FastAPI:
     application = FastAPI(
         title="Functional Proteomics Workbench API",
         version="0.1.0",
@@ -25,6 +30,8 @@ def create_app(tool_registry: ToolRegistry | None = None) -> FastAPI:
         redoc_url="/redoc",
     )
     application.state.tool_registry = tool_registry or create_default_tool_registry()
+    application.state.trace_sink = trace_sink or InMemoryTraceSink()
+    application.include_router(create_mcp_router())
 
     @application.get("/health", response_model=HealthResponse, tags=["operational"])
     async def health() -> HealthResponse:
