@@ -4,6 +4,7 @@ from typing import Literal
 
 import pytest
 from pydantic import BaseModel, ConfigDict
+from shared_schemas import AnalysisResult
 
 from fpw_api import create_app
 from fpw_api.tools import (
@@ -335,8 +336,7 @@ def test_analysis_tools_create_traced_plan_result_and_ranking_artifact(tmp_path)
     assert result["ranking"]["rows"][0]["protein"] == "TNF alpha"
     assert result["ranking"]["rows"][0]["q_value"] == pytest.approx(0.036458333333333336)
     assert len(result["donor_consistency"]) == 6
-    assert "Matched donors" in result["donor_handling"]
-    assert result["limitations"]
+    AnalysisResult.model_validate(result)
     table_uri = result["table_ref"]["uri"]
     assert table_uri.startswith("project://proj_demo/analysis/results/res_")
     table_path = (

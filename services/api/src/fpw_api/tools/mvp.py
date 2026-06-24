@@ -129,11 +129,8 @@ class AnalysisResultOutput(ToolModel):
     method_id: str
     ranking: dict[str, Any]
     donor_consistency: list[dict[str, Any]] = Field(default_factory=list)
+    plot_id: str | None = None
     table_ref: dict[str, Any]
-    donor_handling: str
-    replicate_handling: str | None = None
-    multiple_testing: str | None = None
-    limitations: list[str]
     created_at: str
 
 
@@ -492,11 +489,8 @@ def _run_comparison_handler(tool_input: BaseModel, context: ToolContext) -> Anal
         "method_id": output.method_id,
         "ranking": ranking,
         "donor_consistency": output.donor_consistency,
+        "plot_id": None,
         "table_ref": table_ref,
-        "donor_handling": output.donor_handling,
-        "replicate_handling": output.replicate_handling,
-        "multiple_testing": output.multiple_testing,
-        "limitations": output.limitations,
         "created_at": _utc_now(),
     }
     _RESULTS[result_id] = result
