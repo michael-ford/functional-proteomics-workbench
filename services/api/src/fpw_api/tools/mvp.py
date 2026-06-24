@@ -433,7 +433,6 @@ def _get_project_status_handler(tool_input: BaseModel, context: ToolContext) -> 
     project = projects.get(typed_input.project_id)
     if project is None and typed_input.project_id == DEMO_PROJECT_ID:
         project = _demo_project_state()
-        projects[typed_input.project_id] = project
     if project is None:
         raise ToolExecutionError("not_found", f"project not found: {typed_input.project_id}")
 
@@ -450,7 +449,7 @@ def _get_project_status_handler(tool_input: BaseModel, context: ToolContext) -> 
 
 
 def _shared_projects(context: ToolContext) -> dict[str, dict[str, Any]]:
-    raw_projects = context.state.setdefault("projects", {})
+    raw_projects = context.state.get("projects", {})
     if not isinstance(raw_projects, dict):
         raise ToolExecutionError("internal_error", "shared project state must be a mapping.")
     return raw_projects

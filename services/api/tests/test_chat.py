@@ -28,6 +28,7 @@ def test_chat_invokes_safe_tool_through_shared_registry_and_records_trace() -> N
     assert sink.traces[0].id == body["tool_traces"][0]["id"]
     assert sink.traces[0].project_id == "proj_demo"
     assert sink.traces[0].origin.surface == "web_chat"
+    assert app.state.project_state == {}
 
 
 def test_chat_sessions_persist_messages_across_turns() -> None:
