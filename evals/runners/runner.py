@@ -248,29 +248,35 @@ def _run_corpus_retrieval_smoke_case(*, eval_run_id: str) -> dict[str, Any]:
             output = result.output.model_dump(mode="json") if result.output else {"chunks": []}
             chunks = output["chunks"]
             expected_chunks = [
-                chunk for chunk in chunks if chunk.get("source_id") in expected_sources
+                chunk
+                for chunk in chunks
+                if chunk.get("metadata", {}).get("source_id") in expected_sources
             ]
             citation_ok = bool(
                 expected_chunks
                 and all(
-                    chunk.get("source_id")
+                    chunk.get("metadata", {}).get("source_id")
                     and (
-                        chunk.get("citation", {}).get("url")
-                        or chunk.get("citation", {}).get("doi")
+                        chunk.get("chunk", {}).get("citation", {}).get("url")
+                        or chunk.get("chunk", {}).get("citation", {}).get("doi")
                     )
                     for chunk in expected_chunks
                 )
             )
             entity_ok = bool(
                 expected_chunks
-                and any(chunk.get("matched_entities") or chunk.get("entities") for chunk in chunks)
+                and any(
+                    chunk.get("matched_entities") or chunk.get("chunk", {}).get("entities")
+                    for chunk in chunks
+                )
             )
             trace_ok = (
                 result.trace.status == "ok"
                 and result.trace.output is not None
                 and bool(result.trace.output.get("chunks"))
                 and all(
-                    chunk.get("source_id") and chunk.get("citation")
+                    chunk.get("metadata", {}).get("source_id")
+                    and chunk.get("chunk", {}).get("citation")
                     for chunk in result.trace.output["chunks"]
                 )
             )

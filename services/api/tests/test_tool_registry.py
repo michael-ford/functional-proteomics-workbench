@@ -5,7 +5,7 @@ from typing import Literal
 import pytest
 from functional_proteomics_corpus import build_corpus_index, write_corpus_index
 from pydantic import BaseModel, ConfigDict
-from shared_schemas import AnalysisResult
+from shared_schemas import AnalysisResult, EvidenceChunk
 
 from fpw_api import create_app
 from fpw_api.tools import (
@@ -426,17 +426,25 @@ def test_search_corpus_reads_built_index_and_traces_citations(tmp_path) -> None:
     assert result.output is not None
     output = result.output.model_dump(mode="json")
     assert output["chunks"]
-    assert output["chunks"][0]["source_id"] in {
+    first = output["chunks"][0]
+    assert first["metadata"]["source_id"] in {
         "src_dandrea_1993_il10",
         "src_wang_1995_il10_nfkb",
     }
-    assert output["chunks"][0]["citation"]["doi"]
-    assert output["chunks"][0]["matched_entities"]
+    EvidenceChunk.model_validate(first["chunk"])
+    assert first["chunk"]["schema_version"] == "0.1.0"
+    assert first["chunk"]["source_id"].startswith("src_")
+    assert first["metadata"]["contract_source_id"] == first["chunk"]["source_id"]
+    assert first["chunk"]["citation"]["doi"]
+    assert first["matched_entities"]
     assert sink.traces[-1].tool_name == "search_corpus"
     assert sink.traces[-1].status == "ok"
     assert sink.traces[-1].output is not None
-    assert sink.traces[-1].output["chunks"][0]["source_id"] == output["chunks"][0]["source_id"]
-    assert sink.traces[-1].output["chunks"][0]["citation"]["doi"]
+    assert (
+        sink.traces[-1].output["chunks"][0]["metadata"]["source_id"]
+        == first["metadata"]["source_id"]
+    )
+    assert sink.traces[-1].output["chunks"][0]["chunk"]["citation"]["doi"]
 
 
 def test_search_corpus_fails_closed_before_index_build(tmp_path) -> None:
