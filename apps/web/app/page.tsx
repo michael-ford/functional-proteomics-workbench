@@ -9,6 +9,7 @@ import {
   PanelTitle,
   StatusPill,
 } from "@/components/workspace-shell";
+import { ChatPanel } from "@/components/chat-panel";
 
 const workflow = [
   ["Project", "Created by agent"],
@@ -26,6 +27,10 @@ export default function ProjectDashboardPage() {
         title="Demo project workspace"
         description="A shared project surface for the web app and MCP tools: state, dataset handoff, analysis artifacts, evidence-backed report, and trace replay."
       />
+      <div className="mb-4">
+        <ChatPanel />
+      </div>
+
       <div className="grid gap-4 xl:grid-cols-[1.1fr_0.9fr]">
         <Panel>
           <PanelTitle icon={Database} title="Project state" meta="empty shell" />
