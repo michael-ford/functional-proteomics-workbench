@@ -11,8 +11,6 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
-import { getDemoWorkspace } from "@/lib/demo-workspace";
-
 type NavItem = {
   href: string;
   label: string;
@@ -29,11 +27,15 @@ export const navItems: NavItem[] = [
 
 type WorkspaceShellProps = {
   children: React.ReactNode;
+  sharedStateLabel?: string;
+  statusLabel?: string;
 };
 
-export function WorkspaceShell({ children }: WorkspaceShellProps) {
-  const workspace = getDemoWorkspace();
-
+export function WorkspaceShell({
+  children,
+  sharedStateLabel = "Project state loaded",
+  statusLabel = "Dataset ready",
+}: WorkspaceShellProps) {
   return (
     <div className="min-h-screen bg-wash text-ink">
       <aside className="fixed inset-y-0 left-0 z-20 hidden w-64 border-r border-nav-border bg-nav px-4 py-5 text-nav-ink lg:block">
@@ -63,7 +65,7 @@ export function WorkspaceShell({ children }: WorkspaceShellProps) {
             <Activity size={14} aria-hidden="true" />
             Shared state
           </div>
-          <p className="mt-2 text-sm">{workspace.project.id} loaded</p>
+          <p className="mt-2 text-sm">{sharedStateLabel}</p>
         </div>
       </aside>
 
@@ -82,9 +84,7 @@ export function WorkspaceShell({ children }: WorkspaceShellProps) {
             </div>
             <div className="flex min-w-0 items-center gap-2 text-sm">
               <span className="size-2 rounded-full bg-signal" aria-hidden="true" />
-              <span className="hidden text-muted sm:inline">
-                {workspace.dataset.validation.status} dataset · {workspace.trace_export.count} traces
-              </span>
+              <span className="hidden text-muted sm:inline">{statusLabel}</span>
             </div>
           </div>
           <nav aria-label="Mobile workspace" className="grid grid-cols-1 gap-1 px-4 pb-3 sm:grid-cols-3 lg:hidden">
