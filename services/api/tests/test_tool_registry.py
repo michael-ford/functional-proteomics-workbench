@@ -3,8 +3,9 @@ import csv
 from typing import Literal
 
 import pytest
+from functional_proteomics_corpus import build_corpus_index, write_corpus_index
 from pydantic import BaseModel, ConfigDict
-from shared_schemas import AnalysisResult
+from shared_schemas import AnalysisResult, EvidenceChunk
 
 from fpw_api import create_app
 from fpw_api.tools import (
@@ -396,6 +397,76 @@ def test_define_comparison_rejects_unsupported_unpaired_assumption() -> None:
     assert result.error.code == "invalid_input"
     assert "paired_by='donor'" in result.error.message
     assert sink.traces[-1].tool_name == "define_comparison"
+    assert sink.traces[-1].status == "error"
+
+
+def test_search_corpus_reads_built_index_and_traces_citations(tmp_path) -> None:
+    index_path = write_corpus_index(build_corpus_index(), tmp_path / "corpus-index.json")
+    registry = create_default_tool_registry()
+    sink = InMemoryTraceSink()
+
+    result = asyncio.run(
+        registry.invoke(
+            "search_corpus",
+            {
+                "query": "What evidence supports IL-10 dampening cytokine production in LPS?",
+                "entities": ["IL-10", "LPS"],
+                "k": 2,
+            },
+            ToolContext(
+                origin=TraceOrigin(surface="api", client="pytest"),
+                trace_sink=sink,
+                project_id="proj_demo",
+                state={"corpus_index_path": index_path},
+            ),
+        )
+    )
+
+    assert result.error is None
+    assert result.output is not None
+    output = result.output.model_dump(mode="json")
+    assert output["chunks"]
+    first = output["chunks"][0]
+    assert first["metadata"]["source_id"] in {
+        "src_dandrea_1993_il10",
+        "src_wang_1995_il10_nfkb",
+    }
+    EvidenceChunk.model_validate(first["chunk"])
+    assert first["chunk"]["schema_version"] == "0.1.0"
+    assert first["chunk"]["source_id"].startswith("src_")
+    assert first["metadata"]["contract_source_id"] == first["chunk"]["source_id"]
+    assert first["chunk"]["citation"]["doi"]
+    assert first["matched_entities"]
+    assert sink.traces[-1].tool_name == "search_corpus"
+    assert sink.traces[-1].status == "ok"
+    assert sink.traces[-1].output is not None
+    assert (
+        sink.traces[-1].output["chunks"][0]["metadata"]["source_id"]
+        == first["metadata"]["source_id"]
+    )
+    assert sink.traces[-1].output["chunks"][0]["chunk"]["citation"]["doi"]
+
+
+def test_search_corpus_fails_closed_before_index_build(tmp_path) -> None:
+    registry = create_default_tool_registry()
+    sink = InMemoryTraceSink()
+
+    result = asyncio.run(
+        registry.invoke(
+            "search_corpus",
+            {"query": "IL-10 evidence"},
+            ToolContext(
+                origin=TraceOrigin(surface="api", client="pytest"),
+                trace_sink=sink,
+                project_id="proj_demo",
+                state={"corpus_index_path": tmp_path / "missing-index.json"},
+            ),
+        )
+    )
+
+    assert result.output is None
+    assert result.error is not None
+    assert result.error.code == "corpus_unindexed"
     assert sink.traces[-1].status == "error"
 
 

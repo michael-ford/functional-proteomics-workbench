@@ -5,6 +5,7 @@ from __future__ import annotations
 import csv
 import hashlib
 import json
+import os
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Literal
@@ -17,8 +18,14 @@ from functional_proteomics_analysis import (
     load_long_csv,
     run_donor_aware_paired_difference,
 )
+from functional_proteomics_corpus import (
+    DEFAULT_INDEX_RELATIVE,
+    CorpusUnindexedError,
+    load_corpus_index,
+    search_corpus_index,
+)
 from pydantic import BaseModel, ConfigDict, Field
-from shared_schemas import EntityPrefix, new_id
+from shared_schemas import EntityPrefix, EvidenceChunk, new_id
 
 from fpw_api.tools.registry import (
     ToolContext,
@@ -170,8 +177,33 @@ class SearchCorpusInput(ToolModel):
     k: int | None = Field(default=None, ge=1)
 
 
+class CorpusChunkMetadataOutput(ToolModel):
+    source_id: str
+    contract_source_id: str
+    source_type: Literal["paper", "docs", "github", "webpage", "supplement"]
+    title: str
+    topic_buckets: list[str]
+    approved_for_claims: bool
+    retrieval_priority: int
+    source_locator: str
+    access_route: str
+    license_note: str | None = None
+    content_sha256: str
+    candidate_rank: int | None = None
+    citation_count: int | None = None
+    candidate_score: float | None = None
+    venue: str | None = None
+
+
+class ScoredEvidenceChunkOutput(ToolModel):
+    chunk: EvidenceChunk
+    score: float
+    matched_entities: list[str] = Field(default_factory=list)
+    metadata: CorpusChunkMetadataOutput
+
+
 class EvidenceChunkListOutput(ToolModel):
-    chunks: list[dict[str, Any]]
+    chunks: list[ScoredEvidenceChunkOutput]
 
 
 class AttachEvidenceInput(ProjectInput):
@@ -314,6 +346,7 @@ def mvp_tool_definitions() -> list[ToolDefinition]:
             mutates_state=False,
             reads_corpus=True,
             error_codes=["invalid_input", "corpus_unindexed", "out_of_scope", "internal_error"],
+            handler=_search_corpus_handler,
         ),
         _tool(
             "attach_evidence",
@@ -516,6 +549,53 @@ def _rank_proteins_handler(tool_input: BaseModel, _context: ToolContext) -> Prot
     return ProteinRankingOutput.model_validate(result["ranking"])
 
 
+def _search_corpus_handler(tool_input: BaseModel, context: ToolContext) -> EvidenceChunkListOutput:
+    typed_input = SearchCorpusInput.model_validate(tool_input)
+    try:
+        index = load_corpus_index(_corpus_index_path(context))
+    except CorpusUnindexedError as exc:
+        raise ToolExecutionError("corpus_unindexed", str(exc)) from exc
+
+    chunks = search_corpus_index(
+        index,
+        typed_input.query,
+        entities=typed_input.entities,
+        k=typed_input.k or 5,
+    )
+    return EvidenceChunkListOutput(
+        chunks=[_scored_evidence_chunk_output(chunk) for chunk in chunks]
+    )
+
+
+def _scored_evidence_chunk_output(chunk: dict[str, Any]) -> ScoredEvidenceChunkOutput:
+    manifest_source_id = str(chunk["source_id"])
+    contract_source_id = _deterministic_contract_id(
+        EntityPrefix.EVIDENCE_SOURCE,
+        manifest_source_id,
+    )
+    evidence_chunk = {
+        "id": _deterministic_contract_id(EntityPrefix.EVIDENCE_CHUNK, str(chunk["id"])),
+        "schema_version": SCHEMA_VERSION,
+        "source_id": contract_source_id,
+        "text": chunk["text"],
+        "section": chunk.get("section"),
+        "entities": chunk.get("entities", []),
+        "assay_context": chunk.get("assay_context", []),
+        "citation": chunk["citation"],
+        "embedding_status": chunk.get("embedding_status", "pending"),
+    }
+    metadata = dict(chunk["metadata"])
+    metadata["contract_source_id"] = contract_source_id
+    return ScoredEvidenceChunkOutput.model_validate(
+        {
+            "chunk": evidence_chunk,
+            "score": chunk["score"],
+            "matched_entities": chunk.get("matched_entities", []),
+            "metadata": metadata,
+        }
+    )
+
+
 def _write_result_table(
     *,
     context: ToolContext,
@@ -580,6 +660,16 @@ def _project_root(context: ToolContext, project_id: str) -> Path:
     return root / "projects" / project_id
 
 
+def _corpus_index_path(context: ToolContext) -> Path:
+    explicit = context.state.get("corpus_index_path")
+    if isinstance(explicit, str | Path):
+        return Path(explicit)
+    env_path = os.environ.get("FPW_CORPUS_INDEX_PATH")
+    if env_path:
+        return Path(env_path)
+    return _repo_root() / DEFAULT_INDEX_RELATIVE
+
+
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[5]
 
@@ -594,3 +684,14 @@ def _sha256_file(path: Path) -> str:
         for chunk in iter(lambda: handle.read(1024 * 1024), b""):
             digest.update(chunk)
     return digest.hexdigest()
+
+
+def _deterministic_contract_id(prefix: EntityPrefix, value: str) -> str:
+    alphabet = "0123456789ABCDEFGHJKMNPQRSTVWXYZ"
+    digest = hashlib.sha256(value.encode("utf-8")).digest()
+    number = int.from_bytes(digest[:16], "big")
+    chars: list[str] = []
+    for _ in range(26):
+        chars.append(alphabet[number & 31])
+        number >>= 5
+    return f"{prefix.value}{''.join(reversed(chars))}"

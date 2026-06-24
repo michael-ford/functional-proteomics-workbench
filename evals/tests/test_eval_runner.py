@@ -23,11 +23,23 @@ class EvalRunnerTests(unittest.TestCase):
             run_id="eval_run_test",
         )
 
-        self.assertEqual(report["suite"], "runner-smoke")
+        self.assertEqual(report["suite"], "deterministic-smoke")
         self.assertEqual(report["mode"], "smoke")
         self.assertEqual(report["score"], 1.0)
-        self.assertEqual(report["results"][0]["case_id"], "case_runner_smoke")
-        self.assertEqual(report["results"][0]["trace_step_ids"], [])
+        case_ids = {result["case_id"] for result in report["results"]}
+        self.assertEqual(case_ids, {"case_runner_smoke", "case_corpus_retrieval_smoke"})
+        corpus_result = next(
+            result
+            for result in report["results"]
+            if result["case_id"] == "case_corpus_retrieval_smoke"
+        )
+        self.assertEqual(len(corpus_result["trace_step_ids"]), 3)
+        self.assertTrue(
+            any(check["kind"] == "citation_support" for check in corpus_result["checks"])
+        )
+        self.assertTrue(
+            any(check["kind"] == "entity_grounding" for check in corpus_result["checks"])
+        )
 
     def test_report_schema_documents_eval_run_shape(self) -> None:
         self.assertEqual(
