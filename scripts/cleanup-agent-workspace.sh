@@ -23,7 +23,8 @@ BRANCH="agent/issue-${ISSUE}"
 WT_ROOT="${FPW_AGENT_WORKTREE_ROOT:-${HOME}/fpw-agent-workspaces}"
 WORKDIR="${WT_ROOT}/issue-${ISSUE}"
 STATE="${WT_ROOT}/.state/issue-${ISSUE}"
-ROOT="$(git rev-parse --show-toplevel)"
+CONTROL_REPO="${FPW_AGENT_CONTROL_REPO:-${WT_ROOT}/.control-repo}"
+ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
 
 echo "cleaning agent workspace for issue #${ISSUE}${PR_NUMBER:+ (PR #${PR_NUMBER})}"
 
@@ -37,14 +38,25 @@ fi
 
 if [ -d "$WORKDIR" ]; then
   echo "removing worktree ${WORKDIR}"
-  git -C "$ROOT" worktree remove --force "$WORKDIR" 2>/dev/null || rm -rf "$WORKDIR"
+  if [ -d "${CONTROL_REPO}/.git" ]; then
+    git -C "$CONTROL_REPO" worktree remove --force "$WORKDIR" 2>/dev/null || rm -rf "$WORKDIR"
+  else
+    git -C "$ROOT" worktree remove --force "$WORKDIR" 2>/dev/null || rm -rf "$WORKDIR"
+  fi
 else
   echo "worktree ${WORKDIR} not present"
 fi
 
-git -C "$ROOT" worktree prune
+if [ -d "${CONTROL_REPO}/.git" ]; then
+  git -C "$CONTROL_REPO" worktree prune
+else
+  git -C "$ROOT" worktree prune
+fi
 
-if git -C "$ROOT" show-ref --verify --quiet "refs/heads/${BRANCH}"; then
+if [ -d "${CONTROL_REPO}/.git" ] && git -C "$CONTROL_REPO" show-ref --verify --quiet "refs/heads/${BRANCH}"; then
+  echo "deleting local branch ${BRANCH} from control repo"
+  git -C "$CONTROL_REPO" branch -D "$BRANCH" >/dev/null 2>&1 || true
+elif git -C "$ROOT" show-ref --verify --quiet "refs/heads/${BRANCH}"; then
   echo "deleting local branch ${BRANCH}"
   git -C "$ROOT" branch -D "$BRANCH" >/dev/null 2>&1 || true
 else
