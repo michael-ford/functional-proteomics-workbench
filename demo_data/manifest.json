@@ -1,0 +1,26 @@
+{
+  "artifacts": [
+    {
+      "media_type": "text/csv",
+      "path": "raw/nelisa_pbmc_il10_lps_subset.csv",
+      "rows": 2394,
+      "sha256": "b541813a494f4c395e7338d5581b00c90e1ee77075ba43a48250159c45c8d14d"
+    },
+    {
+      "media_type": "application/parquet",
+      "path": "processed/nelisa_pbmc_il10_lps_long.parquet",
+      "rows": 2394,
+      "sha256": "9ce443ef7cac8bf5e82fa69edfb2c6f79b402a47b1d9c3fbb9e6193e5afc4da1"
+    },
+    {
+      "media_type": "application/json",
+      "path": "raw/provenance.json",
+      "sha256": "0fbf59a64b8764b5a1e7d03e363a12b83f2e2341aac731e55236936e74d9548f"
+    }
+  ],
+  "description": "Approved SPEC-006 direct Perturb-PBMC IL-10/LPS fixture for proj_demo.",
+  "project_id": "proj_demo",
+  "source_commit": "c26223a1d29a1efbdb6577160fab2a323fb7d80d",
+  "source_file": "figure 4/data_pgmc_umap.h5ad",
+  "source_repo": "https://github.com/nplexbio/nELISA-PBMC"
+}

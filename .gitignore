@@ -21,6 +21,12 @@ actions-runner*/
 demo_data/raw/*
 demo_data/processed/*
 !demo_data/**/.gitkeep
+!demo_data/raw/nelisa_pbmc_il10_lps_subset.csv
+!demo_data/raw/provenance.json
+!demo_data/processed/nelisa_pbmc_il10_lps_long.parquet
+
+# Local seeded project state
+.fpw_state/
 
 # Eval report artifacts
 evals/results/*
