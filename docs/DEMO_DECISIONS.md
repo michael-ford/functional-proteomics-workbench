@@ -91,8 +91,8 @@ PR explicitly changes them.
 Research agent output is recorded on GitHub issue #12:
 https://github.com/michael-ford/functional-proteomics-workbench/issues/12#issuecomment-4783622980
 
-Do not treat these as final selection. Mike/orchestrator still needs to choose the hero
-comparison.
+These were the reviewed candidates before final selection. The selected comparison is recorded
+below.
 
 ### Candidate 1: IL-10 under LPS
 
