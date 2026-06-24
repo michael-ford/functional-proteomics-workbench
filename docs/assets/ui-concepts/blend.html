@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Blend — calm tables + colored plots</title>
+<script>{const t=new URLSearchParams(location.search).get('theme');if(t)document.documentElement.dataset.theme=t;}</script>
+<link rel="stylesheet" href="shared.css">
+<style>
+  /* Blend: quiet monochrome tables (like A), full categorical palette only inside the plot (like B). */
+  :root { --cond-lps: #4a4ad8; --cond-ifn: #4ad889; --cond-pma: #ffb700; --cond-il2: #7e66ed; }
+  .down { color: var(--coral); }
+  .volcano { position: relative; height: 248px; margin: 14px 15px 26px; border-left: 1px solid var(--border-strong); border-bottom: 1px solid var(--border-strong); }
+  .volcano .axis-y { position: absolute; left: -34px; top: 50%; transform: rotate(-90deg); transform-origin: center; font-size: 10.5px; color: var(--faint); white-space: nowrap; }
+  .volcano .axis-x { position: absolute; bottom: -20px; width: 100%; text-align: center; font-size: 10.5px; color: var(--faint); }
+  .volcano .thresh { position: absolute; left: 0; right: 0; border-top: 1px dashed var(--border-strong); }
+  .pt { position: absolute; width: 9px; height: 9px; border-radius: 50%; transform: translate(-50%, 50%); opacity: 0.92; }
+  .pt.big { width: 12px; height: 12px; box-shadow: 0 0 0 3px rgba(74,74,216,0.12); }
+  .legend2 { display: flex; flex-wrap: wrap; gap: 14px; padding: 8px 15px 14px; font-size: 11.5px; color: var(--muted); border-top: 1px solid var(--border); }
+  .cchip { display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 600; }
+  .cchip .sw { width: 9px; height: 9px; border-radius: 50%; }
+  .lps .sw { background: var(--cond-lps); } .ifn .sw { background: var(--cond-ifn); }
+  .pma .sw { background: var(--cond-pma); } .il2 .sw { background: var(--cond-il2); }
+  :root[data-theme="dark"] .pt[style*="c7ccd6"] { background: #3a3566 !important; }
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side">
+    <div class="brand">
+      <div class="glyph">N</div>
+      <div><div class="name">Functional Proteomics</div><div class="sub">Agent workbench</div></div>
+    </div>
+    <nav class="nav">
+      <a href="#"><span class="dot"></span>Project</a>
+      <a href="#"><span class="dot"></span>Dataset</a>
+      <a href="#" class="active"><span class="dot"></span>Results</a>
+      <a href="#"><span class="dot"></span>Report</a>
+      <a href="#"><span class="dot"></span>Trace</a>
+      <a href="#"><span class="dot"></span>Evals</a>
+    </nav>
+    <div class="statebox">
+      <div class="lbl">Shared state</div>
+      <div class="val"><span class="run-dot"></span> Perturb-PBMC · loaded</div>
+      <div class="val sub" style="margin-top:6px">12 donors · secretome panel</div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <span class="crumb">Perturb-PBMC / <b>Secretome analysis</b></span>
+      <span class="pill ok">run complete</span>
+      <span class="pill">mock model · CI</span>
+      <span class="spacer"></span>
+      <button class="btn ghost">View trace</button>
+      <button class="btn">Generate report</button>
+    </div>
+
+    <div class="content">
+      <div class="page-h">
+        <div class="eyebrow">Analysis results · demo artifacts</div>
+        <h1>Secretome functional proteomics</h1>
+        <p>Donor-aware differential abundance across stimulated vs. resting PBMCs. Ranked by effect size with per-donor consistency.</p>
+      </div>
+
+      <div class="stats">
+        <div class="tile"><div class="k">Proteins ranked</div><div class="v">1,284</div><div class="d">secretome panel</div></div>
+        <div class="tile"><div class="k">Donors</div><div class="v">12</div><div class="d">paired design</div></div>
+        <div class="tile"><div class="k">Significant hits</div><div class="v">37</div><div class="d up">q &lt; 0.05</div></div>
+        <div class="tile"><div class="k">Median FDR</div><div class="v">0.018</div><div class="d">BH-adjusted</div></div>
+      </div>
+
+      <div class="grid2">
+        <section class="panel">
+          <div class="panel-h"><h2>Ranked proteins</h2><span class="meta">top 8 of 37 significant</span></div>
+          <table>
+            <thead><tr>
+              <th>Protein</th><th>Condition</th><th class="num">log₂FC</th><th class="num">q-value</th><th class="num">Donors↑</th>
+            </tr></thead>
+            <tbody>
+              <tr class="sel"><td><span class="gene">IL6</span><div class="sub">Interleukin-6</div></td><td>LPS</td><td class="num mono">+3.42</td><td class="num mono">1.2e-09</td><td class="num mono">12/12</td></tr>
+              <tr><td><span class="gene">TNF</span><div class="sub">TNF-α</div></td><td>LPS</td><td class="num mono">+2.97</td><td class="num mono">4.6e-08</td><td class="num mono">12/12</td></tr>
+              <tr><td><span class="gene">CXCL10</span><div class="sub">IP-10</div></td><td>IFN-γ</td><td class="num mono">+2.61</td><td class="num mono">9.1e-07</td><td class="num mono">11/12</td></tr>
+              <tr><td><span class="gene">CCL2</span><div class="sub">MCP-1</div></td><td>LPS</td><td class="num mono">+2.18</td><td class="num mono">3.3e-06</td><td class="num mono">12/12</td></tr>
+              <tr><td><span class="gene">IL10</span><div class="sub">Interleukin-10</div></td><td>LPS</td><td class="num mono">+1.84</td><td class="num mono">2.1e-05</td><td class="num mono">10/12</td></tr>
+              <tr><td><span class="gene">CXCL9</span><div class="sub">MIG</div></td><td>IFN-γ</td><td class="num mono">+1.55</td><td class="num mono">8.7e-05</td><td class="num mono">10/12</td></tr>
+              <tr><td><span class="gene">VEGFA</span><div class="sub">VEGF-A</div></td><td>PMA</td><td class="num mono down">−1.31</td><td class="num mono">2.4e-04</td><td class="num mono">9/12</td></tr>
+              <tr><td><span class="gene">CSF2</span><div class="sub">GM-CSF</div></td><td>PMA</td><td class="num mono">+1.12</td><td class="num mono">9.9e-04</td><td class="num mono">9/12</td></tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section class="panel">
+          <div class="panel-h"><h2>Volcano</h2><span class="meta">effect vs. significance</span></div>
+          <div class="volcano">
+            <span class="axis-y">−log₁₀ q</span>
+            <span class="axis-x">log₂ fold change</span>
+            <div class="thresh" style="bottom:30%"></div>
+            <div class="pt" style="left:42%; bottom:12%; background:#c7ccd6"></div>
+            <div class="pt" style="left:55%; bottom:16%; background:#c7ccd6"></div>
+            <div class="pt" style="left:48%; bottom:8%; background:#c7ccd6"></div>
+            <div class="pt" style="left:60%; bottom:22%; background:#c7ccd6"></div>
+            <div class="pt" style="left:38%; bottom:18%; background:#c7ccd6"></div>
+            <div class="pt" style="left:51%; bottom:24%; background:#c7ccd6"></div>
+            <div class="pt big" style="left:90%; bottom:92%; background:var(--cond-lps)"></div>
+            <div class="pt big" style="left:84%; bottom:80%; background:var(--cond-lps)"></div>
+            <div class="pt big" style="left:80%; bottom:70%; background:var(--cond-ifn)"></div>
+            <div class="pt" style="left:74%; bottom:60%; background:var(--cond-lps)"></div>
+            <div class="pt" style="left:70%; bottom:52%; background:var(--cond-lps)"></div>
+            <div class="pt" style="left:72%; bottom:48%; background:var(--cond-ifn)"></div>
+            <div class="pt" style="left:22%; bottom:44%; background:var(--cond-pma)"></div>
+            <div class="pt" style="left:66%; bottom:40%; background:var(--cond-pma)"></div>
+          </div>
+          <div class="legend2">
+            <span class="cchip lps"><span class="sw"></span>LPS</span>
+            <span class="cchip ifn"><span class="sw"></span>IFN-γ</span>
+            <span class="cchip pma"><span class="sw"></span>PMA</span>
+            <span class="cchip il2"><span class="sw"></span>IL-2</span>
+            <span style="color:var(--faint)">○ non-significant</span>
+          </div>
+        </section>
+      </div>
+
+      <section class="panel trace">
+        <div class="panel-h"><h2>Provenance</h2><span class="meta">tool path · trace #a91f</span></div>
+        <div class="steps">
+          <div class="step"><div class="node"><span class="tdot"></span>load_dataset</div><span class="arrow">→</span></div>
+          <div class="step"><div class="node"><span class="tdot"></span>validate_fixture</div><span class="arrow">→</span></div>
+          <div class="step"><div class="node"><span class="tdot"></span>differential_abundance</div><span class="arrow">→</span></div>
+          <div class="step"><div class="node"><span class="tdot"></span>rank_proteins</div><span class="arrow">→</span></div>
+          <div class="step"><div class="node"><span class="tdot"></span>compose_report</div></div>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+</body>
+</html>

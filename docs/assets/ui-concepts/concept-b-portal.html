@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Concept B — Portal match (dark sidebar + light canvas)</title>
+<link rel="stylesheet" href="shared.css">
+<style>
+  /* Concept B refined to match the real Nomic Portal: dark navy sidebar + light data canvas,
+     categorical palette for conditions, viridis sequential ramp for continuous scales. */
+  :root {
+    --cond-lps: #4a4ad8; --cond-ifn: #4ad889; --cond-pma: #ffb700; --cond-il2: #7e66ed;
+    --nav-bg: #0e0930; --nav-border: #241d52;
+  }
+  /* dark navy sidebar */
+  .side { background: var(--nav-bg); border-right: 1px solid var(--nav-border); }
+  .brand .name { color: #eef0ff; }
+  .brand .sub { color: #8a86c4; }
+  .nav a { color: #b7b4e4; }
+  .nav a .dot { background: #3b3470; }
+  .nav a:hover { background: rgba(123,120,240,0.12); color: #fff; }
+  .nav a.active { background: rgba(123,120,240,0.22); color: #d7d6ff; }
+  .nav a.active .dot { background: #7b78f0; }
+  .statebox { background: #161046; border-color: var(--nav-border); color: #cdcaf0; }
+  .statebox .lbl { color: #8a86c4; }
+  .statebox .sub { color: #8a86c4; }
+
+  /* condition chips (categorical) */
+  .cchip { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; }
+  .cchip .sw { width: 9px; height: 9px; border-radius: 50%; }
+  .lps { color: #2c2ca8; } .lps .sw { background: var(--cond-lps); }
+  .ifn { color: var(--mint-700); } .ifn .sw { background: var(--cond-ifn); }
+  .pma { color: #9a6f00; } .pma .sw { background: var(--cond-pma); }
+  .il2 { color: #5a45c0; } .il2 .sw { background: var(--cond-il2); }
+
+  .volcano { position: relative; height: 248px; margin: 14px 15px 26px; border-left: 1px solid var(--border-strong); border-bottom: 1px solid var(--border-strong); }
+  .volcano .axis-y { position: absolute; left: -34px; top: 50%; transform: rotate(-90deg); transform-origin: center; font-size: 10.5px; color: var(--faint); white-space: nowrap; }
+  .volcano .axis-x { position: absolute; bottom: -20px; width: 100%; text-align: center; font-size: 10.5px; color: var(--faint); }
+  .volcano .thresh { position: absolute; left: 0; right: 0; border-top: 1px dashed var(--border-strong); }
+  .pt { position: absolute; width: 9px; height: 9px; border-radius: 50%; transform: translate(-50%, 50%); opacity: 0.92; }
+  .pt.big { width: 12px; height: 12px; box-shadow: 0 0 0 3px rgba(74,74,216,0.12); }
+  /* viridis continuous ramp (matches Portal colorbar) */
+  .ramp { display: flex; align-items: center; gap: 8px; padding: 0 15px 10px; font-size: 11px; color: var(--muted); }
+  .rampbar { height: 8px; width: 120px; border-radius: 4px; background: linear-gradient(90deg, #440154, #414487, #2a788e, #22a884, #7ad151, #fde725); }
+  .legend2 { display: flex; flex-wrap: wrap; gap: 14px; padding: 6px 15px 14px; font-size: 11.5px; color: var(--muted); border-top: 1px solid var(--border); }
+  .down { color: var(--coral); }
+  .qbadge { display:inline-block; font-size:10.5px; font-weight:600; padding:1px 7px; border-radius:10px; background:#eef0fb; color:#2c2ca8; }
+  .qbadge-hi { background:#e7f8ef; color: var(--mint-700); }
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side">
+    <div class="brand">
+      <div class="glyph">N</div>
+      <div><div class="name">Functional Proteomics</div><div class="sub">Agent workbench</div></div>
+    </div>
+    <nav class="nav">
+      <a href="#"><span class="dot"></span>Project</a>
+      <a href="#"><span class="dot"></span>Dataset</a>
+      <a href="#" class="active"><span class="dot"></span>Results</a>
+      <a href="#"><span class="dot"></span>Report</a>
+      <a href="#"><span class="dot"></span>Trace</a>
+      <a href="#"><span class="dot"></span>Evals</a>
+    </nav>
+    <div class="statebox">
+      <div class="lbl">Shared state</div>
+      <div class="val"><span class="run-dot"></span> Perturb-PBMC · loaded</div>
+      <div class="val sub" style="margin-top:6px">12 donors · secretome panel</div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <span class="crumb">Perturb-PBMC / <b>Secretome analysis</b></span>
+      <span class="pill ok">run complete</span>
+      <span class="pill">mock model · CI</span>
+      <span class="spacer"></span>
+      <button class="btn ghost">View trace</button>
+      <button class="btn">Generate report</button>
+    </div>
+
+    <div class="content">
+      <div class="page-h">
+        <div class="eyebrow">Analysis results · demo artifacts</div>
+        <h1>Secretome functional proteomics</h1>
+        <p>Donor-aware differential abundance across stimulated vs. resting PBMCs. Ranked by effect size with per-donor consistency.</p>
+      </div>
+
+      <div class="stats">
+        <div class="tile"><div class="k">Proteins ranked</div><div class="v">1,284</div><div class="d">secretome panel</div></div>
+        <div class="tile"><div class="k">Donors</div><div class="v">12</div><div class="d">paired design</div></div>
+        <div class="tile"><div class="k">Significant hits</div><div class="v">37</div><div class="d up">q &lt; 0.05</div></div>
+        <div class="tile"><div class="k">Conditions</div><div class="v">4</div><div class="d">LPS · IFN-γ · PMA · IL-2</div></div>
+      </div>
+
+      <div class="grid2">
+        <section class="panel">
+          <div class="panel-h"><h2>Ranked proteins</h2><span class="meta">top 8 of 37 significant</span></div>
+          <table>
+            <thead><tr>
+              <th>Protein</th><th>Condition</th><th class="num">log₂FC</th><th class="num">q-value</th><th class="num">Donors↑</th>
+            </tr></thead>
+            <tbody>
+              <tr class="sel"><td><span class="gene">IL6</span><div class="sub">Interleukin-6</div></td><td><span class="cchip lps"><span class="sw"></span>LPS</span></td><td class="num mono">+3.42</td><td class="num"><span class="qbadge qbadge-hi">1.2e-09</span></td><td class="num mono">12/12</td></tr>
+              <tr><td><span class="gene">TNF</span><div class="sub">TNF-α</div></td><td><span class="cchip lps"><span class="sw"></span>LPS</span></td><td class="num mono">+2.97</td><td class="num"><span class="qbadge qbadge-hi">4.6e-08</span></td><td class="num mono">12/12</td></tr>
+              <tr><td><span class="gene">CXCL10</span><div class="sub">IP-10</div></td><td><span class="cchip ifn"><span class="sw"></span>IFN-γ</span></td><td class="num mono">+2.61</td><td class="num"><span class="qbadge qbadge-hi">9.1e-07</span></td><td class="num mono">11/12</td></tr>
+              <tr><td><span class="gene">CCL2</span><div class="sub">MCP-1</div></td><td><span class="cchip lps"><span class="sw"></span>LPS</span></td><td class="num mono">+2.18</td><td class="num"><span class="qbadge">3.3e-06</span></td><td class="num mono">12/12</td></tr>
+              <tr><td><span class="gene">IL10</span><div class="sub">Interleukin-10</div></td><td><span class="cchip lps"><span class="sw"></span>LPS</span></td><td class="num mono">+1.84</td><td class="num"><span class="qbadge">2.1e-05</span></td><td class="num mono">10/12</td></tr>
+              <tr><td><span class="gene">CXCL9</span><div class="sub">MIG</div></td><td><span class="cchip ifn"><span class="sw"></span>IFN-γ</span></td><td class="num mono">+1.55</td><td class="num"><span class="qbadge">8.7e-05</span></td><td class="num mono">10/12</td></tr>
+              <tr><td><span class="gene">VEGFA</span><div class="sub">VEGF-A</div></td><td><span class="cchip pma"><span class="sw"></span>PMA</span></td><td class="num mono down">−1.31</td><td class="num"><span class="qbadge">2.4e-04</span></td><td class="num mono">9/12</td></tr>
+              <tr><td><span class="gene">CSF2</span><div class="sub">GM-CSF</div></td><td><span class="cchip pma"><span class="sw"></span>PMA</span></td><td class="num mono">+1.12</td><td class="num"><span class="qbadge">9.9e-04</span></td><td class="num mono">9/12</td></tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section class="panel">
+          <div class="panel-h"><h2>Volcano</h2><span class="meta">effect vs. significance</span></div>
+          <div class="volcano">
+            <span class="axis-y">−log₁₀ q</span>
+            <span class="axis-x">log₂ fold change</span>
+            <div class="thresh" style="bottom:30%"></div>
+            <div class="pt" style="left:42%; bottom:12%; background:#c7ccd6"></div>
+            <div class="pt" style="left:55%; bottom:16%; background:#c7ccd6"></div>
+            <div class="pt" style="left:48%; bottom:8%; background:#c7ccd6"></div>
+            <div class="pt" style="left:60%; bottom:22%; background:#c7ccd6"></div>
+            <div class="pt" style="left:38%; bottom:18%; background:#c7ccd6"></div>
+            <div class="pt" style="left:51%; bottom:24%; background:#c7ccd6"></div>
+            <div class="pt big" style="left:90%; bottom:92%; background:var(--cond-lps)"></div>
+            <div class="pt big" style="left:84%; bottom:80%; background:var(--cond-lps)"></div>
+            <div class="pt big" style="left:80%; bottom:70%; background:var(--cond-ifn)"></div>
+            <div class="pt" style="left:74%; bottom:60%; background:var(--cond-lps)"></div>
+            <div class="pt" style="left:70%; bottom:52%; background:var(--cond-lps)"></div>
+            <div class="pt" style="left:72%; bottom:48%; background:var(--cond-ifn)"></div>
+            <div class="pt" style="left:22%; bottom:44%; background:var(--cond-pma)"></div>
+            <div class="pt" style="left:66%; bottom:40%; background:var(--cond-pma)"></div>
+          </div>
+          <div class="ramp"><span>donor consistency</span><span class="rampbar"></span><span>9/12 → 12/12</span></div>
+          <div class="legend2">
+            <span class="cchip lps"><span class="sw"></span>LPS</span>
+            <span class="cchip ifn"><span class="sw"></span>IFN-γ</span>
+            <span class="cchip pma"><span class="sw"></span>PMA</span>
+            <span class="cchip il2"><span class="sw"></span>IL-2</span>
+            <span style="color:var(--faint)">○ non-significant</span>
+          </div>
+        </section>
+      </div>
+
+      <section class="panel trace">
+        <div class="panel-h"><h2>Provenance</h2><span class="meta">tool path · trace #a91f</span></div>
+        <div class="steps">
+          <div class="step"><div class="node" style="border-color:#bcbcef"><span class="tdot" style="background:var(--cond-lps)"></span>load_dataset</div><span class="arrow">→</span></div>
+          <div class="step"><div class="node" style="border-color:#bcbcef"><span class="tdot" style="background:var(--cond-lps)"></span>validate_fixture</div><span class="arrow">→</span></div>
+          <div class="step"><div class="node" style="border-color:#b4e6c9"><span class="tdot" style="background:var(--cond-ifn)"></span>differential_abundance</div><span class="arrow">→</span></div>
+          <div class="step"><div class="node" style="border-color:#b4e6c9"><span class="tdot" style="background:var(--cond-ifn)"></span>rank_proteins</div><span class="arrow">→</span></div>
+          <div class="step"><div class="node" style="border-color:#ffe39e"><span class="tdot" style="background:var(--cond-pma)"></span>compose_report</div></div>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+</body>
+</html>
