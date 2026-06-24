@@ -41,6 +41,7 @@ def create_mcp_router() -> APIRouter:
     ) -> dict[str, Any] | Response:
         registry = _registry_from_app(request)
         trace_sink = _trace_sink_from_app(request)
+        project_state = _project_state_from_app(request)
 
         if payload.method == "initialize":
             return _success(
@@ -62,7 +63,7 @@ def create_mcp_router() -> APIRouter:
             return _success(payload.id, {"tools": _tool_schemas(registry)})
 
         if payload.method == "tools/call":
-            return await _call_tool(payload, request, registry, trace_sink)
+            return await _call_tool(payload, request, registry, trace_sink, project_state)
 
         return _error(payload.id, code=-32601, message=f"method not found: {payload.method}")
 
@@ -89,6 +90,7 @@ async def _call_tool(
     request: Request,
     registry: ToolRegistry,
     trace_sink: TraceSink,
+    project_state: dict[str, Any],
 ) -> dict[str, Any]:
     name = payload.params.get("name")
     arguments = payload.params.get("arguments", {})
@@ -110,6 +112,7 @@ async def _call_tool(
             project_id=_optional_string(payload.params.get("project_id")),
             client=_mcp_client_name(request),
             token_id=MCP_DEMO_TOKEN_ID,
+            state=project_state,
         )
     except ToolRegistryError as exc:
         return _error(payload.id, code=-32602, message=str(exc))
@@ -166,6 +169,14 @@ def _trace_sink_from_app(request: Request) -> TraceSink:
         trace_sink = InMemoryTraceSink()
         request.app.state.trace_sink = trace_sink
     return trace_sink
+
+
+def _project_state_from_app(request: Request) -> dict[str, Any]:
+    project_state = getattr(request.app.state, "project_state", None)
+    if project_state is None:
+        project_state = {}
+        request.app.state.project_state = project_state
+    return project_state
 
 
 def _mcp_client_name(request: Request) -> str | None:

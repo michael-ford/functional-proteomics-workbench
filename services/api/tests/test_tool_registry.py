@@ -153,8 +153,11 @@ def test_project_scoped_tool_trace_uses_validated_input_project_id() -> None:
     result = asyncio.run(
         invoke_for_web_chat(
             registry,
-            "get_project_status",
-            {"project_id": "proj_demo"},
+            "validate_dataset",
+            {
+                "project_id": "proj_demo",
+                "dataset_id": "ds_01KCYAG0000000000000000000",
+            },
             trace_sink=sink,
         )
     )

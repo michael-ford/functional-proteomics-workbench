@@ -174,8 +174,11 @@ def test_mcp_tool_errors_still_emit_trace(monkeypatch) -> None:
                 "id": "call-1",
                 "method": "tools/call",
                 "params": {
-                    "name": "get_project_status",
-                    "arguments": {"project_id": "proj_demo"},
+                    "name": "validate_dataset",
+                    "arguments": {
+                        "project_id": "proj_demo",
+                        "dataset_id": "ds_01KCYAG0000000000000000000",
+                    },
                 },
             },
         )

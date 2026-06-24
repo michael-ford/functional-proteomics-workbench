@@ -8,6 +8,7 @@ import {
   PanelTitle,
   StatusPill,
 } from "@/components/workspace-shell";
+import { ChatPanel } from "@/components/chat-panel";
 import { EffectPlot, MetricTile, RankedProteinTable, StatusBadge, TraceTable } from "@/components/demo-artifact-ui";
 import { formatBytes, formatNumber, formatPercent, getDemoWorkspace } from "@/lib/demo-workspace";
 
@@ -26,6 +27,10 @@ export default function ProjectDashboardPage() {
         title={workspace.project.title}
         description="Seeded IL-10/LPS public subset with matched donor controls, analysis artifacts, report claims, traces, and eval replay."
       />
+
+      <div className="mb-4">
+        <ChatPanel />
+      </div>
 
       <div className="mb-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <MetricTile

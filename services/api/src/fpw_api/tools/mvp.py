@@ -276,6 +276,7 @@ def mvp_tool_definitions() -> list[ToolDefinition]:
             ProjectStatusOutput,
             scope="project",
             mutates_state=False,
+            handler=_get_project_status_handler,
         ),
         _tool(
             "create_upload_url",
@@ -424,6 +425,91 @@ def _stub_handler(name: str) -> ToolHandler:
         )
 
     return handler
+
+
+def _get_project_status_handler(tool_input: BaseModel, context: ToolContext) -> ProjectStatusOutput:
+    typed_input = ProjectInput.model_validate(tool_input)
+    projects = _shared_projects(context)
+    project = projects.get(typed_input.project_id)
+    if project is None and typed_input.project_id == DEMO_PROJECT_ID:
+        project = _demo_project_state()
+    if project is None:
+        raise ToolExecutionError("not_found", f"project not found: {typed_input.project_id}")
+
+    project_contract = project.get("project")
+    if not isinstance(project_contract, dict):
+        raise ToolExecutionError("internal_error", "project state is missing contract fields.")
+
+    summary_counts = _project_summary_counts(
+        project_id=typed_input.project_id,
+        project=project,
+        trace_count=_trace_count_for_project(context, typed_input.project_id),
+    )
+    return ProjectStatusOutput(project=project_contract, summary_counts=summary_counts)
+
+
+def _shared_projects(context: ToolContext) -> dict[str, dict[str, Any]]:
+    raw_projects = context.state.get("projects", {})
+    if not isinstance(raw_projects, dict):
+        raise ToolExecutionError("internal_error", "shared project state must be a mapping.")
+    return raw_projects
+
+
+def _demo_project_state() -> dict[str, Any]:
+    created_at = "2026-06-24T00:00:00Z"
+    return {
+        "project": {
+            "id": DEMO_PROJECT_ID,
+            "schema_version": SCHEMA_VERSION,
+            "title": "v0.1 Perturb-PBMC IL-10/LPS demo",
+            "status": "validated",
+            "context_md": (
+                "Seeded v0.1 demo project for IL-10 vs matched no-cytokine control "
+                "under LPS 2000 ng/mL using the approved public Perturb-PBMC subset."
+            ),
+            "created_at": created_at,
+            "updated_at": created_at,
+        },
+        "datasets": [
+            {
+                "id": DEMO_DATASET_ID,
+                "source": "selected_public",
+                "status": "validated",
+                "rows": 2394,
+            }
+        ],
+    }
+
+
+def _project_summary_counts(
+    *,
+    project_id: str,
+    project: dict[str, Any],
+    trace_count: int,
+) -> dict[str, int]:
+    datasets = project.get("datasets", [])
+    dataset_count = len(datasets) if isinstance(datasets, list) else 0
+    return {
+        "datasets": dataset_count,
+        "analysis_plans": sum(
+            1 for plan in _PLANS.values() if plan.get("project_id") == project_id
+        ),
+        "analysis_results": sum(
+            1 for result in _RESULTS.values() if result.get("project_id") == project_id
+        ),
+        "tool_calls": trace_count,
+    }
+
+
+def _trace_count_for_project(context: ToolContext, project_id: str) -> int:
+    traces = getattr(context.trace_sink, "traces", None)
+    if not isinstance(traces, list):
+        return 0
+    return sum(
+        1
+        for trace in traces
+        if getattr(trace, "project_id", None) == project_id
+    )
 
 
 def _define_comparison_handler(tool_input: BaseModel, _context: ToolContext) -> AnalysisPlanOutput:
