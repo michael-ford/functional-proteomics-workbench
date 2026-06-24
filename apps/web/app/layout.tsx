@@ -1,7 +1,14 @@
 import type { Metadata, Viewport } from "next";
+import { Outfit } from "next/font/google";
 
 import "./globals.css";
 import { WorkspaceShell } from "@/components/workspace-shell";
+
+const outfit = Outfit({
+  subsets: ["latin"],
+  variable: "--font-sans",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "Functional Proteomics Workbench",
@@ -15,7 +22,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
+    <html lang="en" className={outfit.variable}>
       <body>
         <WorkspaceShell>{children}</WorkspaceShell>
       </body>

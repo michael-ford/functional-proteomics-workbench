@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Concept A — Indigo, restrained</title>
+<script>{const t=new URLSearchParams(location.search).get('theme');if(t)document.documentElement.dataset.theme=t;}</script>
+<link rel="stylesheet" href="shared.css">
+<style>
+  :root[data-theme="dark"] .bartrack { background: rgba(255,255,255,0.07); }
+  /* Concept A: indigo as the single solid accent. Plot is monochrome indigo. */
+  .barrow { display: grid; grid-template-columns: 92px 1fr 54px; align-items: center; gap: 10px; padding: 7px 15px; }
+  .barrow .lab { font-size: 12.5px; font-weight: 600; }
+  .bartrack { height: 14px; background: #eef0f6; border-radius: 3px; overflow: hidden; }
+  .barfill { height: 100%; background: var(--indigo); border-radius: 3px; }
+  .barrow .amt { text-align: right; font-size: 12px; color: var(--muted); }
+  .legend { display: flex; gap: 14px; font-size: 11.5px; color: var(--muted); padding: 0 15px 12px; }
+  .legend .sw { display: inline-flex; align-items: center; gap: 6px; }
+  .legend .chip { width: 10px; height: 10px; border-radius: 2px; background: var(--indigo); }
+  .conf-flag { color: var(--mint-700); font-weight: 600; }
+  .down { color: var(--coral); }
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side">
+    <div class="brand">
+      <div class="glyph">N</div>
+      <div><div class="name">Functional Proteomics</div><div class="sub">Agent workbench</div></div>
+    </div>
+    <nav class="nav">
+      <a href="#"><span class="dot"></span>Project</a>
+      <a href="#"><span class="dot"></span>Dataset</a>
+      <a href="#" class="active"><span class="dot"></span>Results</a>
+      <a href="#"><span class="dot"></span>Report</a>
+      <a href="#"><span class="dot"></span>Trace</a>
+      <a href="#"><span class="dot"></span>Evals</a>
+    </nav>
+    <div class="statebox">
+      <div class="lbl">Shared state</div>
+      <div class="val"><span class="run-dot"></span> Perturb-PBMC · loaded</div>
+      <div class="val sub" style="margin-top:6px">12 donors · secretome panel</div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <span class="crumb">Perturb-PBMC / <b>Secretome analysis</b></span>
+      <span class="pill ok">run complete</span>
+      <span class="pill">mock model · CI</span>
+      <span class="spacer"></span>
+      <button class="btn ghost">View trace</button>
+      <button class="btn">Generate report</button>
+    </div>
+
+    <div class="content">
+      <div class="page-h">
+        <div class="eyebrow">Analysis results · demo artifacts</div>
+        <h1>Secretome functional proteomics</h1>
+        <p>Donor-aware differential abundance across stimulated vs. resting PBMCs. Ranked by effect size with per-donor consistency.</p>
+      </div>
+
+      <div class="stats">
+        <div class="tile"><div class="k">Proteins ranked</div><div class="v">1,284</div><div class="d">secretome panel</div></div>
+        <div class="tile"><div class="k">Donors</div><div class="v">12</div><div class="d">paired design</div></div>
+        <div class="tile"><div class="k">Significant hits</div><div class="v">37</div><div class="d up">q &lt; 0.05</div></div>
+        <div class="tile"><div class="k">Median FDR</div><div class="v">0.018</div><div class="d">BH-adjusted</div></div>
+      </div>
+
+      <div class="grid2">
+        <section class="panel">
+          <div class="panel-h"><h2>Ranked proteins</h2><span class="meta">top 8 of 37 significant</span></div>
+          <table>
+            <thead><tr>
+              <th>Protein</th><th>Condition</th><th class="num">log₂FC</th><th class="num">q-value</th><th class="num">Donors↑</th>
+            </tr></thead>
+            <tbody>
+              <tr class="sel"><td><span class="gene">IL6</span><div class="sub">Interleukin-6</div></td><td>LPS</td><td class="num mono">+3.42</td><td class="num mono">1.2e-09</td><td class="num mono">12/12</td></tr>
+              <tr><td><span class="gene">TNF</span><div class="sub">TNF-α</div></td><td>LPS</td><td class="num mono">+2.97</td><td class="num mono">4.6e-08</td><td class="num mono">12/12</td></tr>
+              <tr><td><span class="gene">CXCL10</span><div class="sub">IP-10</div></td><td>IFN-γ</td><td class="num mono">+2.61</td><td class="num mono">9.1e-07</td><td class="num mono">11/12</td></tr>
+              <tr><td><span class="gene">CCL2</span><div class="sub">MCP-1</div></td><td>LPS</td><td class="num mono">+2.18</td><td class="num mono">3.3e-06</td><td class="num mono">12/12</td></tr>
+              <tr><td><span class="gene">IL10</span><div class="sub">Interleukin-10</div></td><td>LPS</td><td class="num mono">+1.84</td><td class="num mono">2.1e-05</td><td class="num mono">10/12</td></tr>
+              <tr><td><span class="gene">CXCL9</span><div class="sub">MIG</div></td><td>IFN-γ</td><td class="num mono">+1.55</td><td class="num mono">8.7e-05</td><td class="num mono">10/12</td></tr>
+              <tr><td><span class="gene">VEGFA</span><div class="sub">VEGF-A</div></td><td>PMA</td><td class="num mono down">−1.31</td><td class="num mono">2.4e-04</td><td class="num mono">9/12</td></tr>
+              <tr><td><span class="gene">CSF2</span><div class="sub">GM-CSF</div></td><td>PMA</td><td class="num mono">+1.12</td><td class="num mono">9.9e-04</td><td class="num mono">9/12</td></tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section class="panel">
+          <div class="panel-h"><h2>Effect size</h2><span class="meta">log₂FC, top hits</span></div>
+          <div style="padding:12px 0 4px">
+            <div class="barrow"><span class="lab">IL6</span><div class="bartrack"><div class="barfill" style="width:100%"></div></div><span class="amt mono">3.42</span></div>
+            <div class="barrow"><span class="lab">TNF</span><div class="bartrack"><div class="barfill" style="width:87%"></div></div><span class="amt mono">2.97</span></div>
+            <div class="barrow"><span class="lab">CXCL10</span><div class="bartrack"><div class="barfill" style="width:76%"></div></div><span class="amt mono">2.61</span></div>
+            <div class="barrow"><span class="lab">CCL2</span><div class="bartrack"><div class="barfill" style="width:64%"></div></div><span class="amt mono">2.18</span></div>
+            <div class="barrow"><span class="lab">IL10</span><div class="bartrack"><div class="barfill" style="width:54%"></div></div><span class="amt mono">1.84</span></div>
+            <div class="barrow"><span class="lab">CXCL9</span><div class="bartrack"><div class="barfill" style="width:45%"></div></div><span class="amt mono">1.55</span></div>
+          </div>
+          <div class="legend"><span class="sw"><span class="chip"></span>log₂ fold change</span><span class="sw"><span class="conf-flag">●</span> consistent ≥10/12 donors</span></div>
+        </section>
+      </div>
+
+      <section class="panel trace">
+        <div class="panel-h"><h2>Provenance</h2><span class="meta">tool path · trace #a91f</span></div>
+        <div class="steps">
+          <div class="step"><div class="node"><span class="tdot"></span>load_dataset</div><span class="arrow">→</span></div>
+          <div class="step"><div class="node"><span class="tdot"></span>validate_fixture</div><span class="arrow">→</span></div>
+          <div class="step"><div class="node"><span class="tdot"></span>differential_abundance</div><span class="arrow">→</span></div>
+          <div class="step"><div class="node"><span class="tdot"></span>rank_proteins</div><span class="arrow">→</span></div>
+          <div class="step"><div class="node"><span class="tdot"></span>compose_report</div></div>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -2,14 +2,38 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * Nomic-derived theme tokens (locked direction: Concept B, Portal-matched).
+ * Source: design language extracted from www.nomic.bio/portal — see docs/UI_DIRECTION.md.
+ * RGB triplets are space-separated so Tailwind can apply <alpha-value>.
+ */
 :root {
-  --ink: 26 31 34;
-  --muted: 91 103 112;
+  /* Neutral workbench (light data canvas) */
+  --ink: 14 17 22;
+  --muted: 91 103 114;
+  --faint: 138 149 160;
   --surface: 255 255 255;
-  --wash: 245 247 248;
-  --border: 215 221 225;
-  --accent: 24 92 112;
-  --signal: 28 142 96;
+  --wash: 246 247 249;
+  --border: 228 229 238;
+  --border-strong: 211 214 226;
+
+  /* Brand accents (Nomic) */
+  --accent: 74 74 216;        /* indigo  #4a4ad8 — primary */
+  --accent-strong: 58 58 176; /* indigo  #3a3ab0 */
+  --accent-wash: 236 228 255; /* lavender #ece4ff — selected/active backgrounds */
+  --secondary: 74 216 137;    /* mint    #4ad889 — positive / success */
+  --secondary-strong: 47 174 106;
+  --lavender: 126 102 237;    /* #7e66ed */
+  --amber: 255 183 0;         /* #ffb700 */
+  --coral: 249 107 107;       /* #f96b6b — error / down-regulation */
+  --signal: 74 216 137;       /* status dot = mint */
+
+  /* Dark indigo-navy sidebar (matches real Nomic Portal chrome) */
+  --nav: 14 9 48;             /* #0e0930 */
+  --nav-2: 22 16 70;          /* #161046 — raised panels in nav */
+  --nav-border: 36 29 82;     /* #241d52 */
+  --nav-ink: 238 240 255;     /* #eef0ff */
+  --nav-muted: 167 164 216;   /* #a7a4d8 */
 }
 
 * {
@@ -23,6 +47,8 @@ html {
 body {
   margin: 0;
   overflow-x: hidden;
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-variant-numeric: tabular-nums;
 }
 
 a {

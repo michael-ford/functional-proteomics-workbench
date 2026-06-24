@@ -32,14 +32,14 @@ type WorkspaceShellProps = {
 export function WorkspaceShell({ children }: WorkspaceShellProps) {
   return (
     <div className="min-h-screen bg-wash text-ink">
-      <aside className="fixed inset-y-0 left-0 z-20 hidden w-64 border-r border-border bg-surface px-4 py-5 lg:block">
+      <aside className="fixed inset-y-0 left-0 z-20 hidden w-64 border-r border-nav-border bg-nav px-4 py-5 text-nav-ink lg:block">
         <Link href="/" className="flex items-center gap-3">
-          <span className="flex size-9 items-center justify-center rounded border border-border bg-ink text-white">
+          <span className="flex size-9 items-center justify-center rounded bg-accent text-white">
             <FlaskConical size={18} aria-hidden="true" />
           </span>
           <span>
             <span className="block text-sm font-semibold">Functional Proteomics</span>
-            <span className="block text-xs text-muted">Agent workbench</span>
+            <span className="block text-xs text-nav-muted">Agent workbench</span>
           </span>
         </Link>
         <nav aria-label="Workspace" className="mt-8 space-y-1">
@@ -47,15 +47,15 @@ export function WorkspaceShell({ children }: WorkspaceShellProps) {
             <Link
               key={item.href}
               href={item.href}
-              className="flex items-center gap-3 rounded px-3 py-2 text-sm font-medium text-muted transition hover:bg-wash hover:text-ink"
+              className="flex items-center gap-3 rounded px-3 py-2 text-sm font-medium text-nav-muted transition hover:bg-white/5 hover:text-nav-ink"
             >
               <item.icon size={17} aria-hidden="true" />
               {item.label}
             </Link>
           ))}
         </nav>
-        <div className="absolute inset-x-4 bottom-5 rounded border border-border bg-wash p-3">
-          <div className="flex items-center gap-2 text-xs font-semibold uppercase text-muted">
+        <div className="absolute inset-x-4 bottom-5 rounded border border-nav-border bg-nav-2 p-3">
+          <div className="flex items-center gap-2 text-xs font-semibold uppercase text-nav-muted">
             <Activity size={14} aria-hidden="true" />
             Shared state
           </div>
