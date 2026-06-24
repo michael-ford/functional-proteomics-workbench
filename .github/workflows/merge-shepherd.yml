@@ -41,7 +41,7 @@ jobs:
           candidates="$(mktemp)"
           trap 'rm -f "$prs_json" "$candidates"' EXIT
 
-          gh pr list --repo "$GH_REPO" --state open --limit 100 \
+          GH_TOKEN="${{ github.token }}" gh pr list --repo "$GH_REPO" --state open --limit 100 \
             --json number,headRefName,mergeStateStatus,autoMergeRequest,updatedAt,statusCheckRollup \
             > "$prs_json"
 
@@ -167,7 +167,7 @@ jobs:
             if [ "$attempts" -ge "${MAX_ATTEMPTS}" ]; then
               echo "PR #${pr}: attempt cap reached (${attempts}); human needed"
               if [ ! -f "$commented_file" ]; then
-                gh pr comment "$pr" --repo "$GH_REPO" --body \
+                GH_TOKEN="${{ github.token }}" gh pr comment "$pr" --repo "$GH_REPO" --body \
                   "Merge shepherd has reached ${attempts} automated respawns for this PR and it is still ${merge_state} (${reason}). A human needs to resolve the remaining merge conflict or failed required check."
                 date -u +"%Y-%m-%dT%H:%M:%SZ" > "$commented_file"
               fi
