@@ -1,0 +1,87 @@
+{
+  "created_at": "2026-06-24T20:21:26.680666Z",
+  "id": "eval_run_01K1M9M8J6T2P3R4S5T6V7W8X9",
+  "mode": "smoke",
+  "results": [
+    {
+      "case_id": "case_runner_smoke",
+      "checks": [
+        {
+          "detail": "Smoke case produced a valid EvalResult envelope.",
+          "kind": "schema_validity",
+          "passed": true
+        },
+        {
+          "detail": "EvalRun report includes required replay and score fields.",
+          "kind": "report_structure",
+          "passed": true
+        },
+        {
+          "detail": "No tool calls were executed; trace_step_ids is explicitly empty.",
+          "kind": "trace_completeness",
+          "passed": true
+        }
+      ],
+      "passed": true,
+      "trace_step_ids": []
+    },
+    {
+      "case_id": "case_corpus_retrieval_smoke",
+      "checks": [
+        {
+          "detail": "Retrieved approved cited source for query: What public dataset and assay does this demo use?",
+          "kind": "citation_support",
+          "passed": true
+        },
+        {
+          "detail": "Retrieved chunk includes entity tags for query: What public dataset and assay does this demo use?",
+          "kind": "entity_grounding",
+          "passed": true
+        },
+        {
+          "detail": "search_corpus trace records source IDs and citation metadata.",
+          "kind": "trace_completeness",
+          "passed": true
+        },
+        {
+          "detail": "Retrieved approved cited source for query: What evidence supports IL-10 dampening cytokine production in LPS or human immune-cell contexts?",
+          "kind": "citation_support",
+          "passed": true
+        },
+        {
+          "detail": "Retrieved chunk includes entity tags for query: What evidence supports IL-10 dampening cytokine production in LPS or human immune-cell contexts?",
+          "kind": "entity_grounding",
+          "passed": true
+        },
+        {
+          "detail": "search_corpus trace records source IDs and citation metadata.",
+          "kind": "trace_completeness",
+          "passed": true
+        },
+        {
+          "detail": "Retrieved approved cited source for query: What context supports LPS-stimulated PBMC cytokine response interpretation?",
+          "kind": "citation_support",
+          "passed": true
+        },
+        {
+          "detail": "Retrieved chunk includes entity tags for query: What context supports LPS-stimulated PBMC cytokine response interpretation?",
+          "kind": "entity_grounding",
+          "passed": true
+        },
+        {
+          "detail": "search_corpus trace records source IDs and citation metadata.",
+          "kind": "trace_completeness",
+          "passed": true
+        }
+      ],
+      "passed": true,
+      "trace_step_ids": [
+        "tc_01KVXMPX0P8M3ETY9Y0R1BNA6Z",
+        "tc_01KVXMPX0QN2NE5VYKF6Q5W1HV",
+        "tc_01KVXMPX0QN2NE5VYKF6Q5W1HW"
+      ]
+    }
+  ],
+  "score": 1.0,
+  "suite": "deterministic-smoke"
+}

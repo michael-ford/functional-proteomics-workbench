@@ -3,6 +3,7 @@ import { Outfit } from "next/font/google";
 
 import "./globals.css";
 import { WorkspaceShell } from "@/components/workspace-shell";
+import { getDemoWorkspace } from "@/lib/demo-workspace";
 
 const outfit = Outfit({
   subsets: ["latin"],
@@ -21,10 +22,17 @@ export const viewport: Viewport = {
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  const workspace = getDemoWorkspace();
+
   return (
     <html lang="en" className={outfit.variable}>
       <body>
-        <WorkspaceShell>{children}</WorkspaceShell>
+        <WorkspaceShell
+          sharedStateLabel={`${workspace.project.id} loaded`}
+          statusLabel={`${workspace.dataset.validation.status} dataset · ${workspace.trace_export.count} traces`}
+        >
+          {children}
+        </WorkspaceShell>
       </body>
     </html>
   );

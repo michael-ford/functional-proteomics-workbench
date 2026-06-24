@@ -1,0 +1,1366 @@
+{
+  "analysis_plan": {
+    "assumptions": [
+      "Rows are the frozen long-format Perturb-PBMC fixture with finite response_value values.",
+      "Each included donor has at least one treatment and one matched control row per protein.",
+      "Donor-paired differences, not row-level observations, are the units used for exploratory inference."
+    ],
+    "comparison": {
+      "group_a": {
+        "perturbagen": "IL-10"
+      },
+      "group_b": {
+        "perturbagen": "control"
+      },
+      "paired_by": "donor",
+      "proteins": null,
+      "stimulation_context": "LPS"
+    },
+    "created_at": "2026-06-24T20:21:26.659072Z",
+    "dataset_id": "ds_01KCYAG0000000000000000000",
+    "donor_handling": "Matched donors are the biological replicate unit. For each donor/protein, matched control rows are collapsed with the median before computing the IL-10 minus control paired difference.",
+    "id": "plan_01KVXMPX035YYMJ7R8QM6C0Y3S",
+    "limitations": [
+      "Small paired donor count limits inferential power; p-values and q-values are exploratory.",
+      "The method summarizes donor-matched response_value differences and does not make mechanistic claims.",
+      "The fixture carries the public H5AD normalized_response values verbatim; v0.1 does not renormalize.",
+      "Only the approved IL-10 versus matched no-cytokine control comparison under LPS is supported."
+    ],
+    "method_id": "donor_aware_paired_difference",
+    "multiple_testing": "Exact paired sign-flip p-values are reported as exploratory outputs and Benjamini-Hochberg q-values are computed across the tested proteins.",
+    "project_id": "proj_demo",
+    "rationale": "The fixture is a matched donor design with repeated controls. The approved v0.1 path compares donor-paired IL-10 and control responses after collapsing controls per donor/protein.",
+    "replicate_handling": "Multiple control samples per donor/protein are technical or matched-condition rows for v0.1 and are collapsed by median; they are not treated as independent biological replicates.",
+    "schema_version": "0.1.0",
+    "unsupported_assumptions": []
+  },
+  "analysis_result": {
+    "created_at": "2026-06-24T20:21:26.676388Z",
+    "donor_consistency": [
+      {
+        "agrees_with_consensus": true,
+        "donor": "donor_1",
+        "note": "Agrees on 19/21 ranked protein directions."
+      },
+      {
+        "agrees_with_consensus": true,
+        "donor": "donor_2",
+        "note": "Agrees on 21/21 ranked protein directions."
+      },
+      {
+        "agrees_with_consensus": true,
+        "donor": "donor_3",
+        "note": "Agrees on 21/21 ranked protein directions."
+      },
+      {
+        "agrees_with_consensus": true,
+        "donor": "donor_4",
+        "note": "Agrees on 20/21 ranked protein directions."
+      },
+      {
+        "agrees_with_consensus": true,
+        "donor": "donor_5",
+        "note": "Agrees on 19/21 ranked protein directions."
+      },
+      {
+        "agrees_with_consensus": true,
+        "donor": "donor_6",
+        "note": "Agrees on 20/21 ranked protein directions."
+      }
+    ],
+    "id": "res_01KVXMPX0KFS6V4AF3HQEQN2MJ",
+    "method_id": "donor_aware_paired_difference",
+    "plan_id": "plan_01KVXMPX035YYMJ7R8QM6C0Y3S",
+    "plot_id": null,
+    "project_id": "proj_demo",
+    "ranking": {
+      "correction": "Benjamini-Hochberg q_value from exact paired sign-flip p-values",
+      "metric": "effect_size",
+      "rows": [
+        {
+          "direction": "down",
+          "donor_consistency": 1.0,
+          "effect_size": -0.8155901585,
+          "p_value": 0.03125,
+          "protein": "TNF alpha",
+          "q_value": 0.036458333333333336
+        },
+        {
+          "direction": "down",
+          "donor_consistency": 1.0,
+          "effect_size": -0.7473968606666667,
+          "p_value": 0.03125,
+          "protein": "IL-1 beta",
+          "q_value": 0.036458333333333336
+        },
+        {
+          "direction": "down",
+          "donor_consistency": 1.0,
+          "effect_size": -0.6719611360516666,
+          "p_value": 0.03125,
+          "protein": "IL-1 alpha",
+          "q_value": 0.036458333333333336
+        },
+        {
+          "direction": "down",
+          "donor_consistency": 1.0,
+          "effect_size": -0.6531773640028333,
+          "p_value": 0.03125,
+          "protein": "CCL1",
+          "q_value": 0.036458333333333336
+        },
+        {
+          "direction": "down",
+          "donor_consistency": 1.0,
+          "effect_size": -0.63170554605,
+          "p_value": 0.03125,
+          "protein": "IFN gamma",
+          "q_value": 0.036458333333333336
+        },
+        {
+          "direction": "down",
+          "donor_consistency": 1.0,
+          "effect_size": -0.5940847936666667,
+          "p_value": 0.03125,
+          "protein": "IL-12 p40",
+          "q_value": 0.036458333333333336
+        },
+        {
+          "direction": "down",
+          "donor_consistency": 1.0,
+          "effect_size": -0.49245705276833335,
+          "p_value": 0.03125,
+          "protein": "CCL22",
+          "q_value": 0.036458333333333336
+        },
+        {
+          "direction": "down",
+          "donor_consistency": 1.0,
+          "effect_size": -0.45472876318333333,
+          "p_value": 0.03125,
+          "protein": "CCL24",
+          "q_value": 0.036458333333333336
+        },
+        {
+          "direction": "down",
+          "donor_consistency": 1.0,
+          "effect_size": -0.32613574905333337,
+          "p_value": 0.03125,
+          "protein": "G-CSF",
+          "q_value": 0.036458333333333336
+        },
+        {
+          "direction": "up",
+          "donor_consistency": 1.0,
+          "effect_size": 0.2809834801666667,
+          "p_value": 0.03125,
+          "protein": "CXCL16",
+          "q_value": 0.036458333333333336
+        },
+        {
+          "direction": "up",
+          "donor_consistency": 1.0,
+          "effect_size": 0.28054680508333335,
+          "p_value": 0.03125,
+          "protein": "CCL2",
+          "q_value": 0.036458333333333336
+        },
+        {
+          "direction": "down",
+          "donor_consistency": 1.0,
+          "effect_size": -0.26989780783333334,
+          "p_value": 0.03125,
+          "protein": "IL-6",
+          "q_value": 0.036458333333333336
+        },
+        {
+          "direction": "up",
+          "donor_consistency": 1.0,
+          "effect_size": 0.24034604675000001,
+          "p_value": 0.03125,
+          "protein": "IL-1 RA RN",
+          "q_value": 0.036458333333333336
+        },
+        {
+          "direction": "up",
+          "donor_consistency": 1.0,
+          "effect_size": 0.22467272266666669,
+          "p_value": 0.03125,
+          "protein": "TNF RII",
+          "q_value": 0.036458333333333336
+        },
+        {
+          "direction": "down",
+          "donor_consistency": 1.0,
+          "effect_size": -0.17048264153499998,
+          "p_value": 0.03125,
+          "protein": "GM-CSF",
+          "q_value": 0.036458333333333336
+        },
+        {
+          "direction": "down",
+          "donor_consistency": 1.0,
+          "effect_size": -0.16606340283333335,
+          "p_value": 0.03125,
+          "protein": "CCL5",
+          "q_value": 0.036458333333333336
+        },
+        {
+          "direction": "up",
+          "donor_consistency": 1.0,
+          "effect_size": 0.15519887954999997,
+          "p_value": 0.03125,
+          "protein": "MMP-1",
+          "q_value": 0.036458333333333336
+        },
+        {
+          "direction": "up",
+          "donor_consistency": 1.0,
+          "effect_size": 0.14145186034166665,
+          "p_value": 0.03125,
+          "protein": "CCL7",
+          "q_value": 0.036458333333333336
+        },
+        {
+          "direction": "down",
+          "donor_consistency": 0.8333333333333334,
+          "effect_size": -0.03233540666166666,
+          "p_value": 0.09375,
+          "protein": "CXCL10",
+          "q_value": 0.10361842105263158
+        },
+        {
+          "direction": "up",
+          "donor_consistency": 0.5,
+          "effect_size": 0.031987820108333336,
+          "p_value": 0.46875,
+          "protein": "CCL8",
+          "q_value": 0.46875
+        },
+        {
+          "direction": "down",
+          "donor_consistency": 0.6666666666666666,
+          "effect_size": -0.019904077166666645,
+          "p_value": 0.4375,
+          "protein": "CXCL1",
+          "q_value": 0.459375
+        }
+      ]
+    },
+    "schema_version": "0.1.0",
+    "table_ref": {
+      "bytes": 5311,
+      "media_type": "text/csv",
+      "sha256": "1a30f1f1d4fd44a546bea7476b7c8a9b5254d46769578581cd5578ecaf8e328f",
+      "uri": "project://proj_demo/analysis/results/res_01KVXMPX0KFS6V4AF3HQEQN2MJ.csv"
+    }
+  },
+  "dataset": {
+    "created_at": "2026-06-24T00:00:00Z",
+    "id": "ds_01KCYAG0000000000000000000",
+    "name": "Perturb-PBMC IL-10/LPS direct subset",
+    "normalized_ref": {
+      "bytes": 24634,
+      "media_type": "application/parquet",
+      "sha256": "9ce443ef7cac8bf5e82fa69edfb2c6f79b402a47b1d9c3fbb9e6193e5afc4da1",
+      "uri": "project://proj_demo/datasets/normalized/nelisa_pbmc_il10_lps_long.parquet"
+    },
+    "project_id": "proj_demo",
+    "raw_ref": {
+      "bytes": 122082,
+      "media_type": "text/csv",
+      "sha256": "b541813a494f4c395e7338d5581b00c90e1ee77075ba43a48250159c45c8d14d",
+      "uri": "project://proj_demo/datasets/raw/nelisa_pbmc_il10_lps_subset.csv"
+    },
+    "schema_version": "0.1.0",
+    "source": "selected_public",
+    "validation": {
+      "issues": [],
+      "row_count": 2394,
+      "status": "passed"
+    }
+  },
+  "eval_run": {
+    "created_at": "2026-06-24T20:21:26.680666Z",
+    "id": "eval_run_01K1M9M8J6T2P3R4S5T6V7W8X9",
+    "mode": "smoke",
+    "results": [
+      {
+        "case_id": "case_runner_smoke",
+        "checks": [
+          {
+            "detail": "Smoke case produced a valid EvalResult envelope.",
+            "kind": "schema_validity",
+            "passed": true
+          },
+          {
+            "detail": "EvalRun report includes required replay and score fields.",
+            "kind": "report_structure",
+            "passed": true
+          },
+          {
+            "detail": "No tool calls were executed; trace_step_ids is explicitly empty.",
+            "kind": "trace_completeness",
+            "passed": true
+          }
+        ],
+        "passed": true,
+        "trace_step_ids": []
+      },
+      {
+        "case_id": "case_corpus_retrieval_smoke",
+        "checks": [
+          {
+            "detail": "Retrieved approved cited source for query: What public dataset and assay does this demo use?",
+            "kind": "citation_support",
+            "passed": true
+          },
+          {
+            "detail": "Retrieved chunk includes entity tags for query: What public dataset and assay does this demo use?",
+            "kind": "entity_grounding",
+            "passed": true
+          },
+          {
+            "detail": "search_corpus trace records source IDs and citation metadata.",
+            "kind": "trace_completeness",
+            "passed": true
+          },
+          {
+            "detail": "Retrieved approved cited source for query: What evidence supports IL-10 dampening cytokine production in LPS or human immune-cell contexts?",
+            "kind": "citation_support",
+            "passed": true
+          },
+          {
+            "detail": "Retrieved chunk includes entity tags for query: What evidence supports IL-10 dampening cytokine production in LPS or human immune-cell contexts?",
+            "kind": "entity_grounding",
+            "passed": true
+          },
+          {
+            "detail": "search_corpus trace records source IDs and citation metadata.",
+            "kind": "trace_completeness",
+            "passed": true
+          },
+          {
+            "detail": "Retrieved approved cited source for query: What context supports LPS-stimulated PBMC cytokine response interpretation?",
+            "kind": "citation_support",
+            "passed": true
+          },
+          {
+            "detail": "Retrieved chunk includes entity tags for query: What context supports LPS-stimulated PBMC cytokine response interpretation?",
+            "kind": "entity_grounding",
+            "passed": true
+          },
+          {
+            "detail": "search_corpus trace records source IDs and citation metadata.",
+            "kind": "trace_completeness",
+            "passed": true
+          }
+        ],
+        "passed": true,
+        "trace_step_ids": [
+          "tc_01KVXMPX0P8M3ETY9Y0R1BNA6Z",
+          "tc_01KVXMPX0QN2NE5VYKF6Q5W1HV",
+          "tc_01KVXMPX0QN2NE5VYKF6Q5W1HW"
+        ]
+      }
+    ],
+    "score": 1.0,
+    "suite": "deterministic-smoke"
+  },
+  "evidence_results": [
+    {
+      "output": {
+        "chunks": [
+          {
+            "chunk": {
+              "assay_context": [
+                "perturbation"
+              ],
+              "citation": {
+                "authors": null,
+                "doi": null,
+                "paper_title": null,
+                "url": "https://info.nomic.bio/perturb-pbmc",
+                "year": null
+              },
+              "embedding_status": "pending",
+              "entities": [
+                "PBMC",
+                "nELISA",
+                "perturbation"
+              ],
+              "id": "chunk_2YWTRHNBBSGAMRM93NP4AC9GRF",
+              "schema_version": "0.1.0",
+              "section": "Dataset provenance",
+              "source_id": "src_24MZP5Z42HZT4AK3AKHMBJZ1Z6",
+              "text": "Nomic Perturb-PBMC page. Approved dataset provenance for the public Perturb-PBMC demo using PBMC perturbation context and nELISA assay-related inflammatory protein measurements. Cite this source for the dataset page locator and public dataset context, not for mechanistic biology claims."
+            },
+            "matched_entities": [
+              "PBMC",
+              "nELISA",
+              "perturbation"
+            ],
+            "metadata": {
+              "access_route": "public webpage",
+              "approved_for_claims": true,
+              "candidate_rank": null,
+              "candidate_score": null,
+              "citation_count": null,
+              "content_sha256": "10c0183a3cad3d3151f681cdba047c66087911be17fafda3ebbf9bdaeca83e04",
+              "contract_source_id": "src_24MZP5Z42HZT4AK3AKHMBJZ1Z6",
+              "license_note": "Public source locator; citation metadata and local fixture snippet only.",
+              "retrieval_priority": 1,
+              "source_id": "src_nomic_perturb_pbmc",
+              "source_locator": "https://info.nomic.bio/perturb-pbmc",
+              "source_type": "webpage",
+              "title": "Nomic Perturb-PBMC page",
+              "topic_buckets": [
+                "dataset provenance",
+                "PBMC perturbation design"
+              ],
+              "venue": null
+            },
+            "score": 5.6
+          },
+          {
+            "chunk": {
+              "assay_context": [
+                "secretome",
+                "cytokine",
+                "perturbation"
+              ],
+              "citation": {
+                "authors": "Milad Dagher; Grant Ongo; Nathaniel Robichaud; Jinglin Kong; Woojong Rho; Ivan Teahulos; Arya Tavakoli; Samantha Bovaird; Shahem Merjaneh; Andrew Tan; Kiran Edwardson; Christelle Scheepers; Andy Ng; Andy Hajjar; Baly Sow; Michael Vrouvides; Andy Lee; Philippe DeCorwin-Martin; Shafqat Rasool; Jian-Yuan Huang; Timothy Erps; Spencer Coffin; Narges Rashidi; Yu Han; Srinivas Niranj Chandrasekaran; Lisa Miller; Maria Kost-Alimova; Adam Skepner; Shantanu Singh; Anne E. Carpenter; Jeffrey D. Munzar; David Juncker",
+                "doi": "10.1038/s41592-025-02861-6",
+                "paper_title": "nELISA: a high-throughput, high-plex platform enables quantitative profiling of the inflammatory secretome",
+                "url": "https://doi.org/10.1038/s41592-025-02861-6",
+                "year": "2025"
+              },
+              "embedding_status": "pending",
+              "entities": [
+                "PBMC",
+                "nELISA",
+                "secretome",
+                "cytokine",
+                "perturbation"
+              ],
+              "id": "chunk_1RX4F4PNK4MPCTGR336Y0QPN43",
+              "schema_version": "0.1.0",
+              "section": "Assay context",
+              "source_id": "src_1VDKKVGJK60XSP7MFNTGBAHMJ7",
+              "text": "nELISA: a high-throughput, high-plex platform enables quantitative profiling of the inflammatory secretome. Approved nELISA assay context source for high-throughput, high-plex inflammatory secretome profiling in PBMC perturbation and cytokine-response settings."
+            },
+            "matched_entities": [
+              "PBMC",
+              "nELISA",
+              "secretome",
+              "cytokine",
+              "perturbation"
+            ],
+            "metadata": {
+              "access_route": "DOI metadata and approved citation-level snippet",
+              "approved_for_claims": true,
+              "candidate_rank": 5,
+              "candidate_score": 0.4662,
+              "citation_count": 11,
+              "content_sha256": "0c7ba70e216a19d4d48d1e13464d661bf712035e6598e649e124e9e4d689c3b4",
+              "contract_source_id": "src_1VDKKVGJK60XSP7MFNTGBAHMJ7",
+              "license_note": "DOI-backed paper metadata and local fixture snippet only; no unapproved full-text copy.",
+              "retrieval_priority": 3,
+              "source_id": "src_dagher_2025_nelisa",
+              "source_locator": "DOI 10.1038/s41592-025-02861-6",
+              "source_type": "paper",
+              "title": "nELISA: a high-throughput, high-plex platform enables quantitative profiling of the inflammatory secretome",
+              "topic_buckets": [
+                "nELISA assay context",
+                "dataset provenance"
+              ],
+              "venue": "Nature Methods"
+            },
+            "score": 4.133333
+          },
+          {
+            "chunk": {
+              "assay_context": [],
+              "citation": {
+                "authors": "nplexbio",
+                "doi": null,
+                "paper_title": null,
+                "url": "https://github.com/nplexbio/nELISA-PBMC",
+                "year": null
+              },
+              "embedding_status": "pending",
+              "entities": [
+                "PBMC",
+                "nELISA"
+              ],
+              "id": "chunk_1843C3VK2TKCRCYR88P3Z9ZMYR",
+              "schema_version": "0.1.0",
+              "section": "Fixture provenance",
+              "source_id": "src_21T3GTATV1WXB9C67HY5PHDJP6",
+              "text": "nELISA-PBMC public repository. Approved fixture provenance for the committed public PBMC subset and source repository locator. Cite this source for public repository provenance, fixture lineage, and the nELISA-PBMC source location."
+            },
+            "matched_entities": [
+              "PBMC",
+              "nELISA"
+            ],
+            "metadata": {
+              "access_route": "public GitHub repository",
+              "approved_for_claims": true,
+              "candidate_rank": null,
+              "candidate_score": null,
+              "citation_count": null,
+              "content_sha256": "176fa5ddaba03f661cc38a29aa35944ce92837332123fa48f7fd9a92eab0487c",
+              "contract_source_id": "src_21T3GTATV1WXB9C67HY5PHDJP6",
+              "license_note": "Public repository locator; citation metadata and local fixture snippet only.",
+              "retrieval_priority": 2,
+              "source_id": "src_nelisa_pbmc_repo",
+              "source_locator": "https://github.com/nplexbio/nELISA-PBMC",
+              "source_type": "github",
+              "title": "nELISA-PBMC public repo",
+              "topic_buckets": [
+                "dataset provenance",
+                "fixture provenance"
+              ],
+              "venue": "GitHub"
+            },
+            "score": 3.9
+          }
+        ]
+      },
+      "query": "What public dataset and assay does this demo use?",
+      "trace_id": "tc_01KVXMPX0NDDD021TCY7MN24Q7"
+    },
+    {
+      "output": {
+        "chunks": [
+          {
+            "chunk": {
+              "assay_context": [
+                "cytokine"
+              ],
+              "citation": {
+                "authors": "Annalisa D'Andrea; Miguel Aste-Amezaga; Nicholas M. Valiante; Xiaojing Ma; Marek Kubin; Giorgio Trinchieri",
+                "doi": "10.1084/jem.178.3.1041",
+                "paper_title": "Interleukin 10 inhibits human lymphocyte interferon gamma-production by suppressing natural killer cell stimulatory factor/IL-12 synthesis in accessory cells",
+                "url": "https://doi.org/10.1084/jem.178.3.1041",
+                "year": "1993"
+              },
+              "embedding_status": "pending",
+              "entities": [
+                "IL-10",
+                "LPS",
+                "PBMC",
+                "IFN gamma",
+                "cytokine"
+              ],
+              "id": "chunk_17XVETHC38E0DRGF1505DD8G4Q",
+              "schema_version": "0.1.0",
+              "section": "IL-10 biology",
+              "source_id": "src_2Y3PE3M7YCT4AJYYP1KFF132S9",
+              "text": "Interleukin 10 inhibits human lymphocyte interferon gamma-production by suppressing natural killer cell stimulatory factor/IL-12 synthesis in accessory cells. Approved DOI-backed source for IL-10, IL-12, IFN gamma and cytokine-production context in human immune cells, with peripheral blood mononuclear cells, LPS and lipopolysaccharide relevance recorded in the candidate manifest."
+            },
+            "matched_entities": [
+              "IL-10",
+              "LPS",
+              "cytokine"
+            ],
+            "metadata": {
+              "access_route": "DOI metadata and approved citation-level snippet",
+              "approved_for_claims": true,
+              "candidate_rank": 1,
+              "candidate_score": 0.822,
+              "citation_count": 1401,
+              "content_sha256": "c757a5e4b4fa7ab006606b90b2c1049ece578fd98c4146ee944544d29319e0fd",
+              "contract_source_id": "src_2Y3PE3M7YCT4AJYYP1KFF132S9",
+              "license_note": "DOI-backed paper metadata and local fixture snippet only; no unapproved full-text copy.",
+              "retrieval_priority": 4,
+              "source_id": "src_dandrea_1993_il10",
+              "source_locator": "DOI 10.1084/jem.178.3.1041",
+              "source_type": "paper",
+              "title": "Interleukin 10 inhibits human lymphocyte interferon gamma-production by suppressing natural killer cell stimulatory factor/IL-12 synthesis in accessory cells",
+              "topic_buckets": [
+                "selected perturbagen biology"
+              ],
+              "venue": "Journal of Experimental Medicine"
+            },
+            "score": 6.65
+          },
+          {
+            "chunk": {
+              "assay_context": [
+                "cytokine",
+                "monocyte"
+              ],
+              "citation": {
+                "authors": "Peng Wang; Ping Wu; Marvin I. Siegel; Robert W. Egan; M. Motasim Billah",
+                "doi": "10.1074/jbc.270.16.9558",
+                "paper_title": "Interleukin (IL)-10 Inhibits Nuclear Factor kB (NFkB) Activation in Human Monocytes",
+                "url": "https://doi.org/10.1074/jbc.270.16.9558",
+                "year": "1995"
+              },
+              "embedding_status": "pending",
+              "entities": [
+                "IL-10",
+                "LPS",
+                "TNF alpha",
+                "IL-1 beta",
+                "IL-6",
+                "cytokine",
+                "monocyte"
+              ],
+              "id": "chunk_2DYM1YZDTRM8A3SARMEK118WVR",
+              "schema_version": "0.1.0",
+              "section": "IL-10 monocyte context",
+              "source_id": "src_6Y775RXTJ0VG4A9VR2MMRQJRGK",
+              "text": "Interleukin (IL)-10 Inhibits Nuclear Factor kB (NFkB) Activation in Human Monocytes. Approved DOI-backed source for IL-10 inhibition context in human monocytes, LPS and lipopolysaccharide settings, and cytokine entities including TNF alpha, IL-1 beta and IL-6."
+            },
+            "matched_entities": [
+              "IL-10",
+              "LPS",
+              "cytokine"
+            ],
+            "metadata": {
+              "access_route": "DOI metadata and approved citation-level snippet",
+              "approved_for_claims": true,
+              "candidate_rank": 2,
+              "candidate_score": 0.6917,
+              "citation_count": 710,
+              "content_sha256": "b249c94221e33c5ca3ff74068a3c6ca46528f3d9f93c559321f5e04ec3992a19",
+              "contract_source_id": "src_6Y775RXTJ0VG4A9VR2MMRQJRGK",
+              "license_note": "DOI-backed paper metadata and local fixture snippet only; no unapproved full-text copy.",
+              "retrieval_priority": 5,
+              "source_id": "src_wang_1995_il10_nfkb",
+              "source_locator": "DOI 10.1074/jbc.270.16.9558",
+              "source_type": "paper",
+              "title": "Interleukin (IL)-10 Inhibits Nuclear Factor kB (NFkB) Activation in Human Monocytes",
+              "topic_buckets": [
+                "selected perturbagen biology"
+              ],
+              "venue": "Journal of Biological Chemistry"
+            },
+            "score": 6.6
+          },
+          {
+            "chunk": {
+              "assay_context": [
+                "cytokine",
+                "whole blood",
+                "perturbation"
+              ],
+              "citation": {
+                "authors": "D De Groote; P.F. Zangerle; Y. Gevaert; Marie France Fassotte; Yves Beguin; F. Noizat-Pirenne; Jacques Pirenne; R. Gathy; M. Lopez; I. Dehart; D. Igot; M. Baudrihaye; Dominique L. Delacroix; P Franchimont",
+                "doi": "10.1016/1043-4666(92)90062-v",
+                "paper_title": "Direct stimulation of cytokines in whole blood. I. Comparison with isolated PBMC stimulation",
+                "url": "https://doi.org/10.1016/1043-4666(92)90062-v",
+                "year": "1992"
+              },
+              "embedding_status": "pending",
+              "entities": [
+                "LPS",
+                "PBMC",
+                "TNF alpha",
+                "IL-1 beta",
+                "IL-6",
+                "IFN gamma",
+                "GM-CSF",
+                "cytokine",
+                "whole blood",
+                "perturbation"
+              ],
+              "id": "chunk_7402J2FCP7P59NPSNSRBZ2EBXH",
+              "schema_version": "0.1.0",
+              "section": "PBMC cytokine response",
+              "source_id": "src_5EWX3FS6JBT7A6YMFM4G8QAQZC",
+              "text": "Direct stimulation of cytokines in whole blood. I. Comparison with isolated PBMC stimulation. Approved DOI-backed context source for PBMC stimulation, whole blood comparison, cytokine response interpretation, TNF alpha, IL-1 beta, IL-6, IFN gamma and GM-CSF."
+            },
+            "matched_entities": [
+              "LPS",
+              "cytokine"
+            ],
+            "metadata": {
+              "access_route": "DOI metadata and approved citation-level snippet",
+              "approved_for_claims": true,
+              "candidate_rank": 3,
+              "candidate_score": 0.5888,
+              "citation_count": 473,
+              "content_sha256": "f7b2383fb83b898c260c1c3c345d8182510cc52a8b4f031bddd0151c80a2ccc2",
+              "contract_source_id": "src_5EWX3FS6JBT7A6YMFM4G8QAQZC",
+              "license_note": "DOI-backed paper metadata and local fixture snippet only; no unapproved full-text copy.",
+              "retrieval_priority": 6,
+              "source_id": "src_degroote_1992_pbmc",
+              "source_locator": "DOI 10.1016/1043-4666(92)90062-v",
+              "source_type": "paper",
+              "title": "Direct stimulation of cytokines in whole blood. I. Comparison with isolated PBMC stimulation",
+              "topic_buckets": [
+                "PBMC perturbation design",
+                "LPS cytokine response"
+              ],
+              "venue": "Cytokine"
+            },
+            "score": 4.433333
+          }
+        ]
+      },
+      "query": "What evidence supports IL-10 dampening cytokine production in LPS or human immune-cell contexts?",
+      "trace_id": "tc_01KVXMPX0NDDD021TCY7MN24Q8"
+    },
+    {
+      "output": {
+        "chunks": [
+          {
+            "chunk": {
+              "assay_context": [
+                "cytokine",
+                "whole blood",
+                "perturbation"
+              ],
+              "citation": {
+                "authors": "Jan Bertil Eggesbo; Ingvar Hjermann; Per Kristian Lund; Gun Britt Joo; Reidun Ovstebo; Peter Kierulf",
+                "doi": "10.1016/1043-4666(94)90080-9",
+                "paper_title": "LPS-induced release of IL-1 beta, IL-6, IL-8, TNF-alpha and sCD14 in whole blood and PBMC",
+                "url": "https://doi.org/10.1016/1043-4666(94)90080-9",
+                "year": "1994"
+              },
+              "embedding_status": "pending",
+              "entities": [
+                "LPS",
+                "PBMC",
+                "TNF alpha",
+                "IL-1 beta",
+                "IL-6",
+                "cytokine",
+                "whole blood",
+                "perturbation"
+              ],
+              "id": "chunk_3H335QXZ0WG5D63S3D2CBGEVKA",
+              "schema_version": "0.1.0",
+              "section": "LPS PBMC cytokine response",
+              "source_id": "src_7766EP26YJPPZXZW9HR69GPS9B",
+              "text": "LPS-induced release of IL-1 beta, IL-6, IL-8, TNF-alpha and sCD14 in whole blood and PBMC. Approved DOI-backed context source for LPS-stimulated PBMC and whole blood cytokine response interpretation, including TNF alpha, IL-1 beta and IL-6."
+            },
+            "matched_entities": [
+              "LPS",
+              "PBMC",
+              "cytokine"
+            ],
+            "metadata": {
+              "access_route": "DOI metadata and approved citation-level snippet",
+              "approved_for_claims": true,
+              "candidate_rank": 4,
+              "candidate_score": 0.5359,
+              "citation_count": 31,
+              "content_sha256": "8763927e71124a9e477f25c2ea3451e017c94d2509dea2e40a7e00fb4182ed18",
+              "contract_source_id": "src_7766EP26YJPPZXZW9HR69GPS9B",
+              "license_note": "DOI-backed paper metadata and local fixture snippet only; no unapproved full-text copy.",
+              "retrieval_priority": 7,
+              "source_id": "src_eggesbo_1994_lps_pbmc",
+              "source_locator": "DOI 10.1016/1043-4666(94)90080-9",
+              "source_type": "paper",
+              "title": "LPS-induced release of IL-1 beta, IL-6, IL-8, TNF-alpha and sCD14 in whole blood and PBMC",
+              "topic_buckets": [
+                "PBMC perturbation design",
+                "LPS cytokine response"
+              ],
+              "venue": "Cytokine"
+            },
+            "score": 10.142857
+          },
+          {
+            "chunk": {
+              "assay_context": [
+                "cytokine",
+                "whole blood",
+                "perturbation"
+              ],
+              "citation": {
+                "authors": "D De Groote; P.F. Zangerle; Y. Gevaert; Marie France Fassotte; Yves Beguin; F. Noizat-Pirenne; Jacques Pirenne; R. Gathy; M. Lopez; I. Dehart; D. Igot; M. Baudrihaye; Dominique L. Delacroix; P Franchimont",
+                "doi": "10.1016/1043-4666(92)90062-v",
+                "paper_title": "Direct stimulation of cytokines in whole blood. I. Comparison with isolated PBMC stimulation",
+                "url": "https://doi.org/10.1016/1043-4666(92)90062-v",
+                "year": "1992"
+              },
+              "embedding_status": "pending",
+              "entities": [
+                "LPS",
+                "PBMC",
+                "TNF alpha",
+                "IL-1 beta",
+                "IL-6",
+                "IFN gamma",
+                "GM-CSF",
+                "cytokine",
+                "whole blood",
+                "perturbation"
+              ],
+              "id": "chunk_7402J2FCP7P59NPSNSRBZ2EBXH",
+              "schema_version": "0.1.0",
+              "section": "PBMC cytokine response",
+              "source_id": "src_5EWX3FS6JBT7A6YMFM4G8QAQZC",
+              "text": "Direct stimulation of cytokines in whole blood. I. Comparison with isolated PBMC stimulation. Approved DOI-backed context source for PBMC stimulation, whole blood comparison, cytokine response interpretation, TNF alpha, IL-1 beta, IL-6, IFN gamma and GM-CSF."
+            },
+            "matched_entities": [
+              "LPS",
+              "PBMC",
+              "cytokine"
+            ],
+            "metadata": {
+              "access_route": "DOI metadata and approved citation-level snippet",
+              "approved_for_claims": true,
+              "candidate_rank": 3,
+              "candidate_score": 0.5888,
+              "citation_count": 473,
+              "content_sha256": "f7b2383fb83b898c260c1c3c345d8182510cc52a8b4f031bddd0151c80a2ccc2",
+              "contract_source_id": "src_5EWX3FS6JBT7A6YMFM4G8QAQZC",
+              "license_note": "DOI-backed paper metadata and local fixture snippet only; no unapproved full-text copy.",
+              "retrieval_priority": 6,
+              "source_id": "src_degroote_1992_pbmc",
+              "source_locator": "DOI 10.1016/1043-4666(92)90062-v",
+              "source_type": "paper",
+              "title": "Direct stimulation of cytokines in whole blood. I. Comparison with isolated PBMC stimulation",
+              "topic_buckets": [
+                "PBMC perturbation design",
+                "LPS cytokine response"
+              ],
+              "venue": "Cytokine"
+            },
+            "score": 9.309524
+          },
+          {
+            "chunk": {
+              "assay_context": [
+                "cytokine"
+              ],
+              "citation": {
+                "authors": "Annalisa D'Andrea; Miguel Aste-Amezaga; Nicholas M. Valiante; Xiaojing Ma; Marek Kubin; Giorgio Trinchieri",
+                "doi": "10.1084/jem.178.3.1041",
+                "paper_title": "Interleukin 10 inhibits human lymphocyte interferon gamma-production by suppressing natural killer cell stimulatory factor/IL-12 synthesis in accessory cells",
+                "url": "https://doi.org/10.1084/jem.178.3.1041",
+                "year": "1993"
+              },
+              "embedding_status": "pending",
+              "entities": [
+                "IL-10",
+                "LPS",
+                "PBMC",
+                "IFN gamma",
+                "cytokine"
+              ],
+              "id": "chunk_17XVETHC38E0DRGF1505DD8G4Q",
+              "schema_version": "0.1.0",
+              "section": "IL-10 biology",
+              "source_id": "src_2Y3PE3M7YCT4AJYYP1KFF132S9",
+              "text": "Interleukin 10 inhibits human lymphocyte interferon gamma-production by suppressing natural killer cell stimulatory factor/IL-12 synthesis in accessory cells. Approved DOI-backed source for IL-10, IL-12, IFN gamma and cytokine-production context in human immune cells, with peripheral blood mononuclear cells, LPS and lipopolysaccharide relevance recorded in the candidate manifest."
+            },
+            "matched_entities": [
+              "LPS",
+              "PBMC",
+              "cytokine"
+            ],
+            "metadata": {
+              "access_route": "DOI metadata and approved citation-level snippet",
+              "approved_for_claims": true,
+              "candidate_rank": 1,
+              "candidate_score": 0.822,
+              "citation_count": 1401,
+              "content_sha256": "c757a5e4b4fa7ab006606b90b2c1049ece578fd98c4146ee944544d29319e0fd",
+              "contract_source_id": "src_2Y3PE3M7YCT4AJYYP1KFF132S9",
+              "license_note": "DOI-backed paper metadata and local fixture snippet only; no unapproved full-text copy.",
+              "retrieval_priority": 4,
+              "source_id": "src_dandrea_1993_il10",
+              "source_locator": "DOI 10.1084/jem.178.3.1041",
+              "source_type": "paper",
+              "title": "Interleukin 10 inhibits human lymphocyte interferon gamma-production by suppressing natural killer cell stimulatory factor/IL-12 synthesis in accessory cells",
+              "topic_buckets": [
+                "selected perturbagen biology"
+              ],
+              "venue": "Journal of Experimental Medicine"
+            },
+            "score": 6.821429
+          }
+        ]
+      },
+      "query": "What context supports LPS-stimulated PBMC cytokine response interpretation?",
+      "trace_id": "tc_01KVXMPX0NDDD021TCY7MN24Q9"
+    }
+  ],
+  "generated_by": "scripts/build_demo_web_artifacts.py",
+  "project": {
+    "context_md": "Seeded v0.1 demo project for IL-10 vs matched no-cytokine control under LPS 2000 ng/mL using the approved public Perturb-PBMC subset.",
+    "created_at": "2026-06-24T00:00:00Z",
+    "id": "proj_demo",
+    "schema_version": "0.1.0",
+    "status": "validated",
+    "title": "v0.1 Perturb-PBMC IL-10/LPS demo",
+    "updated_at": "2026-06-24T00:00:00Z"
+  },
+  "ranking": {
+    "correction": "Benjamini-Hochberg q_value from exact paired sign-flip p-values",
+    "metric": "effect_size",
+    "rows": [
+      {
+        "direction": "down",
+        "donor_consistency": 1.0,
+        "effect_size": -0.8155901585,
+        "p_value": 0.03125,
+        "protein": "TNF alpha",
+        "q_value": 0.036458333333333336
+      },
+      {
+        "direction": "down",
+        "donor_consistency": 1.0,
+        "effect_size": -0.7473968606666667,
+        "p_value": 0.03125,
+        "protein": "IL-1 beta",
+        "q_value": 0.036458333333333336
+      },
+      {
+        "direction": "down",
+        "donor_consistency": 1.0,
+        "effect_size": -0.6719611360516666,
+        "p_value": 0.03125,
+        "protein": "IL-1 alpha",
+        "q_value": 0.036458333333333336
+      },
+      {
+        "direction": "down",
+        "donor_consistency": 1.0,
+        "effect_size": -0.6531773640028333,
+        "p_value": 0.03125,
+        "protein": "CCL1",
+        "q_value": 0.036458333333333336
+      },
+      {
+        "direction": "down",
+        "donor_consistency": 1.0,
+        "effect_size": -0.63170554605,
+        "p_value": 0.03125,
+        "protein": "IFN gamma",
+        "q_value": 0.036458333333333336
+      },
+      {
+        "direction": "down",
+        "donor_consistency": 1.0,
+        "effect_size": -0.5940847936666667,
+        "p_value": 0.03125,
+        "protein": "IL-12 p40",
+        "q_value": 0.036458333333333336
+      },
+      {
+        "direction": "down",
+        "donor_consistency": 1.0,
+        "effect_size": -0.49245705276833335,
+        "p_value": 0.03125,
+        "protein": "CCL22",
+        "q_value": 0.036458333333333336
+      },
+      {
+        "direction": "down",
+        "donor_consistency": 1.0,
+        "effect_size": -0.45472876318333333,
+        "p_value": 0.03125,
+        "protein": "CCL24",
+        "q_value": 0.036458333333333336
+      },
+      {
+        "direction": "down",
+        "donor_consistency": 1.0,
+        "effect_size": -0.32613574905333337,
+        "p_value": 0.03125,
+        "protein": "G-CSF",
+        "q_value": 0.036458333333333336
+      },
+      {
+        "direction": "up",
+        "donor_consistency": 1.0,
+        "effect_size": 0.2809834801666667,
+        "p_value": 0.03125,
+        "protein": "CXCL16",
+        "q_value": 0.036458333333333336
+      },
+      {
+        "direction": "up",
+        "donor_consistency": 1.0,
+        "effect_size": 0.28054680508333335,
+        "p_value": 0.03125,
+        "protein": "CCL2",
+        "q_value": 0.036458333333333336
+      },
+      {
+        "direction": "down",
+        "donor_consistency": 1.0,
+        "effect_size": -0.26989780783333334,
+        "p_value": 0.03125,
+        "protein": "IL-6",
+        "q_value": 0.036458333333333336
+      },
+      {
+        "direction": "up",
+        "donor_consistency": 1.0,
+        "effect_size": 0.24034604675000001,
+        "p_value": 0.03125,
+        "protein": "IL-1 RA RN",
+        "q_value": 0.036458333333333336
+      },
+      {
+        "direction": "up",
+        "donor_consistency": 1.0,
+        "effect_size": 0.22467272266666669,
+        "p_value": 0.03125,
+        "protein": "TNF RII",
+        "q_value": 0.036458333333333336
+      },
+      {
+        "direction": "down",
+        "donor_consistency": 1.0,
+        "effect_size": -0.17048264153499998,
+        "p_value": 0.03125,
+        "protein": "GM-CSF",
+        "q_value": 0.036458333333333336
+      },
+      {
+        "direction": "down",
+        "donor_consistency": 1.0,
+        "effect_size": -0.16606340283333335,
+        "p_value": 0.03125,
+        "protein": "CCL5",
+        "q_value": 0.036458333333333336
+      },
+      {
+        "direction": "up",
+        "donor_consistency": 1.0,
+        "effect_size": 0.15519887954999997,
+        "p_value": 0.03125,
+        "protein": "MMP-1",
+        "q_value": 0.036458333333333336
+      },
+      {
+        "direction": "up",
+        "donor_consistency": 1.0,
+        "effect_size": 0.14145186034166665,
+        "p_value": 0.03125,
+        "protein": "CCL7",
+        "q_value": 0.036458333333333336
+      },
+      {
+        "direction": "down",
+        "donor_consistency": 0.8333333333333334,
+        "effect_size": -0.03233540666166666,
+        "p_value": 0.09375,
+        "protein": "CXCL10",
+        "q_value": 0.10361842105263158
+      },
+      {
+        "direction": "up",
+        "donor_consistency": 0.5,
+        "effect_size": 0.031987820108333336,
+        "p_value": 0.46875,
+        "protein": "CCL8",
+        "q_value": 0.46875
+      },
+      {
+        "direction": "down",
+        "donor_consistency": 0.6666666666666666,
+        "effect_size": -0.019904077166666645,
+        "p_value": 0.4375,
+        "protein": "CXCL1",
+        "q_value": 0.459375
+      }
+    ]
+  },
+  "report": {
+    "citations": [
+      {
+        "approved_for_claims": true,
+        "doi": "10.1038/s41592-025-02861-6",
+        "source_id": "src_dagher_2025_nelisa",
+        "source_locator": "DOI 10.1038/s41592-025-02861-6",
+        "source_type": "paper",
+        "title": "nELISA: a high-throughput, high-plex platform enables quantitative profiling of the inflammatory secretome",
+        "trace_id": "tc_01KVXMPX0NDDD021TCY7MN24Q7",
+        "url": "https://doi.org/10.1038/s41592-025-02861-6"
+      },
+      {
+        "approved_for_claims": true,
+        "doi": "10.1084/jem.178.3.1041",
+        "source_id": "src_dandrea_1993_il10",
+        "source_locator": "DOI 10.1084/jem.178.3.1041",
+        "source_type": "paper",
+        "title": "Interleukin 10 inhibits human lymphocyte interferon gamma-production by suppressing natural killer cell stimulatory factor/IL-12 synthesis in accessory cells",
+        "trace_id": "tc_01KVXMPX0NDDD021TCY7MN24Q8",
+        "url": "https://doi.org/10.1084/jem.178.3.1041"
+      },
+      {
+        "approved_for_claims": true,
+        "doi": "10.1016/1043-4666(92)90062-v",
+        "source_id": "src_degroote_1992_pbmc",
+        "source_locator": "DOI 10.1016/1043-4666(92)90062-v",
+        "source_type": "paper",
+        "title": "Direct stimulation of cytokines in whole blood. I. Comparison with isolated PBMC stimulation",
+        "trace_id": "tc_01KVXMPX0NDDD021TCY7MN24Q8",
+        "url": "https://doi.org/10.1016/1043-4666(92)90062-v"
+      },
+      {
+        "approved_for_claims": true,
+        "doi": "10.1016/1043-4666(94)90080-9",
+        "source_id": "src_eggesbo_1994_lps_pbmc",
+        "source_locator": "DOI 10.1016/1043-4666(94)90080-9",
+        "source_type": "paper",
+        "title": "LPS-induced release of IL-1 beta, IL-6, IL-8, TNF-alpha and sCD14 in whole blood and PBMC",
+        "trace_id": "tc_01KVXMPX0NDDD021TCY7MN24Q9",
+        "url": "https://doi.org/10.1016/1043-4666(94)90080-9"
+      },
+      {
+        "approved_for_claims": true,
+        "doi": null,
+        "source_id": "src_nelisa_pbmc_repo",
+        "source_locator": "https://github.com/nplexbio/nELISA-PBMC",
+        "source_type": "github",
+        "title": "nELISA-PBMC public repo",
+        "trace_id": "tc_01KVXMPX0NDDD021TCY7MN24Q7",
+        "url": "https://github.com/nplexbio/nELISA-PBMC"
+      },
+      {
+        "approved_for_claims": true,
+        "doi": null,
+        "source_id": "src_nomic_perturb_pbmc",
+        "source_locator": "https://info.nomic.bio/perturb-pbmc",
+        "source_type": "webpage",
+        "title": "Nomic Perturb-PBMC page",
+        "trace_id": "tc_01KVXMPX0NDDD021TCY7MN24Q7",
+        "url": "https://info.nomic.bio/perturb-pbmc"
+      },
+      {
+        "approved_for_claims": true,
+        "doi": "10.1074/jbc.270.16.9558",
+        "source_id": "src_wang_1995_il10_nfkb",
+        "source_locator": "DOI 10.1074/jbc.270.16.9558",
+        "source_type": "paper",
+        "title": "Interleukin (IL)-10 Inhibits Nuclear Factor kB (NFkB) Activation in Human Monocytes",
+        "trace_id": "tc_01KVXMPX0NDDD021TCY7MN24Q8",
+        "url": "https://doi.org/10.1074/jbc.270.16.9558"
+      }
+    ],
+    "claims": [
+      {
+        "kind": "data_derived",
+        "label": "Ranked fixture result",
+        "support": [
+          {
+            "id": "res_01KVXMPX0KFS6V4AF3HQEQN2MJ",
+            "trace_id": "tc_01KVXMPX0MDST977P3B67C1AE3",
+            "type": "analysis_result"
+          },
+          {
+            "trace_id": "tc_01KVXMPX0MDST977P3B67C1AE4",
+            "type": "ranking"
+          }
+        ],
+        "text": "6/6 of the top ranked proteins decrease under IL-10 in the seeded LPS comparison; each row is computed from donor-level paired differences."
+      },
+      {
+        "kind": "source_derived",
+        "label": "Dataset and assay provenance",
+        "support": [
+          {
+            "source_id": "src_nomic_perturb_pbmc",
+            "title": "Nomic Perturb-PBMC page",
+            "trace_id": "tc_01KVXMPX0NDDD021TCY7MN24Q7",
+            "type": "citation"
+          },
+          {
+            "source_id": "src_nelisa_pbmc_repo",
+            "title": "nELISA-PBMC public repo",
+            "trace_id": "tc_01KVXMPX0NDDD021TCY7MN24Q7",
+            "type": "citation"
+          },
+          {
+            "source_id": "src_dagher_2025_nelisa",
+            "title": "nELISA: a high-throughput, high-plex platform enables quantitative profiling of the inflammatory secretome",
+            "trace_id": "tc_01KVXMPX0NDDD021TCY7MN24Q7",
+            "type": "citation"
+          }
+        ],
+        "text": "The selected fixture is tied to the public Perturb-PBMC/nELISA-PBMC source lineage and an nELISA assay context source approved for demo claims."
+      },
+      {
+        "kind": "interpretive",
+        "label": "Conservative biological readout",
+        "support": [
+          {
+            "id": "res_01KVXMPX0KFS6V4AF3HQEQN2MJ",
+            "trace_id": "tc_01KVXMPX0MDST977P3B67C1AE3",
+            "type": "analysis_result"
+          },
+          {
+            "source_id": "src_dandrea_1993_il10",
+            "title": "Interleukin 10 inhibits human lymphocyte interferon gamma-production by suppressing natural killer cell stimulatory factor/IL-12 synthesis in accessory cells",
+            "trace_id": "tc_01KVXMPX0NDDD021TCY7MN24Q8",
+            "type": "citation"
+          },
+          {
+            "source_id": "src_wang_1995_il10_nfkb",
+            "title": "Interleukin (IL)-10 Inhibits Nuclear Factor kB (NFkB) Activation in Human Monocytes",
+            "trace_id": "tc_01KVXMPX0NDDD021TCY7MN24Q8",
+            "type": "citation"
+          }
+        ],
+        "text": "The result supports a descriptive readout of IL-10-associated dampening across LPS inflammatory-response proteins in this fixture; it does not establish a mechanism or generalize beyond the demo subset."
+      }
+    ],
+    "generated_from": {
+      "analysis_result_id": "res_01KVXMPX0KFS6V4AF3HQEQN2MJ",
+      "analysis_trace_id": "tc_01KVXMPX0MDST977P3B67C1AE3",
+      "evidence_trace_ids": [
+        "tc_01KVXMPX0NDDD021TCY7MN24Q7",
+        "tc_01KVXMPX0NDDD021TCY7MN24Q8",
+        "tc_01KVXMPX0NDDD021TCY7MN24Q9"
+      ],
+      "ranking_trace_id": "tc_01KVXMPX0MDST977P3B67C1AE4"
+    },
+    "id": "report_demo_il10_lps",
+    "limitations": [
+      "The donor count is small; exploratory p/q values should not be treated as hard significance calls.",
+      "The fixture carries public H5AD normalized_response values verbatim and is not renormalized in v0.1.",
+      "The report is descriptive and source-grounded; mechanistic claims are out of scope."
+    ],
+    "project_id": "proj_demo",
+    "schema_version": "0.1.0",
+    "subtitle": "Conservative demo report generated from the seeded public Perturb-PBMC fixture.",
+    "summary": "The donor-aware paired analysis ranks TNF alpha, IL-1 beta, IL-1 alpha as the largest response-value changes in the IL-10 condition versus matched no-cytokine controls. The display treats p/q values as exploratory and emphasizes effect size plus donor consistency.",
+    "title": "IL-10 vs matched control under LPS 2000 ng/mL"
+  },
+  "schema_profile": {
+    "columns": [
+      {
+        "dtype": "string",
+        "examples": [
+          "266",
+          "267",
+          "268"
+        ],
+        "n_unique": 114,
+        "name": "sample_id",
+        "role": "metadata"
+      },
+      {
+        "dtype": "categorical",
+        "examples": [
+          "donor_1",
+          "donor_2",
+          "donor_3"
+        ],
+        "n_unique": 6,
+        "name": "donor",
+        "role": "donor"
+      },
+      {
+        "dtype": "categorical",
+        "examples": [
+          "LPS"
+        ],
+        "n_unique": 1,
+        "name": "stimulation",
+        "role": "stimulation"
+      },
+      {
+        "dtype": "float",
+        "examples": [
+          "2000.0"
+        ],
+        "n_unique": 1,
+        "name": "stimulus_concentration_ng_ml",
+        "role": "metadata"
+      },
+      {
+        "dtype": "categorical",
+        "examples": [
+          "IL-10",
+          "control"
+        ],
+        "n_unique": 2,
+        "name": "perturbagen",
+        "role": "perturbagen"
+      },
+      {
+        "dtype": "float",
+        "examples": [
+          "50.0",
+          "0.0"
+        ],
+        "n_unique": 2,
+        "name": "cytokine_concentration_ng_ml",
+        "role": "metadata"
+      },
+      {
+        "dtype": "categorical",
+        "examples": [
+          "TNF alpha",
+          "IL-1 beta",
+          "IL-1 alpha"
+        ],
+        "n_unique": 21,
+        "name": "protein",
+        "role": "protein"
+      },
+      {
+        "dtype": "float",
+        "examples": [
+          "0.0"
+        ],
+        "n_unique": null,
+        "name": "response_value",
+        "role": "value"
+      }
+    ],
+    "dataset_id": "ds_01KCYAG0000000000000000000",
+    "detected_axes": {
+      "donor": "donor",
+      "perturbagen": "perturbagen",
+      "protein": "protein",
+      "stimulation": "stimulation",
+      "value": "response_value"
+    },
+    "id": "sp_01KCYAG0000000000000000000",
+    "layout": "long",
+    "schema_version": "0.1.0"
+  },
+  "schema_version": "0.1.0",
+  "seed_manifest": {
+    "artifact_refs": [
+      "project://proj_demo/datasets/raw/nelisa_pbmc_il10_lps_subset.csv",
+      "project://proj_demo/datasets/raw/provenance.json",
+      "project://proj_demo/datasets/normalized/nelisa_pbmc_il10_lps_long.parquet"
+    ],
+    "dataset_id": "ds_01KCYAG0000000000000000000",
+    "project_id": "proj_demo",
+    "schema_profile_id": "sp_01KCYAG0000000000000000000",
+    "seeded_at": "2026-06-24T00:00:00Z",
+    "source_commit": "c26223a1d29a1efbdb6577160fab2a323fb7d80d",
+    "source_file": "figure 4/data_pgmc_umap.h5ad",
+    "source_file_sha256": "eaf448510a429797a9ca2d8f2581c13573e90868c8190edbbe4a4e209df51500",
+    "source_repo": "https://github.com/nplexbio/nELISA-PBMC"
+  },
+  "trace_export": {
+    "count": 9,
+    "eval_trace_ids": [
+      "tc_01KVXMPX0P8M3ETY9Y0R1BNA6Z",
+      "tc_01KVXMPX0QN2NE5VYKF6Q5W1HV",
+      "tc_01KVXMPX0QN2NE5VYKF6Q5W1HW"
+    ],
+    "path": "traces/tool_calls.jsonl",
+    "web_chat_trace_ids": [
+      "tc_01KVXMPX035YYMJ7R8QM6C0Y3T",
+      "tc_01KVXMPX0MDST977P3B67C1AE3",
+      "tc_01KVXMPX0MDST977P3B67C1AE4",
+      "tc_01KVXMPX0NDDD021TCY7MN24Q7",
+      "tc_01KVXMPX0NDDD021TCY7MN24Q8",
+      "tc_01KVXMPX0NDDD021TCY7MN24Q9"
+    ]
+  },
+  "validation": {
+    "issues": [],
+    "row_count": 2394,
+    "status": "passed"
+  }
+}
