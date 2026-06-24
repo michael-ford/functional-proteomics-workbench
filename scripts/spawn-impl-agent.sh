@@ -27,12 +27,15 @@ WINDOW="issue-${ISSUE}"
 BRANCH="agent/issue-${ISSUE}"
 WT_ROOT="${FPW_AGENT_WORKTREE_ROOT:-${HOME}/fpw-agent-workspaces}"
 WORKDIR="${WT_ROOT}/issue-${ISSUE}"
+CONTROL_REPO="${FPW_AGENT_CONTROL_REPO:-${WT_ROOT}/.control-repo}"
+ORIGIN_URL="https://github.com/${REPO}.git"
 # Durable state dir — NOT RUNNER_TEMP, which is job-scoped and wiped when the workflow ends.
 # The implementer is fire-and-forget and reads these files AFTER the job exits, so they must
 # live somewhere the runner won't reclaim.
 STATE="${WT_ROOT}/.state/issue-${ISSUE}"; mkdir -p "$STATE" "$WT_ROOT"
 PROMPT="${STATE}/prompt"
 GOAL="${STATE}/goal"
+START_PROMPT="${STATE}/start-prompt"
 RUNSH="${STATE}/run.sh"
 CONTEXT="${STATE}/context.md"
 
@@ -63,27 +66,41 @@ fi
 # Make git push use the host user's ambient credentials (not GITHUB_TOKEN).
 gh auth setup-git 2>/dev/null || true
 
+# The launcher may run from an ephemeral GitHub Actions checkout. Never base durable agent
+# worktrees on that checkout: Actions cleanup can remove its .git metadata while the tmux
+# agent is still alive. Keep a persistent control clone under WT_ROOT and create all agent
+# worktrees from there.
+if [ ! -d "${CONTROL_REPO}/.git" ]; then
+  if [ -e "$CONTROL_REPO" ]; then
+    echo "::error::${CONTROL_REPO} exists but is not a git checkout"
+    exit 1
+  fi
+  git clone -q --no-checkout "$ORIGIN_URL" "$CONTROL_REPO"
+fi
+git -C "$CONTROL_REPO" remote set-url origin "$ORIGIN_URL"
+git -C "$CONTROL_REPO" config --unset-all "http.https://github.com/.extraheader" 2>/dev/null || true
+
 # Fresh worktree from origin/main for new implementation runs. Resolve-existing mode is used
 # by the merge shepherd: preserve the remote PR branch and check it out for conflict repair.
-[ -d "$WORKDIR" ] && { git worktree remove --force "$WORKDIR" 2>/dev/null || rm -rf "$WORKDIR"; }
-git worktree prune
-git branch -D "$BRANCH" 2>/dev/null || true
+[ -d "$WORKDIR" ] && { git -C "$CONTROL_REPO" worktree remove --force "$WORKDIR" 2>/dev/null || rm -rf "$WORKDIR"; }
+git -C "$CONTROL_REPO" worktree prune
+git -C "$CONTROL_REPO" branch -D "$BRANCH" 2>/dev/null || true
 if [ "$MODE" = "resolve-existing" ]; then
-  git fetch -q origin \
+  git -C "$CONTROL_REPO" fetch -q origin \
     "+refs/heads/main:refs/remotes/origin/main" \
     "+refs/heads/${BRANCH}:refs/remotes/origin/${BRANCH}"
-  git worktree add -q -b "$BRANCH" "$WORKDIR" "origin/${BRANCH}"
+  git -C "$CONTROL_REPO" worktree add -q -b "$BRANCH" "$WORKDIR" "origin/${BRANCH}"
 else
-  git fetch -q origin "+refs/heads/main:refs/remotes/origin/main"
+  git -C "$CONTROL_REPO" fetch -q origin "+refs/heads/main:refs/remotes/origin/main"
   # Local AND remote stale-branch cleanup so re-runs on the same issue push cleanly.
-  git push -q origin --delete "$BRANCH" 2>/dev/null || true
-  git worktree add -q -b "$BRANCH" "$WORKDIR" origin/main
+  git -C "$CONTROL_REPO" push -q origin --delete "$BRANCH" 2>/dev/null || true
+  git -C "$CONTROL_REPO" worktree add -q -b "$BRANCH" "$WORKDIR" origin/main
 fi
 
 # Strip the Actions checkout's GITHUB_TOKEN auth header + reset origin to a plain URL so the
 # agent's push/PR uses ambient `gh` creds (and thus triggers downstream workflows).
-git config --unset-all "http.https://github.com/.extraheader" 2>/dev/null || true
-git -C "$WORKDIR" remote set-url origin "https://github.com/${REPO}.git"
+git -C "$WORKDIR" config --unset-all "http.https://github.com/.extraheader" 2>/dev/null || true
+git -C "$WORKDIR" remote set-url origin "$ORIGIN_URL"
 echo "worktree: $WORKDIR on $BRANCH"
 
 # Trust-filtered context (maintainer-authored content only).
@@ -166,6 +183,10 @@ If the task depends on an unresolved item in docs/OPEN_QUESTIONS.md, stop and co
 issue asking for a human decision instead of guessing.
 EOF
 
+cat > "$START_PROMPT" <<EOF
+Read ${PROMPT} and execute it exactly. The maintainer-curated issue context is already sanitized in the files referenced by that prompt. Do not stop until the branch PR is MERGED or the prompt tells you to stop for a human.
+EOF
+
 cat > "$RUNSH" <<EOF
 #!/usr/bin/env bash
 set -euo pipefail
@@ -207,7 +228,7 @@ tmux paste-buffer -d -b "$goal_buffer" -t "$PANE"
 tmux send-keys -t "$PANE" Enter
 
 sleep "$after_goal_secs"
-tmux load-buffer -b "$prompt_buffer" "$PROMPT"
+tmux load-buffer -b "$prompt_buffer" "$START_PROMPT"
 tmux paste-buffer -d -b "$prompt_buffer" -t "$PANE"
 tmux send-keys -t "$PANE" Enter
 
