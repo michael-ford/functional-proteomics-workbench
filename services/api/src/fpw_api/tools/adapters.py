@@ -24,6 +24,7 @@ async def invoke_for_web_chat(
     client: str = "web",
     chat_session_id: str | None = None,
     chat_message_id: str | None = None,
+    state: dict[str, Any] | None = None,
 ) -> ToolInvocationResult:
     context = ToolContext(
         origin=TraceOrigin(surface="web_chat", client=client),
@@ -31,6 +32,7 @@ async def invoke_for_web_chat(
         project_id=project_id,
         chat_session_id=chat_session_id,
         chat_message_id=chat_message_id,
+        state=state if state is not None else {},
     )
     return await registry.invoke(name, payload, context)
 
@@ -44,10 +46,12 @@ async def invoke_for_mcp(
     project_id: str | None = None,
     client: str | None = None,
     token_id: str | None = None,
+    state: dict[str, Any] | None = None,
 ) -> ToolInvocationResult:
     context = ToolContext(
         origin=TraceOrigin(surface="mcp", client=client, token_id=token_id),
         trace_sink=trace_sink or InMemoryTraceSink(),
         project_id=project_id,
+        state=state if state is not None else {},
     )
     return await registry.invoke(name, payload, context)
