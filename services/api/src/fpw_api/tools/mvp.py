@@ -5,6 +5,7 @@ from __future__ import annotations
 import csv
 import hashlib
 import json
+import os
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Literal
@@ -16,6 +17,12 @@ from functional_proteomics_analysis import (
     build_default_analysis_plan,
     load_long_csv,
     run_donor_aware_paired_difference,
+)
+from functional_proteomics_corpus import (
+    DEFAULT_INDEX_RELATIVE,
+    CorpusUnindexedError,
+    load_corpus_index,
+    search_corpus_index,
 )
 from pydantic import BaseModel, ConfigDict, Field
 from shared_schemas import EntityPrefix, new_id
@@ -314,6 +321,7 @@ def mvp_tool_definitions() -> list[ToolDefinition]:
             mutates_state=False,
             reads_corpus=True,
             error_codes=["invalid_input", "corpus_unindexed", "out_of_scope", "internal_error"],
+            handler=_search_corpus_handler,
         ),
         _tool(
             "attach_evidence",
@@ -516,6 +524,22 @@ def _rank_proteins_handler(tool_input: BaseModel, _context: ToolContext) -> Prot
     return ProteinRankingOutput.model_validate(result["ranking"])
 
 
+def _search_corpus_handler(tool_input: BaseModel, context: ToolContext) -> EvidenceChunkListOutput:
+    typed_input = SearchCorpusInput.model_validate(tool_input)
+    try:
+        index = load_corpus_index(_corpus_index_path(context))
+    except CorpusUnindexedError as exc:
+        raise ToolExecutionError("corpus_unindexed", str(exc)) from exc
+
+    chunks = search_corpus_index(
+        index,
+        typed_input.query,
+        entities=typed_input.entities,
+        k=typed_input.k or 5,
+    )
+    return EvidenceChunkListOutput(chunks=chunks)
+
+
 def _write_result_table(
     *,
     context: ToolContext,
@@ -578,6 +602,16 @@ def _project_root(context: ToolContext, project_id: str) -> Path:
     state_root = context.state.get("state_root")
     root = Path(state_root) if isinstance(state_root, str | Path) else _repo_root() / ".fpw_state"
     return root / "projects" / project_id
+
+
+def _corpus_index_path(context: ToolContext) -> Path:
+    explicit = context.state.get("corpus_index_path")
+    if isinstance(explicit, str | Path):
+        return Path(explicit)
+    env_path = os.environ.get("FPW_CORPUS_INDEX_PATH")
+    if env_path:
+        return Path(env_path)
+    return _repo_root() / DEFAULT_INDEX_RELATIVE
 
 
 def _repo_root() -> Path:

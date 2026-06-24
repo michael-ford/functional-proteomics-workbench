@@ -1,0 +1,208 @@
+{
+  "generated_at": "2026-06-24T00:00:00Z",
+  "manifest_id": "corpus_sources_il10_lps_v0",
+  "schema_version": "0.1.0",
+  "sources": [
+    {
+      "access_route": "public webpage",
+      "approved_for_claims": true,
+      "authors": null,
+      "candidate_rank": null,
+      "candidate_score": null,
+      "citation_count": null,
+      "doi": null,
+      "ingested_at": "2026-06-24T00:00:00Z",
+      "license_note": "Public source locator; citation metadata and local fixture snippet only.",
+      "retrieval_priority": 1,
+      "sections": [
+        {
+          "section": "Dataset provenance",
+          "text": "Nomic Perturb-PBMC page. Approved dataset provenance for the public Perturb-PBMC demo using PBMC perturbation context and nELISA assay-related inflammatory protein measurements. Cite this source for the dataset page locator and public dataset context, not for mechanistic biology claims."
+        }
+      ],
+      "source_id": "src_nomic_perturb_pbmc",
+      "source_locator": "https://info.nomic.bio/perturb-pbmc",
+      "source_type": "webpage",
+      "title": "Nomic Perturb-PBMC page",
+      "topic_buckets": [
+        "dataset provenance",
+        "PBMC perturbation design"
+      ],
+      "url": "https://info.nomic.bio/perturb-pbmc",
+      "venue": null,
+      "year": null
+    },
+    {
+      "access_route": "public GitHub repository",
+      "approved_for_claims": true,
+      "authors": "nplexbio",
+      "candidate_rank": null,
+      "candidate_score": null,
+      "citation_count": null,
+      "doi": null,
+      "ingested_at": "2026-06-24T00:00:00Z",
+      "license_note": "Public repository locator; citation metadata and local fixture snippet only.",
+      "retrieval_priority": 2,
+      "sections": [
+        {
+          "section": "Fixture provenance",
+          "text": "nELISA-PBMC public repository. Approved fixture provenance for the committed public PBMC subset and source repository locator. Cite this source for public repository provenance, fixture lineage, and the nELISA-PBMC source location."
+        }
+      ],
+      "source_id": "src_nelisa_pbmc_repo",
+      "source_locator": "https://github.com/nplexbio/nELISA-PBMC",
+      "source_type": "github",
+      "title": "nELISA-PBMC public repo",
+      "topic_buckets": [
+        "dataset provenance",
+        "fixture provenance"
+      ],
+      "url": "https://github.com/nplexbio/nELISA-PBMC",
+      "venue": "GitHub",
+      "year": null
+    },
+    {
+      "access_route": "DOI metadata and approved citation-level snippet",
+      "approved_for_claims": true,
+      "authors": "Milad Dagher; Grant Ongo; Nathaniel Robichaud; Jinglin Kong; Woojong Rho; Ivan Teahulos; Arya Tavakoli; Samantha Bovaird; Shahem Merjaneh; Andrew Tan; Kiran Edwardson; Christelle Scheepers; Andy Ng; Andy Hajjar; Baly Sow; Michael Vrouvides; Andy Lee; Philippe DeCorwin-Martin; Shafqat Rasool; Jian-Yuan Huang; Timothy Erps; Spencer Coffin; Narges Rashidi; Yu Han; Srinivas Niranj Chandrasekaran; Lisa Miller; Maria Kost-Alimova; Adam Skepner; Shantanu Singh; Anne E. Carpenter; Jeffrey D. Munzar; David Juncker",
+      "candidate_rank": 5,
+      "candidate_score": 0.4662,
+      "citation_count": 11,
+      "doi": "10.1038/s41592-025-02861-6",
+      "ingested_at": "2026-06-24T00:00:00Z",
+      "license_note": "DOI-backed paper metadata and local fixture snippet only; no unapproved full-text copy.",
+      "retrieval_priority": 3,
+      "sections": [
+        {
+          "section": "Assay context",
+          "text": "nELISA: a high-throughput, high-plex platform enables quantitative profiling of the inflammatory secretome. Approved nELISA assay context source for high-throughput, high-plex inflammatory secretome profiling in PBMC perturbation and cytokine-response settings."
+        }
+      ],
+      "source_id": "src_dagher_2025_nelisa",
+      "source_locator": "DOI 10.1038/s41592-025-02861-6",
+      "source_type": "paper",
+      "title": "nELISA: a high-throughput, high-plex platform enables quantitative profiling of the inflammatory secretome",
+      "topic_buckets": [
+        "nELISA assay context",
+        "dataset provenance"
+      ],
+      "url": "https://doi.org/10.1038/s41592-025-02861-6",
+      "venue": "Nature Methods",
+      "year": "2025"
+    },
+    {
+      "access_route": "DOI metadata and approved citation-level snippet",
+      "approved_for_claims": true,
+      "authors": "Annalisa D'Andrea; Miguel Aste-Amezaga; Nicholas M. Valiante; Xiaojing Ma; Marek Kubin; Giorgio Trinchieri",
+      "candidate_rank": 1,
+      "candidate_score": 0.822,
+      "citation_count": 1401,
+      "doi": "10.1084/jem.178.3.1041",
+      "ingested_at": "2026-06-24T00:00:00Z",
+      "license_note": "DOI-backed paper metadata and local fixture snippet only; no unapproved full-text copy.",
+      "retrieval_priority": 4,
+      "sections": [
+        {
+          "section": "IL-10 biology",
+          "text": "Interleukin 10 inhibits human lymphocyte interferon gamma-production by suppressing natural killer cell stimulatory factor/IL-12 synthesis in accessory cells. Approved DOI-backed source for IL-10, IL-12, IFN gamma and cytokine-production context in human immune cells, with peripheral blood mononuclear cells, LPS and lipopolysaccharide relevance recorded in the candidate manifest."
+        }
+      ],
+      "source_id": "src_dandrea_1993_il10",
+      "source_locator": "DOI 10.1084/jem.178.3.1041",
+      "source_type": "paper",
+      "title": "Interleukin 10 inhibits human lymphocyte interferon gamma-production by suppressing natural killer cell stimulatory factor/IL-12 synthesis in accessory cells",
+      "topic_buckets": [
+        "selected perturbagen biology"
+      ],
+      "url": "https://doi.org/10.1084/jem.178.3.1041",
+      "venue": "Journal of Experimental Medicine",
+      "year": "1993"
+    },
+    {
+      "access_route": "DOI metadata and approved citation-level snippet",
+      "approved_for_claims": true,
+      "authors": "Peng Wang; Ping Wu; Marvin I. Siegel; Robert W. Egan; M. Motasim Billah",
+      "candidate_rank": 2,
+      "candidate_score": 0.6917,
+      "citation_count": 710,
+      "doi": "10.1074/jbc.270.16.9558",
+      "ingested_at": "2026-06-24T00:00:00Z",
+      "license_note": "DOI-backed paper metadata and local fixture snippet only; no unapproved full-text copy.",
+      "retrieval_priority": 5,
+      "sections": [
+        {
+          "section": "IL-10 monocyte context",
+          "text": "Interleukin (IL)-10 Inhibits Nuclear Factor kB (NFkB) Activation in Human Monocytes. Approved DOI-backed source for IL-10 inhibition context in human monocytes, LPS and lipopolysaccharide settings, and cytokine entities including TNF alpha, IL-1 beta and IL-6."
+        }
+      ],
+      "source_id": "src_wang_1995_il10_nfkb",
+      "source_locator": "DOI 10.1074/jbc.270.16.9558",
+      "source_type": "paper",
+      "title": "Interleukin (IL)-10 Inhibits Nuclear Factor kB (NFkB) Activation in Human Monocytes",
+      "topic_buckets": [
+        "selected perturbagen biology"
+      ],
+      "url": "https://doi.org/10.1074/jbc.270.16.9558",
+      "venue": "Journal of Biological Chemistry",
+      "year": "1995"
+    },
+    {
+      "access_route": "DOI metadata and approved citation-level snippet",
+      "approved_for_claims": true,
+      "authors": "D De Groote; P.F. Zangerle; Y. Gevaert; Marie France Fassotte; Yves Beguin; F. Noizat-Pirenne; Jacques Pirenne; R. Gathy; M. Lopez; I. Dehart; D. Igot; M. Baudrihaye; Dominique L. Delacroix; P Franchimont",
+      "candidate_rank": 3,
+      "candidate_score": 0.5888,
+      "citation_count": 473,
+      "doi": "10.1016/1043-4666(92)90062-v",
+      "ingested_at": "2026-06-24T00:00:00Z",
+      "license_note": "DOI-backed paper metadata and local fixture snippet only; no unapproved full-text copy.",
+      "retrieval_priority": 6,
+      "sections": [
+        {
+          "section": "PBMC cytokine response",
+          "text": "Direct stimulation of cytokines in whole blood. I. Comparison with isolated PBMC stimulation. Approved DOI-backed context source for PBMC stimulation, whole blood comparison, cytokine response interpretation, TNF alpha, IL-1 beta, IL-6, IFN gamma and GM-CSF."
+        }
+      ],
+      "source_id": "src_degroote_1992_pbmc",
+      "source_locator": "DOI 10.1016/1043-4666(92)90062-v",
+      "source_type": "paper",
+      "title": "Direct stimulation of cytokines in whole blood. I. Comparison with isolated PBMC stimulation",
+      "topic_buckets": [
+        "PBMC perturbation design",
+        "LPS cytokine response"
+      ],
+      "url": "https://doi.org/10.1016/1043-4666(92)90062-v",
+      "venue": "Cytokine",
+      "year": "1992"
+    },
+    {
+      "access_route": "DOI metadata and approved citation-level snippet",
+      "approved_for_claims": true,
+      "authors": "Jan Bertil Eggesbo; Ingvar Hjermann; Per Kristian Lund; Gun Britt Joo; Reidun Ovstebo; Peter Kierulf",
+      "candidate_rank": 4,
+      "candidate_score": 0.5359,
+      "citation_count": 31,
+      "doi": "10.1016/1043-4666(94)90080-9",
+      "ingested_at": "2026-06-24T00:00:00Z",
+      "license_note": "DOI-backed paper metadata and local fixture snippet only; no unapproved full-text copy.",
+      "retrieval_priority": 7,
+      "sections": [
+        {
+          "section": "LPS PBMC cytokine response",
+          "text": "LPS-induced release of IL-1 beta, IL-6, IL-8, TNF-alpha and sCD14 in whole blood and PBMC. Approved DOI-backed context source for LPS-stimulated PBMC and whole blood cytokine response interpretation, including TNF alpha, IL-1 beta and IL-6."
+        }
+      ],
+      "source_id": "src_eggesbo_1994_lps_pbmc",
+      "source_locator": "DOI 10.1016/1043-4666(94)90080-9",
+      "source_type": "paper",
+      "title": "LPS-induced release of IL-1 beta, IL-6, IL-8, TNF-alpha and sCD14 in whole blood and PBMC",
+      "topic_buckets": [
+        "PBMC perturbation design",
+        "LPS cytokine response"
+      ],
+      "url": "https://doi.org/10.1016/1043-4666(94)90080-9",
+      "venue": "Cytokine",
+      "year": "1994"
+    }
+  ]
+}

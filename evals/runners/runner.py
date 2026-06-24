@@ -1,17 +1,18 @@
-"""Offline eval runner skeleton.
-
-The runner intentionally depends only on the Python standard library so deterministic
-eval smoke can run in CI before the application stack exists.
-"""
+"""Offline eval runner for deterministic CI-safe workflow checks."""
 
 from __future__ import annotations
 
 import argparse
+import asyncio
 import json
+import tempfile
 from copy import deepcopy
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Literal
+
+from functional_proteomics_corpus import build_corpus_index, write_corpus_index
+from fpw_api.tools import InMemoryTraceSink, ToolContext, TraceOrigin, create_default_tool_registry
 
 EvalMode = Literal["smoke", "full"]
 
@@ -94,11 +95,15 @@ def run_eval_suite(
         raise ValueError(f"unsupported eval mode {mode!r}")
 
     now = _as_utc(created_at or datetime.now(UTC))
-    results = [_run_runner_smoke_case()]
+    report_id = run_id or _new_eval_run_id(now)
+    results = [
+        _run_runner_smoke_case(),
+        _run_corpus_retrieval_smoke_case(eval_run_id=report_id),
+    ]
     passed = sum(1 for result in results if result["passed"])
     report = {
-        "id": run_id or _new_eval_run_id(now),
-        "suite": "runner-smoke" if mode == "smoke" else "offline-skeleton",
+        "id": report_id,
+        "suite": "deterministic-smoke" if mode == "smoke" else "offline-skeleton",
         "mode": mode,
         "results": results,
         "score": passed / len(results),
@@ -194,6 +199,103 @@ def _run_runner_smoke_case() -> dict[str, Any]:
         "passed": all(check["passed"] for check in checks),
         "checks": checks,
         "trace_step_ids": [],
+    }
+
+
+def _run_corpus_retrieval_smoke_case(*, eval_run_id: str) -> dict[str, Any]:
+    queries = [
+        (
+            "What public dataset and assay does this demo use?",
+            {
+                "src_nomic_perturb_pbmc",
+                "src_nelisa_pbmc_repo",
+                "src_dagher_2025_nelisa",
+            },
+        ),
+        (
+            "What evidence supports IL-10 dampening cytokine production in LPS or human "
+            "immune-cell contexts?",
+            {"src_dandrea_1993_il10", "src_wang_1995_il10_nfkb"},
+        ),
+        (
+            "What context supports LPS-stimulated PBMC cytokine response interpretation?",
+            {"src_degroote_1992_pbmc", "src_eggesbo_1994_lps_pbmc"},
+        ),
+    ]
+    registry = create_default_tool_registry()
+    sink = InMemoryTraceSink()
+    checks: list[dict[str, Any]] = []
+    trace_step_ids: list[str] = []
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        index_path = write_corpus_index(build_corpus_index(), Path(tmpdir) / "corpus-index.json")
+        context = ToolContext(
+            origin=TraceOrigin(surface="eval", client="offline-runner"),
+            trace_sink=sink,
+            project_id="proj_demo",
+            eval_run_id=eval_run_id,
+            state={"corpus_index_path": index_path},
+        )
+        for query, expected_sources in queries:
+            result = asyncio.run(
+                registry.invoke(
+                    "search_corpus",
+                    {"query": query, "k": 3},
+                    context,
+                )
+            )
+            trace_step_ids.append(result.trace.id)
+            output = result.output.model_dump(mode="json") if result.output else {"chunks": []}
+            chunks = output["chunks"]
+            expected_chunks = [
+                chunk for chunk in chunks if chunk.get("source_id") in expected_sources
+            ]
+            citation_ok = bool(
+                expected_chunks
+                and all(
+                    chunk.get("citation", {}).get("url")
+                    or chunk.get("citation", {}).get("doi")
+                    for chunk in expected_chunks
+                )
+            )
+            entity_ok = bool(
+                expected_chunks
+                and any(chunk.get("matched_entities") or chunk.get("entities") for chunk in chunks)
+            )
+            trace_ok = (
+                result.trace.status == "ok"
+                and result.trace.output is not None
+                and bool(result.trace.output.get("chunks"))
+                and all(
+                    chunk.get("source_id") and chunk.get("citation")
+                    for chunk in result.trace.output["chunks"]
+                )
+            )
+            checks.extend(
+                [
+                    {
+                        "kind": "citation_support",
+                        "passed": citation_ok,
+                        "detail": f"Retrieved approved cited source for query: {query}",
+                    },
+                    {
+                        "kind": "entity_grounding",
+                        "passed": entity_ok,
+                        "detail": f"Retrieved chunk includes entity tags for query: {query}",
+                    },
+                    {
+                        "kind": "trace_completeness",
+                        "passed": trace_ok,
+                        "detail": "search_corpus trace records source IDs and citation metadata.",
+                    },
+                ]
+            )
+
+    return {
+        "case_id": "case_corpus_retrieval_smoke",
+        "passed": all(check["passed"] for check in checks),
+        "checks": checks,
+        "trace_step_ids": trace_step_ids,
     }
 
 
