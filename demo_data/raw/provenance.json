@@ -1,0 +1,77 @@
+{
+  "citation": {
+    "authors": "Dagher, M., Ongo, G., Robichaud, N. et al.",
+    "doi": "10.1038/s41592-025-02861-6",
+    "paper_title": "nELISA: a high-throughput, high-plex platform enables quantitative profiling of the inflammatory secretome.",
+    "url": "https://doi.org/10.1038/s41592-025-02861-6",
+    "year": "2025"
+  },
+  "donor_counts": {
+    "donor_1": 399,
+    "donor_2": 399,
+    "donor_3": 399,
+    "donor_4": 399,
+    "donor_5": 399,
+    "donor_6": 399
+  },
+  "extracted_at": "2026-06-24T00:00:00Z",
+  "generated_by": "scripts/seed_demo_project.py fixture generation constants, pyarrow parquet writer",
+  "license": "CC BY-NC 4.0 (data)",
+  "normalization_note": "verbatim public H5AD normalized value; not renormalized",
+  "row_count": 2394,
+  "selection": {
+    "cytokine_concentration_ng_ml": {
+      "IL-10": 50.0,
+      "control": 0.0
+    },
+    "donors": [
+      "donor_1",
+      "donor_2",
+      "donor_3",
+      "donor_4",
+      "donor_5",
+      "donor_6"
+    ],
+    "perturbagens": [
+      "IL-10",
+      "control"
+    ],
+    "proteins": [
+      "TNF alpha",
+      "IL-1 beta",
+      "IL-1 alpha",
+      "IL-6",
+      "IL-12 p40",
+      "IFN gamma",
+      "CCL1",
+      "CCL2",
+      "CCL22",
+      "CCL24",
+      "CCL5",
+      "CCL7",
+      "CCL8",
+      "CXCL1",
+      "CXCL10",
+      "CXCL16",
+      "G-CSF",
+      "GM-CSF",
+      "IL-1 RA RN",
+      "TNF RII",
+      "MMP-1"
+    ],
+    "stimulation": "LPS",
+    "stimulus_concentration_ng_ml": 2000.0
+  },
+  "source_commit": "c26223a1d29a1efbdb6577160fab2a323fb7d80d",
+  "source_file": "figure 4/data_pgmc_umap.h5ad",
+  "source_file_sha256": "eaf448510a429797a9ca2d8f2581c13573e90868c8190edbbe4a4e209df51500",
+  "source_repo": "https://github.com/nplexbio/nELISA-PBMC",
+  "source_value_field": "X",
+  "transforms_applied": [
+    "row filter: stimulation == LPS, stimulus_concentration == 2000, cytokine in {IL-10, control}",
+    "wide-to-long melt over the frozen 21-protein panel",
+    "column rename to SPEC-006 contract names",
+    "donor integer relabel to donor_N"
+  ],
+  "value_type": "normalized_response"
+}

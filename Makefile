@@ -39,7 +39,7 @@ ingest-demo-data: ## ingest Perturb-PBMC subset (TODO)
 	@echo "TODO: ingest-demo-data"
 build-corpus:     ## build entity-aware RAG corpus (TODO)
 	@echo "TODO: build-corpus"
-seed-demo-project:## seed the demo project (TODO)
-	@echo "TODO: seed-demo-project"
-demo-reset:       ## reset demo state (TODO)
-	@echo "TODO: demo-reset"
+seed-demo-project:## seed the demo project
+	uv run --project packages/shared-schemas python scripts/seed_demo_project.py
+demo-reset:       ## reset demo state
+	rm -rf .fpw_state/projects/proj_demo
