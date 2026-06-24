@@ -55,6 +55,9 @@ def create_mcp_router() -> APIRouter:
                 },
             )
 
+        if payload.method == "notifications/initialized":
+            return _success(payload.id, {})
+
         if payload.method == "tools/list":
             return _success(payload.id, {"tools": _tool_schemas(registry)})
 

@@ -41,11 +41,18 @@ def test_mcp_startup_smoke(monkeypatch) -> None:
             headers={"Authorization": "Bearer test-token"},
             json={"jsonrpc": "2.0", "id": 1, "method": "initialize"},
         )
+        notification = client.post(
+            "/mcp",
+            headers={"Authorization": "Bearer test-token"},
+            json={"jsonrpc": "2.0", "method": "notifications/initialized"},
+        )
 
     assert health.status_code == 200
     assert health.json() == {"status": "ok", "service": "functional-proteomics-mcp"}
     assert initialized.status_code == 200
     assert initialized.json()["result"]["capabilities"] == {"tools": {"listChanged": False}}
+    assert notification.status_code == 200
+    assert notification.json() == {"jsonrpc": "2.0", "id": None, "result": {}}
 
 
 def test_mcp_requires_configured_demo_token(monkeypatch) -> None:
