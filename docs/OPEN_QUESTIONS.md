@@ -33,6 +33,7 @@ This file tracks unresolved decisions and records resolutions with rationale.
 | R20 | Corpus direction | Deterministic indexed corpus: Nomic/Perturb-PBMC plus small curated public biology sources | Avoids live-search nondeterminism while supporting evidence-backed reports |
 | R21 | Eval direction | Evals primarily prove agent workflow correctness; real model evals run for agent/tool/prompt changes | Keeps CI deterministic while still testing agent behavior when it changes |
 | R22 | DATA-001 hero comparison | **IL-10 vs matched no-cytokine control under LPS 2000 ng/mL** | Clearest donor-consistent visual signal; conservative anti-inflammatory interpretation (see `docs/DEMO_DECISIONS.md`, issue #12) |
+| R23 | SPEC-006 fixture contract | Frozen in `docs/DATA_CONTRACTS.md`: direct H5AD-derived IL-10/LPS fixture with required metadata, provenance, validation expectations, and a 21-protein curated panel | Gives IMPL-007 enough detail to seed the demo project without guessing |
 
 See `docs/DEVELOPMENT_WORKFLOW.md` for the pipeline; `docs/DATA_CONTRACTS.md` /
 `docs/TRACE_MODEL.md` / `docs/MCP_TOOLS.md` / `docs/ARCHITECTURE.md` for contracts; and
@@ -47,8 +48,8 @@ See `docs/DEVELOPMENT_WORKFLOW.md` for the pipeline; `docs/DATA_CONTRACTS.md` /
 
 ### Data
 - ✅ Hero comparison + Perturb-PBMC subset chosen → **R22** / DATA-001 (issue #12).
-- Exact fixture columns, units, preprocessing state, provenance, and validation contract →
-  being finalized in **SPEC-006** (#15).
+- ✅ Fixture columns, units, preprocessing state, provenance, and validation contract frozen
+  in **SPEC-006** (#15) → **R23**.
 
 ### Statistics
 - Exact v0.1 method menu; normalization assumptions; donor-consistency metric; paired vs
