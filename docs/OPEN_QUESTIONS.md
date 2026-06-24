@@ -34,6 +34,8 @@ This file tracks unresolved decisions and records resolutions with rationale.
 | R21 | Eval direction | Evals primarily prove agent workflow correctness; real model evals run for agent/tool/prompt changes | Keeps CI deterministic while still testing agent behavior when it changes |
 | R22 | DATA-001 hero comparison | **IL-10 vs matched no-cytokine control under LPS 2000 ng/mL** | Clearest donor-consistent visual signal; conservative anti-inflammatory interpretation (see `docs/DEMO_DECISIONS.md`, issue #12) |
 | R23 | SPEC-006 fixture contract | Frozen in `docs/DATA_CONTRACTS.md`: direct H5AD-derived IL-10/LPS fixture with required metadata, provenance, validation expectations, and a 21-protein curated panel | Gives IMPL-007 enough detail to seed the demo project without guessing |
+| R24 | STAT-001 method menu | Default to `donor_aware_paired_difference`: median-collapse matched controls per donor/protein, compute donor-level paired IL-10 minus control differences, report donor consistency plus exploratory exact sign-flip p-values and Benjamini-Hochberg q-values | Preserves donor as the biological unit, avoids row-level pseudoreplication, and keeps p/q values auditable and clearly caveated |
+| R25 | CORPUS-001 source policy | Freeze a small deterministic corpus: Nomic/Perturb-PBMC provenance, nELISA-PBMC repo, Dagher 2025 nELISA paper, and four DOI-backed IL-10/LPS/PBMC context papers from the committed candidate manifest | Supports source-grounded report claims without live-search nondeterminism or unapproved full-text routes |
 
 See `docs/DEVELOPMENT_WORKFLOW.md` for the pipeline; `docs/DATA_CONTRACTS.md` /
 `docs/TRACE_MODEL.md` / `docs/MCP_TOOLS.md` / `docs/ARCHITECTURE.md` for contracts; and
@@ -52,13 +54,13 @@ See `docs/DEVELOPMENT_WORKFLOW.md` for the pipeline; `docs/DATA_CONTRACTS.md` /
   in **SPEC-006** (#15) → **R23**.
 
 ### Statistics
-- Exact v0.1 method menu; normalization assumptions; donor-consistency metric; paired vs
-  unpaired; p-value test; multiple-testing method; best-practice source list.
-- → handoff issue **STAT-001**.
+- ✅ v0.1 method menu, normalization assumptions, donor-consistency metric, pairing,
+  p-value test, multiple-testing method, and reference list resolved in **R24** /
+  `docs/ANALYSIS_METHODS.md`.
 
 ### RAG / corpus
-- Exact source list; entity-extraction method; exact figure/caption inclusion threshold;
-  chunking parameters; retrieval-eval design.
+- ✅ v0.1 source list, entity tagging, figure/caption threshold, chunking parameters, and
+  retrieval-eval design resolved in **R25** / `docs/CORPUS.md`.
 
 ### Architecture
 - Kimi/OpenRouter integration details and fallback behavior.

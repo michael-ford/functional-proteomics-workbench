@@ -29,8 +29,9 @@ are drafted (`docs/DATA_CONTRACTS.md`, `docs/MCP_TOOLS.md`, `docs/TRACE_MODEL.md
 ## Handed-off research (async runners) 🔬
 - ✅ **DATA-001** complete and **decided**: hero comparison = **IL-10 vs matched no-cytokine
   control under LPS 2000 ng/mL** (see `docs/DEMO_DECISIONS.md`). Unblocks SPEC-006.
-- 🔬 **STAT-001** stats best practices → finalize the supported method menu.
-- 🟡 Corpus direction set; exact source list depends on CORPUS-002 ranked source candidates.
+- ✅ **STAT-001** method menu approved; see `docs/ANALYSIS_METHODS.md`.
+- ✅ **CORPUS-002** paper-discovery tooling and IL-10/LPS candidate manifest complete.
+- ✅ **CORPUS-001** v0.1 source list and retrieval policy frozen; see `docs/CORPUS.md`.
 
 ## Phase 1 — the harness ✅
 - ✅ `ci.yml` (lint/test/typecheck; `eval-smoke` path-conditional, non-blocking until gate
@@ -40,19 +41,21 @@ are drafted (`docs/DATA_CONTRACTS.md`, `docs/MCP_TOOLS.md`, `docs/TRACE_MODEL.md
 - ✅ runner registered + branch protection set
 
 ## Phase 2+ — implementation waves (HANDOFF §29.3, §30)
-IMPL-001 scaffold · IMPL-002 shared schemas pkg · IMPL-003 FastAPI skeleton ·
-IMPL-004 ToolRegistry skeleton · IMPL-005 trace models · IMPL-006 Next.js shell ·
-IMPL-007 seeded demo project · IMPL-008 eval runner skeleton → web chat → dashboard →
-eval page → deployment → polish + screen recording.
+✅ IMPL-001 scaffold · ✅ IMPL-002 shared schemas pkg · ✅ IMPL-003 FastAPI skeleton ·
+✅ IMPL-004 ToolRegistry skeleton · ✅ IMPL-005 trace models · ✅ IMPL-006 Next.js shell ·
+✅ IMPL-007 seeded demo project · ✅ IMPL-008 eval runner skeleton · ✅ IMPL-009 bounded
+analysis package · ✅ IMPL-011 MCP server wiring · ✅ agent lifecycle hardening through
+IMPL-017.
 
-Completed foundational pieces: IMPL-002 shared schemas, IMPL-003 FastAPI skeleton, IMPL-004
-ToolRegistry skeleton, IMPL-005 trace models, IMPL-006 Next.js shell, IMPL-008 eval runner
-skeleton, and the agent lifecycle hardening work through IMPL-017.
+Next implementation sequence:
 
-Next unblocked implementation work: IMPL-007 seeded demo project / dataset fixture and
-IMPL-011 MCP server wiring. Analysis remains blocked on STAT-001; corpus ingestion remains
-blocked on CORPUS-002 → CORPUS-001; dashboard/report/deployment remain downstream of the
-fixture, analysis, corpus, and web/MCP tool paths.
+1. **IMPL-010** corpus ingestion and retrieval skeleton.
+2. **IMPL-012** web chat/tool execution path over shared state.
+3. **IMPL-013** dashboard, report view, and trace inspection UI.
+4. **IMPL-014** deployment, demo reset, and screen-recording readiness.
+
+IMPL-010 is now unblocked by `docs/CORPUS.md`. Later UI/report/deployment tickets still depend
+on the corpus skeleton and the end-to-end hero workflow.
 
 ## Eval-gate activation milestone
 `eval-smoke` becomes a **required** check once the end-to-end hero workflow runs against the
