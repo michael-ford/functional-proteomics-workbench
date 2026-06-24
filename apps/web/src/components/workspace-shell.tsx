@@ -11,6 +11,8 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
+import { getDemoWorkspace } from "@/lib/demo-workspace";
+
 type NavItem = {
   href: string;
   label: string;
@@ -30,6 +32,8 @@ type WorkspaceShellProps = {
 };
 
 export function WorkspaceShell({ children }: WorkspaceShellProps) {
+  const workspace = getDemoWorkspace();
+
   return (
     <div className="min-h-screen bg-wash text-ink">
       <aside className="fixed inset-y-0 left-0 z-20 hidden w-64 border-r border-nav-border bg-nav px-4 py-5 text-nav-ink lg:block">
@@ -59,11 +63,11 @@ export function WorkspaceShell({ children }: WorkspaceShellProps) {
             <Activity size={14} aria-hidden="true" />
             Shared state
           </div>
-          <p className="mt-2 text-sm">No project state loaded</p>
+          <p className="mt-2 text-sm">{workspace.project.id} loaded</p>
         </div>
       </aside>
 
-      <div className="lg:pl-64">
+      <div className="min-w-0 lg:pl-64">
         <header className="sticky top-0 z-10 border-b border-border bg-surface/95 backdrop-blur">
           <div className="flex min-h-16 items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
             <Link href="/" className="flex items-center gap-2 font-semibold lg:hidden">
@@ -78,15 +82,17 @@ export function WorkspaceShell({ children }: WorkspaceShellProps) {
             </div>
             <div className="flex min-w-0 items-center gap-2 text-sm">
               <span className="size-2 rounded-full bg-signal" aria-hidden="true" />
-              <span className="hidden text-muted sm:inline">Awaiting dataset selection</span>
+              <span className="hidden text-muted sm:inline">
+                {workspace.dataset.validation.status} dataset · {workspace.trace_export.count} traces
+              </span>
             </div>
           </div>
-          <nav aria-label="Mobile workspace" className="flex flex-wrap gap-1 px-4 pb-3 lg:hidden">
+          <nav aria-label="Mobile workspace" className="grid grid-cols-1 gap-1 px-4 pb-3 sm:grid-cols-3 lg:hidden">
             {navItems.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
-                className="flex shrink-0 items-center gap-2 rounded border border-border bg-wash px-3 py-2 text-sm font-medium"
+                className="flex min-w-0 items-center justify-center gap-2 rounded border border-border bg-wash px-3 py-2 text-sm font-medium"
               >
                 <item.icon size={15} aria-hidden="true" />
                 {item.label}
@@ -94,7 +100,7 @@ export function WorkspaceShell({ children }: WorkspaceShellProps) {
             ))}
           </nav>
         </header>
-        <main className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8">{children}</main>
+        <main className="mx-auto w-full min-w-0 max-w-7xl px-4 py-6 sm:px-6 lg:px-8">{children}</main>
       </div>
     </div>
   );
@@ -110,8 +116,12 @@ export function PageHeader({ eyebrow, title, description }: PageHeaderProps) {
   return (
     <div className="mb-6 border-b border-border pb-5">
       <p className="text-xs font-semibold uppercase tracking-wide text-muted">{eyebrow}</p>
-      <h1 className="mt-2 max-w-4xl text-2xl font-semibold sm:text-3xl">{title}</h1>
-      <p className="mt-3 max-w-3xl text-sm leading-6 text-muted sm:text-base">{description}</p>
+      <h1 className="mt-2 max-w-[calc(100vw-2rem)] break-words text-xl font-semibold [overflow-wrap:anywhere] sm:max-w-4xl sm:text-3xl">
+        {title}
+      </h1>
+      <p className="mt-3 max-w-[calc(100vw-2rem)] break-words text-sm leading-6 text-muted [overflow-wrap:anywhere] sm:max-w-3xl sm:text-base">
+        {description}
+      </p>
     </div>
   );
 }
@@ -122,7 +132,7 @@ type PanelProps = {
 };
 
 export function Panel({ children, className = "" }: PanelProps) {
-  return <section className={`rounded border border-border bg-surface ${className}`}>{children}</section>;
+  return <section className={`min-w-0 rounded border border-border bg-surface ${className}`}>{children}</section>;
 }
 
 type PanelTitleProps = {
@@ -134,11 +144,15 @@ type PanelTitleProps = {
 export function PanelTitle({ icon: Icon, title, meta }: PanelTitleProps) {
   return (
     <div className="flex items-start justify-between gap-3 border-b border-border px-4 py-3">
-      <div className="flex items-center gap-2">
+      <div className="flex min-w-0 items-center gap-2">
         <Icon size={17} aria-hidden="true" />
-        <h2 className="text-sm font-semibold">{title}</h2>
+        <h2 className="break-words text-sm font-semibold">{title}</h2>
       </div>
-      {meta ? <span className="text-xs text-muted">{meta}</span> : null}
+      {meta ? (
+        <span className="hidden max-w-[55%] break-words text-right text-xs text-muted sm:inline">
+          {meta}
+        </span>
+      ) : null}
     </div>
   );
 }
