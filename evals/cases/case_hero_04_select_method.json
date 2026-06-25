@@ -1,0 +1,20 @@
+{
+  "id": "case_hero_04_select_method",
+  "name": "Select supported donor-aware method",
+  "description": "Select donor_aware_paired_difference and document donor handling, repeated-control handling, and limitations.",
+  "tags": ["tool_choice", "schema_validity", "trace_completeness"],
+  "deterministic": true,
+  "fixture_refs": ["docs/ANALYSIS_METHODS.md"],
+  "expectations": [
+    {
+      "tool_name": "define_comparison",
+      "checks": [
+        {
+          "kind": "schema_validity",
+          "passed": true,
+          "detail": "The generated plan uses donor_aware_paired_difference with no unsupported assumptions."
+        }
+      ]
+    }
+  ]
+}

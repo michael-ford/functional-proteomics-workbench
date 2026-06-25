@@ -58,7 +58,8 @@ IMPL-010 is now unblocked by `docs/CORPUS.md`. Later UI/report/deployment ticket
 on the corpus skeleton and the end-to-end hero workflow.
 
 ## Eval-gate activation milestone
-`eval-smoke` becomes a **required** check once the end-to-end hero workflow runs against the
-seeded demo project (target: after IMPL of the analysis + tool pipeline, i.e. once
-`run_comparison` → `rank_proteins` → `export_report` work on fixture data). Until then it runs
-informationally only (`docs/EVALS.md`).
+`eval-smoke` now exercises deterministic hero workflow cases 1-7 through the shared
+`ToolRegistry`, including `run_comparison` → `rank_proteins` → `export_report` on fixture
+data. It is ready to become a required branch-protection check; if automation cannot update
+branch protection for the repository, track that as the remaining activation blocker outside
+the eval runner (`docs/EVALS.md`).

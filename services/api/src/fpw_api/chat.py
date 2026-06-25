@@ -24,6 +24,7 @@ DEFAULT_CHAT_MODEL = "mock/openrouter-kimi-structural"
 DEFAULT_OPENROUTER_MODEL = "moonshotai/kimi-k2"
 OPENROUTER_CHAT_COMPLETIONS_URL = "https://openrouter.ai/api/v1/chat/completions"
 SAFE_CHAT_TOOL_NAMES = frozenset({"get_project_status"})
+ChatRuntimeMode = Literal["openrouter_live", "deterministic_mock", "unavailable"]
 
 
 class ChatRequest(BaseModel):
@@ -64,12 +65,23 @@ class ChatToolTraceView(BaseModel):
     chat_message_id: str | None = None
 
 
+class ChatRuntimeMeta(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    mode: ChatRuntimeMode
+    provider: str
+    model: str
+    limitation: str | None = None
+    reason: str | None = None
+
+
 class ChatResponse(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     session_id: str
     project_id: str
     model: str
+    runtime: ChatRuntimeMeta
     messages: list[ChatMessageView]
     assistant_message: ChatMessageView
     tool_traces: list[ChatToolTraceView] = Field(default_factory=list)
@@ -85,6 +97,9 @@ class ChatToolDecision(BaseModel):
 
 class ChatModelAdapter(Protocol):
     model_name: str
+    runtime_mode: ChatRuntimeMode
+    provider_name: str
+    runtime_reason: str | None
 
     async def choose_tool(
         self,
@@ -111,6 +126,11 @@ class MockChatModelAdapter:
     """CI-safe model adapter for the structural web-chat path."""
 
     model_name = DEFAULT_CHAT_MODEL
+    runtime_mode: ChatRuntimeMode = "deterministic_mock"
+    provider_name = "mock"
+
+    def __init__(self, *, reason: str | None = None) -> None:
+        self.runtime_reason: str | None = reason
 
     async def choose_tool(
         self,
@@ -163,19 +183,20 @@ class MockChatModelAdapter:
 
 
 class OpenRouterChatModelAdapter:
-    """OpenRouter/Kimi adapter with deterministic fallback for demo/test environments."""
+    """OpenRouter/Kimi adapter for live web-chat routing."""
+    runtime_mode: ChatRuntimeMode = "openrouter_live"
+    provider_name = "openrouter"
+    runtime_reason: str | None = None
 
     def __init__(
         self,
         *,
         api_key: str,
         model_name: str = DEFAULT_OPENROUTER_MODEL,
-        fallback: ChatModelAdapter | None = None,
         timeout_seconds: float = 20.0,
     ) -> None:
         self._api_key = api_key
         self.model_name = model_name
-        self._fallback = fallback or MockChatModelAdapter()
         self._timeout_seconds = timeout_seconds
 
     async def choose_tool(
@@ -190,33 +211,25 @@ class OpenRouterChatModelAdapter:
             for definition in registry.list_definitions()
             if definition.name in SAFE_CHAT_TOOL_NAMES
         ]
-        try:
-            raw_decision = await asyncio.to_thread(
-                self._request_decision,
-                message,
-                project_id,
-                available_tools,
-            )
-        except OpenRouterAdapterError:
-            return await self._fallback.choose_tool(
-                message=message,
-                project_id=project_id,
-                registry=registry,
-            )
+        raw_decision = await asyncio.to_thread(
+            self._request_decision,
+            message,
+            project_id,
+            available_tools,
+        )
 
         if raw_decision is None:
             return None
         try:
             decision = ChatToolDecision.model_validate(raw_decision)
-            if decision.tool_name not in SAFE_CHAT_TOOL_NAMES:
-                raise ToolRegistryError(f"unsafe chat tool: {decision.tool_name}")
+        except ValidationError as exc:
+            raise OpenRouterAdapterError("provider_decision_invalid") from exc
+        if decision.tool_name not in SAFE_CHAT_TOOL_NAMES:
+            raise OpenRouterAdapterError("unsafe_tool_choice")
+        try:
             registry.lookup(decision.tool_name)
-        except (ValidationError, ToolRegistryError):
-            return await self._fallback.choose_tool(
-                message=message,
-                project_id=project_id,
-                registry=registry,
-            )
+        except ToolRegistryError as exc:
+            raise OpenRouterAdapterError("provider_tool_unavailable") from exc
         return decision
 
     def render_response(
@@ -226,7 +239,7 @@ class OpenRouterChatModelAdapter:
         tool_output: dict[str, Any] | None,
         tool_error: dict[str, Any] | None,
     ) -> str:
-        rendered = self._fallback.render_response(
+        rendered = MockChatModelAdapter(reason="live_render_template").render_response(
             decision=decision,
             tool_output=tool_output,
             tool_error=tool_error,
@@ -320,7 +333,38 @@ def create_default_chat_model_adapter() -> ChatModelAdapter:
             api_key=api_key,
             model_name=os.environ.get("OPENROUTER_MODEL", DEFAULT_OPENROUTER_MODEL),
         )
-    return MockChatModelAdapter()
+    if force_mock:
+        return MockChatModelAdapter(reason="FPW_USE_MOCK_MODEL")
+    if provider == "openrouter":
+        return MockChatModelAdapter(reason="missing_openrouter_key")
+    return UnavailableChatModelAdapter(provider=provider, reason="unsupported_model_provider")
+
+
+class UnavailableChatModelAdapter:
+    model_name = "unavailable"
+    runtime_mode: ChatRuntimeMode = "unavailable"
+
+    def __init__(self, *, provider: str, reason: str) -> None:
+        self.provider_name = provider
+        self.runtime_reason: str | None = reason
+
+    async def choose_tool(
+        self,
+        *,
+        message: str,
+        project_id: str,
+        registry: ToolRegistry,
+    ) -> ChatToolDecision | None:
+        raise OpenRouterAdapterError(self.runtime_reason or "model_provider_unavailable")
+
+    def render_response(
+        self,
+        *,
+        decision: ChatToolDecision | None,
+        tool_output: dict[str, Any] | None,
+        tool_error: dict[str, Any] | None,
+    ) -> str:
+        return "The configured chat model provider is unavailable."
 
 
 def _parse_json_object(content: str) -> dict[str, Any]:
@@ -421,11 +465,21 @@ def create_chat_router() -> APIRouter:
 
         chat_store.add_message(session, role="user", content=payload.message)
         started = time.perf_counter()
-        decision = await adapter.choose_tool(
-            message=payload.message,
-            project_id=payload.project_id,
-            registry=registry,
-        )
+        try:
+            decision = await adapter.choose_tool(
+                message=payload.message,
+                project_id=payload.project_id,
+                registry=registry,
+            )
+        except OpenRouterAdapterError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_502_BAD_GATEWAY,
+                detail={
+                    "code": exc.public_message,
+                    "message": _public_provider_error_message(exc.public_message),
+                    "runtime": _runtime_meta(adapter).model_dump(mode="json"),
+                },
+            ) from exc
 
         trace_views: list[ChatToolTraceView] = []
         tool_output: dict[str, Any] | None = None
@@ -474,6 +528,7 @@ def create_chat_router() -> APIRouter:
             tool_call_ids=tool_call_ids,
             model_meta={
                 "adapter": adapter.model_name,
+                "runtime": _runtime_meta(adapter).model_dump(mode="json"),
                 "finish_reason": "tool_call" if decision else "stop",
                 "latency_ms": max(0, round((time.perf_counter() - started) * 1000)),
             },
@@ -483,6 +538,7 @@ def create_chat_router() -> APIRouter:
             session_id=session.id,
             project_id=session.project_id,
             model=session.model,
+            runtime=_runtime_meta(adapter),
             messages=session.messages,
             assistant_message=assistant_message,
             tool_traces=trace_views,
@@ -519,6 +575,36 @@ def _trace_view(trace: dict[str, Any]) -> ChatToolTraceView:
 
 def _tool_message_content(tool_name: str, status_value: str) -> str:
     return f"{tool_name} {status_value}"
+
+
+def _runtime_meta(adapter: ChatModelAdapter) -> ChatRuntimeMeta:
+    limitation = (
+        "v0.1 chat is limited to read-only project status tools."
+        if adapter.runtime_mode in {"openrouter_live", "deterministic_mock"}
+        else None
+    )
+    return ChatRuntimeMeta(
+        mode=adapter.runtime_mode,
+        provider=adapter.provider_name,
+        model=adapter.model_name,
+        limitation=limitation,
+        reason=adapter.runtime_reason,
+    )
+
+
+def _public_provider_error_message(code: str) -> str:
+    messages = {
+        "provider_http_401": "The live model provider rejected the configured credentials.",
+        "provider_http_403": "The live model provider rejected the configured credentials.",
+        "provider_response_not_json": "The live model provider returned an invalid response.",
+        "provider_response_invalid": "The live model provider returned an invalid response.",
+        "provider_decision_invalid": "The live model provider returned an invalid tool decision.",
+        "unsafe_tool_choice": "The live model provider selected an unsupported tool.",
+        "provider_tool_unavailable": "The live model provider selected an unavailable tool.",
+        "provider_unavailable": "The live model provider is unavailable.",
+        "unsupported_model_provider": "The configured chat model provider is unsupported.",
+    }
+    return messages.get(code, "The live model provider failed.")
 
 
 def _registry_from_app(request: Request) -> ToolRegistry:

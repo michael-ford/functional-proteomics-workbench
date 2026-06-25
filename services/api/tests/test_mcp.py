@@ -160,7 +160,7 @@ def test_mcp_tool_call_dispatches_shared_handler_and_records_trace(monkeypatch) 
     assert body["result"]["_meta"] == {"trace_id": sink.traces[0].id}
 
 
-def test_mcp_tool_errors_still_emit_trace(monkeypatch) -> None:
+def test_mcp_validate_dataset_success_emits_trace(monkeypatch) -> None:
     monkeypatch.setenv("MCP_DEMO_TOKEN", "test-token")
     sink = InMemoryTraceSink()
     app = create_app(tool_registry=create_default_tool_registry(), trace_sink=sink)
@@ -177,7 +177,7 @@ def test_mcp_tool_errors_still_emit_trace(monkeypatch) -> None:
                     "name": "validate_dataset",
                     "arguments": {
                         "project_id": "proj_demo",
-                        "dataset_id": "ds_01KCYAG0000000000000000001",
+                        "dataset_id": "ds_01KCYAG0000000000000000000",
                     },
                 },
             },
@@ -185,10 +185,11 @@ def test_mcp_tool_errors_still_emit_trace(monkeypatch) -> None:
 
     assert response.status_code == 200
     body = response.json()
-    assert body["result"]["isError"] is True
-    assert body["result"]["structuredContent"]["error"]["code"] == "out_of_scope"
-    assert body["result"]["structuredContent"]["trace_id"] == sink.traces[0].id
-    assert sink.traces[0].status == "error"
+    assert body["result"]["isError"] is False
+    assert body["result"]["structuredContent"]["status"] == "passed"
+    assert body["result"]["structuredContent"]["row_count"] == 2394
+    assert body["result"]["_meta"] == {"trace_id": sink.traces[0].id}
+    assert sink.traces[0].status == "ok"
     assert sink.traces[0].origin.surface == "mcp"
 
 

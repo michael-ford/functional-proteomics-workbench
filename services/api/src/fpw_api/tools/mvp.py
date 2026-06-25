@@ -51,7 +51,7 @@ DEMO_NORMALIZED_RELATIVE = Path("demo_data/processed/nelisa_pbmc_il10_lps_long.p
 DEMO_RAW_NAME = "nelisa_pbmc_il10_lps_subset.csv"
 DEMO_PROVENANCE_NAME = "provenance.json"
 DEMO_NORMALIZED_NAME = "nelisa_pbmc_il10_lps_long.parquet"
-DEMO_SELECTION_URL = "/datasets?source=selected_public&dataset=perturb-pbmc-il10-lps"
+DEMO_SELECTION_URL = "/datasets?dataset=perturb-pbmc-il10-lps&source=selected_public"
 DEMO_DASHBOARD_URL = "/?project_id=proj_demo"
 
 REQUIRED_DEMO_COLUMNS = (
