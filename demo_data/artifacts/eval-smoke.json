@@ -1,87 +1,267 @@
 {
-  "created_at": "2026-06-24T20:21:26.680666Z",
+  "created_at": "2026-06-25T18:23:42.372643Z",
   "id": "eval_run_01K1M9M8J6T2P3R4S5T6V7W8X9",
   "mode": "smoke",
   "results": [
     {
-      "case_id": "case_runner_smoke",
+      "case_id": "case_hero_01_create_project",
       "checks": [
         {
-          "detail": "Smoke case produced a valid EvalResult envelope.",
+          "detail": "Expected tool sequence ['create_project']; observed ['create_project'].",
+          "kind": "tool_choice",
+          "passed": true
+        },
+        {
+          "detail": "create_project executed through the shared ToolRegistry.",
+          "kind": "tool_choice",
+          "passed": true
+        },
+        {
+          "detail": "Created project returns selected_public handoff URL and project id.",
           "kind": "schema_validity",
           "passed": true
         },
         {
-          "detail": "EvalRun report includes required replay and score fields.",
-          "kind": "report_structure",
-          "passed": true
-        },
-        {
-          "detail": "No tool calls were executed; trace_step_ids is explicitly empty.",
-          "kind": "trace_completeness",
-          "passed": true
-        }
-      ],
-      "passed": true,
-      "trace_step_ids": []
-    },
-    {
-      "case_id": "case_corpus_retrieval_smoke",
-      "checks": [
-        {
-          "detail": "Retrieved approved cited source for query: What public dataset and assay does this demo use?",
-          "kind": "citation_support",
-          "passed": true
-        },
-        {
-          "detail": "Retrieved chunk includes entity tags for query: What public dataset and assay does this demo use?",
-          "kind": "entity_grounding",
-          "passed": true
-        },
-        {
-          "detail": "search_corpus trace records source IDs and citation metadata.",
+          "detail": "Every registry invocation produced an eval-origin ToolCallTrace with output.",
           "kind": "trace_completeness",
           "passed": true
         },
         {
-          "detail": "Retrieved approved cited source for query: What evidence supports IL-10 dampening cytokine production in LPS or human immune-cell contexts?",
-          "kind": "citation_support",
-          "passed": true
-        },
-        {
-          "detail": "Retrieved chunk includes entity tags for query: What evidence supports IL-10 dampening cytokine production in LPS or human immune-cell contexts?",
-          "kind": "entity_grounding",
-          "passed": true
-        },
-        {
-          "detail": "search_corpus trace records source IDs and citation metadata.",
-          "kind": "trace_completeness",
-          "passed": true
-        },
-        {
-          "detail": "Retrieved approved cited source for query: What context supports LPS-stimulated PBMC cytokine response interpretation?",
-          "kind": "citation_support",
-          "passed": true
-        },
-        {
-          "detail": "Retrieved chunk includes entity tags for query: What context supports LPS-stimulated PBMC cytokine response interpretation?",
-          "kind": "entity_grounding",
-          "passed": true
-        },
-        {
-          "detail": "search_corpus trace records source IDs and citation metadata.",
-          "kind": "trace_completeness",
+          "detail": "No invoked tool returned a stubbed-tool error.",
+          "kind": "schema_validity",
           "passed": true
         }
       ],
       "passed": true,
       "trace_step_ids": [
-        "tc_01KVXMPX0P8M3ETY9Y0R1BNA6Z",
-        "tc_01KVXMPX0QN2NE5VYKF6Q5W1HV",
-        "tc_01KVXMPX0QN2NE5VYKF6Q5W1HW"
+        "tc_01KW00C1963H0MWPDFHW34N4S2"
+      ]
+    },
+    {
+      "case_id": "case_hero_02_validate_dataset",
+      "checks": [
+        {
+          "detail": "Expected tool sequence ['validate_dataset', 'inspect_dataset_schema']; observed ['validate_dataset', 'inspect_dataset_schema'].",
+          "kind": "tool_choice",
+          "passed": true
+        },
+        {
+          "detail": "Validation and schema inspection ran via registry tools.",
+          "kind": "tool_choice",
+          "passed": true
+        },
+        {
+          "detail": "Approved Perturb-PBMC fixture validates and reports long layout.",
+          "kind": "schema_validity",
+          "passed": true
+        },
+        {
+          "detail": "Every registry invocation produced an eval-origin ToolCallTrace with output.",
+          "kind": "trace_completeness",
+          "passed": true
+        },
+        {
+          "detail": "No invoked tool returned a stubbed-tool error.",
+          "kind": "schema_validity",
+          "passed": true
+        }
+      ],
+      "passed": true,
+      "trace_step_ids": [
+        "tc_01KW00C198XCGT0XKW3MDH0HJJ",
+        "tc_01KW00C198XCGT0XKW3MDH0HJM"
+      ]
+    },
+    {
+      "case_id": "case_hero_03_define_comparison",
+      "checks": [
+        {
+          "detail": "Expected tool sequence ['define_comparison']; observed ['define_comparison'].",
+          "kind": "tool_choice",
+          "passed": true
+        },
+        {
+          "detail": "Comparison was defined through define_comparison.",
+          "kind": "tool_choice",
+          "passed": true
+        },
+        {
+          "detail": "Comparison is IL-10 vs matched control under LPS paired by donor.",
+          "kind": "schema_validity",
+          "passed": true
+        },
+        {
+          "detail": "Every registry invocation produced an eval-origin ToolCallTrace with output.",
+          "kind": "trace_completeness",
+          "passed": true
+        },
+        {
+          "detail": "No invoked tool returned a stubbed-tool error.",
+          "kind": "schema_validity",
+          "passed": true
+        }
+      ],
+      "passed": true,
+      "trace_step_ids": [
+        "tc_01KW00C198XCGT0XKW3MDH0HJP"
+      ]
+    },
+    {
+      "case_id": "case_hero_04_select_method",
+      "checks": [
+        {
+          "detail": "Expected tool sequence ['define_comparison']; observed ['define_comparison'].",
+          "kind": "tool_choice",
+          "passed": true
+        },
+        {
+          "detail": "Method selection is produced by the plan-generating registry tool.",
+          "kind": "tool_choice",
+          "passed": true
+        },
+        {
+          "detail": "Selected supported donor-aware paired difference method with assumptions.",
+          "kind": "schema_validity",
+          "passed": true
+        },
+        {
+          "detail": "Every registry invocation produced an eval-origin ToolCallTrace with output.",
+          "kind": "trace_completeness",
+          "passed": true
+        },
+        {
+          "detail": "No invoked tool returned a stubbed-tool error.",
+          "kind": "schema_validity",
+          "passed": true
+        }
+      ],
+      "passed": true,
+      "trace_step_ids": [
+        "tc_01KW00C198XCGT0XKW3MDH0HJR"
+      ]
+    },
+    {
+      "case_id": "case_hero_05_rank_proteins",
+      "checks": [
+        {
+          "detail": "Expected tool sequence ['run_comparison', 'rank_proteins']; observed ['run_comparison', 'rank_proteins'].",
+          "kind": "tool_choice",
+          "passed": true
+        },
+        {
+          "detail": "Analysis and ranking ran through registry tools.",
+          "kind": "tool_choice",
+          "passed": true
+        },
+        {
+          "detail": "Top rank fields match fixture-derived effect size, p-value, q-value, and consistency.",
+          "kind": "numeric",
+          "passed": true
+        },
+        {
+          "detail": "Analysis result includes method, table ref, ranking, and correction.",
+          "kind": "schema_validity",
+          "passed": true
+        },
+        {
+          "detail": "Every registry invocation produced an eval-origin ToolCallTrace with output.",
+          "kind": "trace_completeness",
+          "passed": true
+        },
+        {
+          "detail": "No invoked tool returned a stubbed-tool error.",
+          "kind": "schema_validity",
+          "passed": true
+        }
+      ],
+      "passed": true,
+      "trace_step_ids": [
+        "tc_01KW00C19MYVTZ48SE0R9PBR4C",
+        "tc_01KW00C19MYVTZ48SE0R9PBR4D"
+      ]
+    },
+    {
+      "case_id": "case_hero_06_retrieve_evidence",
+      "checks": [
+        {
+          "detail": "Expected tool sequence ['search_corpus', 'search_corpus', 'search_corpus']; observed ['search_corpus', 'search_corpus', 'search_corpus'].",
+          "kind": "tool_choice",
+          "passed": true
+        },
+        {
+          "detail": "All evidence retrieval used search_corpus.",
+          "kind": "tool_choice",
+          "passed": true
+        },
+        {
+          "detail": "Each retrieval step returned at least one cited approved chunk.",
+          "kind": "citation_support",
+          "passed": true
+        },
+        {
+          "detail": "Each retrieval step returned entity-grounded chunks.",
+          "kind": "entity_grounding",
+          "passed": true
+        },
+        {
+          "detail": "Every registry invocation produced an eval-origin ToolCallTrace with output.",
+          "kind": "trace_completeness",
+          "passed": true
+        },
+        {
+          "detail": "No invoked tool returned a stubbed-tool error.",
+          "kind": "schema_validity",
+          "passed": true
+        }
+      ],
+      "passed": true,
+      "trace_step_ids": [
+        "tc_01KW00C19MYVTZ48SE0R9PBR4E",
+        "tc_01KW00C19NHE8RPFTYTGHR48PG",
+        "tc_01KW00C19NHE8RPFTYTGHR48PH"
+      ]
+    },
+    {
+      "case_id": "case_hero_07_generate_report",
+      "checks": [
+        {
+          "detail": "Expected tool sequence ['attach_evidence', 'export_report']; observed ['attach_evidence', 'export_report'].",
+          "kind": "tool_choice",
+          "passed": true
+        },
+        {
+          "detail": "Evidence attachment and report export ran through registry tools.",
+          "kind": "tool_choice",
+          "passed": true
+        },
+        {
+          "detail": "Report artifact has markdown ref and required claim types.",
+          "kind": "report_structure",
+          "passed": true
+        },
+        {
+          "detail": "Source-derived/interpretive claims are cited and avoid unsupported mechanisms.",
+          "kind": "unsupported_claim",
+          "passed": true
+        },
+        {
+          "detail": "Every registry invocation produced an eval-origin ToolCallTrace with output.",
+          "kind": "trace_completeness",
+          "passed": true
+        },
+        {
+          "detail": "No invoked tool returned a stubbed-tool error.",
+          "kind": "schema_validity",
+          "passed": true
+        }
+      ],
+      "passed": true,
+      "trace_step_ids": [
+        "tc_01KW00C19PE2D19ZX63RTWTJ1K",
+        "tc_01KW00C19PE2D19ZX63RTWTJ1N"
       ]
     }
   ],
   "score": 1.0,
-  "suite": "deterministic-smoke"
+  "suite": "deterministic-hero-workflow"
 }

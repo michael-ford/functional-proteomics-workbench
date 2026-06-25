@@ -1,0 +1,20 @@
+{
+  "id": "case_hero_03_define_comparison",
+  "name": "Define IL-10 versus matched control comparison",
+  "description": "Define IL-10 versus matched no-cytokine control under LPS 2000 ng/mL, paired by donor.",
+  "tags": ["tool_choice", "schema_validity", "trace_completeness"],
+  "deterministic": true,
+  "fixture_refs": ["docs/DEMO_DECISIONS.md"],
+  "expectations": [
+    {
+      "tool_name": "define_comparison",
+      "checks": [
+        {
+          "kind": "schema_validity",
+          "passed": true,
+          "detail": "The comparison is IL-10 vs control under LPS, paired by donor."
+        }
+      ]
+    }
+  ]
+}

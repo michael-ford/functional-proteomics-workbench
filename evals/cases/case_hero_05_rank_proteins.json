@@ -1,0 +1,30 @@
+{
+  "id": "case_hero_05_rank_proteins",
+  "name": "Run analysis and rank proteins",
+  "description": "Run the approved paired-difference analysis and verify numeric top-ranking fields.",
+  "tags": ["tool_choice", "numeric", "schema_validity", "trace_completeness"],
+  "deterministic": true,
+  "fixture_refs": ["demo_data/raw/nelisa_pbmc_il10_lps_subset.csv"],
+  "expectations": [
+    {
+      "tool_name": "run_comparison",
+      "checks": [
+        {
+          "kind": "schema_validity",
+          "passed": true,
+          "detail": "The result uses donor_aware_paired_difference and writes a table artifact."
+        }
+      ]
+    },
+    {
+      "tool_name": "rank_proteins",
+      "checks": [
+        {
+          "kind": "numeric",
+          "passed": true,
+          "detail": "Top row is TNF alpha with expected effect size, p-value, q-value, and donor consistency."
+        }
+      ]
+    }
+  ]
+}

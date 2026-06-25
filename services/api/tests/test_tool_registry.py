@@ -162,9 +162,12 @@ def test_project_scoped_tool_trace_uses_validated_input_project_id() -> None:
         )
     )
 
-    assert result.output is None
-    assert result.error is not None
-    assert result.error.code == "out_of_scope"
+    assert result.output is not None
+    output = result.output.model_dump(mode="json")
+    assert output["status"] == "passed"
+    assert output["row_count"] == 2394
+    assert result.error is None
+    assert result.trace.status == "ok"
     assert result.trace.project_id == "proj_demo"
     assert sink.traces == [result.trace]
 

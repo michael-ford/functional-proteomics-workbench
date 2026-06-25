@@ -1,0 +1,30 @@
+{
+  "id": "case_hero_01_create_project",
+  "name": "Create project and selected-public handoff",
+  "description": "Create a workflow project from a user request and return a selected_public dataset handoff URL.",
+  "tags": ["tool_choice", "schema_validity", "trace_completeness"],
+  "deterministic": true,
+  "fixture_refs": ["demo_data/raw/nelisa_pbmc_il10_lps_subset.csv"],
+  "expectations": [
+    {
+      "tool_name": "create_project",
+      "checks": [
+        {
+          "kind": "tool_choice",
+          "passed": true,
+          "detail": "create_project must be the first workflow tool."
+        },
+        {
+          "kind": "schema_validity",
+          "passed": true,
+          "detail": "Output includes project_id, upload_url, dashboard_url, and next actions."
+        },
+        {
+          "kind": "trace_completeness",
+          "passed": true,
+          "detail": "The registry records an eval-origin ToolCallTrace."
+        }
+      ]
+    }
+  ]
+}

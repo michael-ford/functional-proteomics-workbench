@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import csv
 import hashlib
+import importlib
 import json
 import os
 from datetime import UTC, datetime
@@ -154,6 +155,8 @@ class ProteinRankingOutput(ToolModel):
 
 _PLANS: dict[str, dict[str, Any]] = {}
 _RESULTS: dict[str, dict[str, Any]] = {}
+_ATTACHMENTS: dict[str, dict[str, Any]] = {}
+_REPORTS: dict[str, dict[str, Any]] = {}
 
 
 class CreatePlotInput(ProjectInput):
@@ -238,8 +241,11 @@ class RunEvalSuiteInput(ToolModel):
 
 
 class EvalRunOutput(ToolModel):
-    suite: str | None = None
-    status: Literal["stubbed"]
+    id: str
+    suite: str
+    mode: Literal["smoke", "full"]
+    status: Literal["passed", "failed"]
+    score: float
     trace_step_ids: list[str] = Field(default_factory=list)
 
 
@@ -268,6 +274,7 @@ def mvp_tool_definitions() -> list[ToolDefinition]:
             scope="project",
             mutates_state=True,
             eval_tags=["project"],
+            handler=_create_project_handler,
         ),
         _tool(
             "get_project_status",
@@ -285,6 +292,7 @@ def mvp_tool_definitions() -> list[ToolDefinition]:
             CreateUploadUrlOutput,
             scope="project",
             mutates_state=True,
+            handler=_create_upload_url_handler,
         ),
         _tool(
             "validate_dataset",
@@ -293,6 +301,7 @@ def mvp_tool_definitions() -> list[ToolDefinition]:
             DatasetValidationOutput,
             scope="project",
             mutates_state=True,
+            handler=_validate_dataset_handler,
         ),
         _tool(
             "inspect_dataset_schema",
@@ -301,6 +310,7 @@ def mvp_tool_definitions() -> list[ToolDefinition]:
             DatasetSchemaOutput,
             scope="project",
             mutates_state=False,
+            handler=_inspect_dataset_schema_handler,
         ),
         _tool(
             "define_comparison",
@@ -356,6 +366,7 @@ def mvp_tool_definitions() -> list[ToolDefinition]:
             EvidenceAttachmentOutput,
             scope="project",
             mutates_state=True,
+            handler=_attach_evidence_handler,
         ),
         _tool(
             "export_report",
@@ -364,6 +375,7 @@ def mvp_tool_definitions() -> list[ToolDefinition]:
             ReportArtifactOutput,
             scope="project",
             mutates_state=True,
+            handler=_export_report_handler,
         ),
         _tool(
             "run_eval_suite",
@@ -373,6 +385,7 @@ def mvp_tool_definitions() -> list[ToolDefinition]:
             scope="global",
             mutates_state=False,
             eval_tags=["eval"],
+            handler=_run_eval_suite_handler,
         ),
         _tool(
             "get_trace",
@@ -381,6 +394,7 @@ def mvp_tool_definitions() -> list[ToolDefinition]:
             GetTraceOutput,
             scope="project",
             mutates_state=False,
+            handler=_get_trace_handler,
         ),
     ]
 
@@ -427,6 +441,52 @@ def _stub_handler(name: str) -> ToolHandler:
     return handler
 
 
+def _create_project_handler(tool_input: BaseModel, context: ToolContext) -> CreateProjectOutput:
+    typed_input = CreateProjectInput.model_validate(tool_input)
+    project_id = new_id(EntityPrefix.PROJECT)
+    created_at = _utc_now()
+    _shared_projects(context)[project_id] = {
+        "project": {
+            "id": project_id,
+            "schema_version": SCHEMA_VERSION,
+            "title": typed_input.title,
+            "status": "dataset_pending",
+            "context_md": (
+                "Agent-created v0.1 project prepared for the approved selected_public "
+                "Perturb-PBMC IL-10/LPS dataset handoff."
+            ),
+            "created_at": created_at,
+            "updated_at": created_at,
+        },
+        "datasets": [
+            {
+                "id": DEMO_DATASET_ID,
+                "source": "selected_public",
+                "status": "pending",
+                "rows": None,
+            }
+        ],
+    }
+    return CreateProjectOutput(
+        project_id=project_id,
+        status="created",
+        upload_url=f"/datasets?project_id={project_id}&source=selected_public",
+        dashboard_url=f"/?project_id={project_id}",
+        next_actions=["validate_dataset", "inspect_dataset_schema"],
+    )
+
+
+def _create_upload_url_handler(
+    tool_input: BaseModel,
+    _context: ToolContext,
+) -> CreateUploadUrlOutput:
+    typed_input = ProjectInput.model_validate(tool_input)
+    return CreateUploadUrlOutput(
+        upload_url=f"/datasets?project_id={typed_input.project_id}&source=selected_public",
+        expires_at="2026-06-24T00:15:00Z",
+    )
+
+
 def _get_project_status_handler(tool_input: BaseModel, context: ToolContext) -> ProjectStatusOutput:
     typed_input = ProjectInput.model_validate(tool_input)
     projects = _shared_projects(context)
@@ -453,6 +513,17 @@ def _shared_projects(context: ToolContext) -> dict[str, dict[str, Any]]:
     if not isinstance(raw_projects, dict):
         raise ToolExecutionError("internal_error", "shared project state must be a mapping.")
     return raw_projects
+
+
+def _require_project(context: ToolContext, project_id: str) -> dict[str, Any]:
+    projects = _shared_projects(context)
+    project = projects.get(project_id)
+    if project is None and project_id == DEMO_PROJECT_ID:
+        project = _demo_project_state()
+        projects[project_id] = project
+    if project is None:
+        raise ToolExecutionError("not_found", f"project not found: {project_id}")
+    return project
 
 
 def _demo_project_state() -> dict[str, Any]:
@@ -510,6 +581,82 @@ def _trace_count_for_project(context: ToolContext, project_id: str) -> int:
         for trace in traces
         if getattr(trace, "project_id", None) == project_id
     )
+
+
+def _validate_dataset_handler(
+    tool_input: BaseModel,
+    context: ToolContext,
+) -> DatasetValidationOutput:
+    typed_input = ValidateDatasetInput.model_validate(tool_input)
+    project = _require_project(context, typed_input.project_id)
+    dataset = _require_demo_dataset(project, typed_input.dataset_id)
+    row_count = _fixture_row_count(_fixture_path(context))
+    dataset["status"] = "validated"
+    dataset["rows"] = row_count
+    project_contract = project.get("project")
+    if isinstance(project_contract, dict):
+        project_contract["status"] = "validated"
+        project_contract["updated_at"] = _utc_now()
+    return DatasetValidationOutput(status="passed", row_count=row_count, issues=[])
+
+
+def _inspect_dataset_schema_handler(
+    tool_input: BaseModel,
+    context: ToolContext,
+) -> DatasetSchemaOutput:
+    typed_input = ValidateDatasetInput.model_validate(tool_input)
+    _require_demo_dataset(_require_project(context, typed_input.project_id), typed_input.dataset_id)
+    return DatasetSchemaOutput(
+        id=new_id(EntityPrefix.DATASET_SCHEMA_PROFILE),
+        schema_version=SCHEMA_VERSION,
+        dataset_id=typed_input.dataset_id,
+        layout="long",
+        columns=[
+            {"name": "sample_id", "dtype": "string", "role": "metadata", "n_unique": None},
+            {"name": "donor", "dtype": "string", "role": "donor", "n_unique": 6},
+            {"name": "stimulation", "dtype": "categorical", "role": "stimulation", "n_unique": 1},
+            {
+                "name": "stimulus_concentration_ng_ml",
+                "dtype": "float",
+                "role": "metadata",
+                "n_unique": 1,
+                "examples": ["2000"],
+            },
+            {"name": "perturbagen", "dtype": "categorical", "role": "perturbagen"},
+            {
+                "name": "cytokine_concentration_ng_ml",
+                "dtype": "float",
+                "role": "metadata",
+                "examples": ["0", "50"],
+            },
+            {"name": "protein", "dtype": "categorical", "role": "protein", "n_unique": 21},
+            {"name": "response_value", "dtype": "float", "role": "value"},
+        ],
+        detected_axes={
+            "donor": "donor",
+            "stimulation": "stimulation",
+            "perturbagen": "perturbagen",
+            "protein": "protein",
+            "value": "response_value",
+        },
+    )
+
+
+def _require_demo_dataset(project: dict[str, Any], dataset_id: str) -> dict[str, Any]:
+    datasets = project.get("datasets")
+    if not isinstance(datasets, list):
+        raise ToolExecutionError("internal_error", "project state is missing datasets.")
+    for dataset in datasets:
+        if isinstance(dataset, dict) and dataset.get("id") == dataset_id:
+            if dataset.get("source") != "selected_public":
+                raise ToolExecutionError("invalid_input", "v0.1 supports selected_public only.")
+            return dataset
+    raise ToolExecutionError("not_found", f"dataset not found: {dataset_id}")
+
+
+def _fixture_row_count(path: Path) -> int:
+    with path.open(newline="", encoding="utf-8") as handle:
+        return sum(1 for _row in csv.DictReader(handle))
 
 
 def _define_comparison_handler(tool_input: BaseModel, _context: ToolContext) -> AnalysisPlanOutput:
@@ -635,6 +782,147 @@ def _rank_proteins_handler(tool_input: BaseModel, _context: ToolContext) -> Prot
     return ProteinRankingOutput.model_validate(result["ranking"])
 
 
+def _attach_evidence_handler(
+    tool_input: BaseModel,
+    _context: ToolContext,
+) -> EvidenceAttachmentOutput:
+    typed_input = AttachEvidenceInput.model_validate(tool_input)
+    if not typed_input.chunk_ids:
+        raise ToolExecutionError("invalid_input", "attach_evidence requires at least one chunk_id.")
+    attachment = {
+        "id": new_id(EntityPrefix.EVIDENCE_ATTACHMENT),
+        "schema_version": SCHEMA_VERSION,
+        "project_id": typed_input.project_id,
+        "chunk_ids": list(typed_input.chunk_ids),
+        "supports_report_id": typed_input.supports_report_id,
+        "note": "Attached deterministic corpus evidence for the IL-10/LPS demo report.",
+    }
+    _ATTACHMENTS[attachment["id"]] = attachment
+    return EvidenceAttachmentOutput.model_validate(attachment)
+
+
+def _export_report_handler(tool_input: BaseModel, context: ToolContext) -> ReportArtifactOutput:
+    typed_input = ExportReportInput.model_validate(tool_input)
+    result = _RESULTS.get(typed_input.result_id)
+    if result is None:
+        raise ToolExecutionError("not_found", f"analysis result not found: {typed_input.result_id}")
+    if result["project_id"] != typed_input.project_id:
+        raise ToolExecutionError(
+            "invalid_input",
+            "result_id does not belong to the requested project_id.",
+        )
+
+    attached_chunk_ids = _attached_chunk_ids(
+        project_id=typed_input.project_id,
+        attachment_ids=typed_input.attachment_ids or [],
+    )
+    if not attached_chunk_ids:
+        raise ToolExecutionError(
+            "invalid_input",
+            "export_report requires attached cited evidence for source-derived claims.",
+        )
+
+    top_row = result["ranking"]["rows"][0]
+    unique_chunk_ids = sorted(set(attached_chunk_ids))
+    claims = [
+        {
+            "text": (
+                f"{top_row['protein']} is the top-ranked protein by absolute paired effect "
+                f"size in the fixture-derived IL-10 versus control comparison."
+            ),
+            "kind": "data-derived",
+            "evidence_chunk_ids": [],
+        },
+        {
+            "text": (
+                "Retrieved approved corpus sources support the report context for the public "
+                "Perturb-PBMC subset, nELISA assay, LPS-stimulated PBMC response, and IL-10."
+            ),
+            "kind": "source-derived",
+            "evidence_chunk_ids": unique_chunk_ids,
+        },
+        {
+            "text": (
+                "The result is reported as an IL-10-associated dampening pattern in this "
+                "fixture, not as a demonstrated molecular mechanism."
+            ),
+            "kind": "interpretive",
+            "evidence_chunk_ids": unique_chunk_ids,
+        },
+        {
+            "text": "Small paired donor count and exploratory p-values/q-values limit inference.",
+            "kind": "limitation",
+            "evidence_chunk_ids": [],
+        },
+    ]
+    report_id = new_id(EntityPrefix.REPORT_ARTIFACT)
+    markdown_ref = _write_report_markdown(
+        context=context,
+        project_id=typed_input.project_id,
+        report_id=report_id,
+        markdown=_report_markdown(top_row=top_row, claims=claims),
+    )
+    report = {
+        "id": report_id,
+        "schema_version": SCHEMA_VERSION,
+        "project_id": typed_input.project_id,
+        "markdown_ref": markdown_ref,
+        "claims": claims,
+    }
+    _REPORTS[report_id] = report
+    return ReportArtifactOutput.model_validate(report)
+
+
+def _attached_chunk_ids(*, project_id: str, attachment_ids: list[str]) -> list[str]:
+    chunk_ids: list[str] = []
+    for attachment_id in attachment_ids:
+        attachment = _ATTACHMENTS.get(attachment_id)
+        if attachment is None:
+            raise ToolExecutionError("not_found", f"evidence attachment not found: {attachment_id}")
+        if attachment["project_id"] != project_id:
+            raise ToolExecutionError(
+                "invalid_input",
+                "attachment_id does not belong to the requested project_id.",
+            )
+        chunk_ids.extend(attachment["chunk_ids"])
+    return chunk_ids
+
+
+def _run_eval_suite_handler(tool_input: BaseModel, _context: ToolContext) -> EvalRunOutput:
+    typed_input = RunEvalSuiteInput.model_validate(tool_input)
+    mode: Literal["smoke", "full"] = "full" if typed_input.suite == "full" else "smoke"
+    runner = importlib.import_module("evals.runners.runner")
+    report = runner.run_eval_suite(mode)
+    trace_step_ids = [
+        trace_step_id
+        for result in report["results"]
+        for trace_step_id in result["trace_step_ids"]
+    ]
+    return EvalRunOutput(
+        id=report["id"],
+        suite=report["suite"],
+        mode=report["mode"],
+        status="passed" if report["score"] == 1 else "failed",
+        score=report["score"],
+        trace_step_ids=trace_step_ids,
+    )
+
+
+def _get_trace_handler(tool_input: BaseModel, context: ToolContext) -> GetTraceOutput:
+    typed_input = GetTraceInput.model_validate(tool_input)
+    traces = getattr(context.trace_sink, "traces", None)
+    if not isinstance(traces, list):
+        return GetTraceOutput(traces=[])
+    return GetTraceOutput(
+        traces=[
+            trace.model_dump(mode="json")
+            for trace in traces
+            if trace.project_id == typed_input.project_id
+            and (typed_input.kind is None or trace.tool_name == typed_input.kind)
+        ]
+    )
+
+
 def _search_corpus_handler(tool_input: BaseModel, context: ToolContext) -> EvidenceChunkListOutput:
     typed_input = SearchCorpusInput.model_validate(tool_input)
     try:
@@ -723,6 +1011,36 @@ def _write_result_table(
     return {
         "uri": f"project://{project_id}/{relative.as_posix()}",
         "media_type": "text/csv",
+        "bytes": path.stat().st_size,
+        "sha256": _sha256_file(path),
+    }
+
+
+def _report_markdown(*, top_row: dict[str, Any], claims: list[dict[str, Any]]) -> str:
+    claim_lines = "\n".join(f"- {claim['kind']}: {claim['text']}" for claim in claims)
+    return (
+        "# IL-10/LPS fixture report\n\n"
+        f"Top ranked protein: {top_row['protein']} "
+        f"({top_row['effect_size']:.6g}, {top_row['direction']}).\n\n"
+        "## Claims\n"
+        f"{claim_lines}\n"
+    )
+
+
+def _write_report_markdown(
+    *,
+    context: ToolContext,
+    project_id: str,
+    report_id: str,
+    markdown: str,
+) -> dict[str, Any]:
+    relative = Path("reports") / f"{report_id}.md"
+    path = _project_root(context, project_id) / relative
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(markdown, encoding="utf-8")
+    return {
+        "uri": f"project://{project_id}/{relative.as_posix()}",
+        "media_type": "text/markdown",
         "bytes": path.stat().st_size,
         "sha256": _sha256_file(path),
     }

@@ -16,10 +16,10 @@
       "proteins": null,
       "stimulation_context": "LPS"
     },
-    "created_at": "2026-06-24T20:21:26.659072Z",
+    "created_at": "2026-06-25T18:23:42.358307Z",
     "dataset_id": "ds_01KCYAG0000000000000000000",
     "donor_handling": "Matched donors are the biological replicate unit. For each donor/protein, matched control rows are collapsed with the median before computing the IL-10 minus control paired difference.",
-    "id": "plan_01KVXMPX035YYMJ7R8QM6C0Y3S",
+    "id": "plan_01KW00C18PTK468MFCSE5H8VJY",
     "limitations": [
       "Small paired donor count limits inferential power; p-values and q-values are exploratory.",
       "The method summarizes donor-matched response_value differences and does not make mechanistic claims.",
@@ -35,7 +35,7 @@
     "unsupported_assumptions": []
   },
   "analysis_result": {
-    "created_at": "2026-06-24T20:21:26.676388Z",
+    "created_at": "2026-06-25T18:23:42.369740Z",
     "donor_consistency": [
       {
         "agrees_with_consensus": true,
@@ -68,9 +68,9 @@
         "note": "Agrees on 20/21 ranked protein directions."
       }
     ],
-    "id": "res_01KVXMPX0KFS6V4AF3HQEQN2MJ",
+    "id": "res_01KW00C191YSPBAGEKQ87DWD10",
     "method_id": "donor_aware_paired_difference",
-    "plan_id": "plan_01KVXMPX035YYMJ7R8QM6C0Y3S",
+    "plan_id": "plan_01KW00C18PTK468MFCSE5H8VJY",
     "plot_id": null,
     "project_id": "proj_demo",
     "ranking": {
@@ -252,7 +252,7 @@
       "bytes": 5311,
       "media_type": "text/csv",
       "sha256": "1a30f1f1d4fd44a546bea7476b7c8a9b5254d46769578581cd5578ecaf8e328f",
-      "uri": "project://proj_demo/analysis/results/res_01KVXMPX0KFS6V4AF3HQEQN2MJ.csv"
+      "uri": "project://proj_demo/analysis/results/res_01KW00C191YSPBAGEKQ87DWD10.csv"
     }
   },
   "dataset": {
@@ -281,91 +281,271 @@
     }
   },
   "eval_run": {
-    "created_at": "2026-06-24T20:21:26.680666Z",
+    "created_at": "2026-06-25T18:23:42.372643Z",
     "id": "eval_run_01K1M9M8J6T2P3R4S5T6V7W8X9",
     "mode": "smoke",
     "results": [
       {
-        "case_id": "case_runner_smoke",
+        "case_id": "case_hero_01_create_project",
         "checks": [
           {
-            "detail": "Smoke case produced a valid EvalResult envelope.",
+            "detail": "Expected tool sequence ['create_project']; observed ['create_project'].",
+            "kind": "tool_choice",
+            "passed": true
+          },
+          {
+            "detail": "create_project executed through the shared ToolRegistry.",
+            "kind": "tool_choice",
+            "passed": true
+          },
+          {
+            "detail": "Created project returns selected_public handoff URL and project id.",
             "kind": "schema_validity",
             "passed": true
           },
           {
-            "detail": "EvalRun report includes required replay and score fields.",
-            "kind": "report_structure",
-            "passed": true
-          },
-          {
-            "detail": "No tool calls were executed; trace_step_ids is explicitly empty.",
-            "kind": "trace_completeness",
-            "passed": true
-          }
-        ],
-        "passed": true,
-        "trace_step_ids": []
-      },
-      {
-        "case_id": "case_corpus_retrieval_smoke",
-        "checks": [
-          {
-            "detail": "Retrieved approved cited source for query: What public dataset and assay does this demo use?",
-            "kind": "citation_support",
-            "passed": true
-          },
-          {
-            "detail": "Retrieved chunk includes entity tags for query: What public dataset and assay does this demo use?",
-            "kind": "entity_grounding",
-            "passed": true
-          },
-          {
-            "detail": "search_corpus trace records source IDs and citation metadata.",
+            "detail": "Every registry invocation produced an eval-origin ToolCallTrace with output.",
             "kind": "trace_completeness",
             "passed": true
           },
           {
-            "detail": "Retrieved approved cited source for query: What evidence supports IL-10 dampening cytokine production in LPS or human immune-cell contexts?",
-            "kind": "citation_support",
-            "passed": true
-          },
-          {
-            "detail": "Retrieved chunk includes entity tags for query: What evidence supports IL-10 dampening cytokine production in LPS or human immune-cell contexts?",
-            "kind": "entity_grounding",
-            "passed": true
-          },
-          {
-            "detail": "search_corpus trace records source IDs and citation metadata.",
-            "kind": "trace_completeness",
-            "passed": true
-          },
-          {
-            "detail": "Retrieved approved cited source for query: What context supports LPS-stimulated PBMC cytokine response interpretation?",
-            "kind": "citation_support",
-            "passed": true
-          },
-          {
-            "detail": "Retrieved chunk includes entity tags for query: What context supports LPS-stimulated PBMC cytokine response interpretation?",
-            "kind": "entity_grounding",
-            "passed": true
-          },
-          {
-            "detail": "search_corpus trace records source IDs and citation metadata.",
-            "kind": "trace_completeness",
+            "detail": "No invoked tool returned a stubbed-tool error.",
+            "kind": "schema_validity",
             "passed": true
           }
         ],
         "passed": true,
         "trace_step_ids": [
-          "tc_01KVXMPX0P8M3ETY9Y0R1BNA6Z",
-          "tc_01KVXMPX0QN2NE5VYKF6Q5W1HV",
-          "tc_01KVXMPX0QN2NE5VYKF6Q5W1HW"
+          "tc_01KW00C1963H0MWPDFHW34N4S2"
+        ]
+      },
+      {
+        "case_id": "case_hero_02_validate_dataset",
+        "checks": [
+          {
+            "detail": "Expected tool sequence ['validate_dataset', 'inspect_dataset_schema']; observed ['validate_dataset', 'inspect_dataset_schema'].",
+            "kind": "tool_choice",
+            "passed": true
+          },
+          {
+            "detail": "Validation and schema inspection ran via registry tools.",
+            "kind": "tool_choice",
+            "passed": true
+          },
+          {
+            "detail": "Approved Perturb-PBMC fixture validates and reports long layout.",
+            "kind": "schema_validity",
+            "passed": true
+          },
+          {
+            "detail": "Every registry invocation produced an eval-origin ToolCallTrace with output.",
+            "kind": "trace_completeness",
+            "passed": true
+          },
+          {
+            "detail": "No invoked tool returned a stubbed-tool error.",
+            "kind": "schema_validity",
+            "passed": true
+          }
+        ],
+        "passed": true,
+        "trace_step_ids": [
+          "tc_01KW00C198XCGT0XKW3MDH0HJJ",
+          "tc_01KW00C198XCGT0XKW3MDH0HJM"
+        ]
+      },
+      {
+        "case_id": "case_hero_03_define_comparison",
+        "checks": [
+          {
+            "detail": "Expected tool sequence ['define_comparison']; observed ['define_comparison'].",
+            "kind": "tool_choice",
+            "passed": true
+          },
+          {
+            "detail": "Comparison was defined through define_comparison.",
+            "kind": "tool_choice",
+            "passed": true
+          },
+          {
+            "detail": "Comparison is IL-10 vs matched control under LPS paired by donor.",
+            "kind": "schema_validity",
+            "passed": true
+          },
+          {
+            "detail": "Every registry invocation produced an eval-origin ToolCallTrace with output.",
+            "kind": "trace_completeness",
+            "passed": true
+          },
+          {
+            "detail": "No invoked tool returned a stubbed-tool error.",
+            "kind": "schema_validity",
+            "passed": true
+          }
+        ],
+        "passed": true,
+        "trace_step_ids": [
+          "tc_01KW00C198XCGT0XKW3MDH0HJP"
+        ]
+      },
+      {
+        "case_id": "case_hero_04_select_method",
+        "checks": [
+          {
+            "detail": "Expected tool sequence ['define_comparison']; observed ['define_comparison'].",
+            "kind": "tool_choice",
+            "passed": true
+          },
+          {
+            "detail": "Method selection is produced by the plan-generating registry tool.",
+            "kind": "tool_choice",
+            "passed": true
+          },
+          {
+            "detail": "Selected supported donor-aware paired difference method with assumptions.",
+            "kind": "schema_validity",
+            "passed": true
+          },
+          {
+            "detail": "Every registry invocation produced an eval-origin ToolCallTrace with output.",
+            "kind": "trace_completeness",
+            "passed": true
+          },
+          {
+            "detail": "No invoked tool returned a stubbed-tool error.",
+            "kind": "schema_validity",
+            "passed": true
+          }
+        ],
+        "passed": true,
+        "trace_step_ids": [
+          "tc_01KW00C198XCGT0XKW3MDH0HJR"
+        ]
+      },
+      {
+        "case_id": "case_hero_05_rank_proteins",
+        "checks": [
+          {
+            "detail": "Expected tool sequence ['run_comparison', 'rank_proteins']; observed ['run_comparison', 'rank_proteins'].",
+            "kind": "tool_choice",
+            "passed": true
+          },
+          {
+            "detail": "Analysis and ranking ran through registry tools.",
+            "kind": "tool_choice",
+            "passed": true
+          },
+          {
+            "detail": "Top rank fields match fixture-derived effect size, p-value, q-value, and consistency.",
+            "kind": "numeric",
+            "passed": true
+          },
+          {
+            "detail": "Analysis result includes method, table ref, ranking, and correction.",
+            "kind": "schema_validity",
+            "passed": true
+          },
+          {
+            "detail": "Every registry invocation produced an eval-origin ToolCallTrace with output.",
+            "kind": "trace_completeness",
+            "passed": true
+          },
+          {
+            "detail": "No invoked tool returned a stubbed-tool error.",
+            "kind": "schema_validity",
+            "passed": true
+          }
+        ],
+        "passed": true,
+        "trace_step_ids": [
+          "tc_01KW00C19MYVTZ48SE0R9PBR4C",
+          "tc_01KW00C19MYVTZ48SE0R9PBR4D"
+        ]
+      },
+      {
+        "case_id": "case_hero_06_retrieve_evidence",
+        "checks": [
+          {
+            "detail": "Expected tool sequence ['search_corpus', 'search_corpus', 'search_corpus']; observed ['search_corpus', 'search_corpus', 'search_corpus'].",
+            "kind": "tool_choice",
+            "passed": true
+          },
+          {
+            "detail": "All evidence retrieval used search_corpus.",
+            "kind": "tool_choice",
+            "passed": true
+          },
+          {
+            "detail": "Each retrieval step returned at least one cited approved chunk.",
+            "kind": "citation_support",
+            "passed": true
+          },
+          {
+            "detail": "Each retrieval step returned entity-grounded chunks.",
+            "kind": "entity_grounding",
+            "passed": true
+          },
+          {
+            "detail": "Every registry invocation produced an eval-origin ToolCallTrace with output.",
+            "kind": "trace_completeness",
+            "passed": true
+          },
+          {
+            "detail": "No invoked tool returned a stubbed-tool error.",
+            "kind": "schema_validity",
+            "passed": true
+          }
+        ],
+        "passed": true,
+        "trace_step_ids": [
+          "tc_01KW00C19MYVTZ48SE0R9PBR4E",
+          "tc_01KW00C19NHE8RPFTYTGHR48PG",
+          "tc_01KW00C19NHE8RPFTYTGHR48PH"
+        ]
+      },
+      {
+        "case_id": "case_hero_07_generate_report",
+        "checks": [
+          {
+            "detail": "Expected tool sequence ['attach_evidence', 'export_report']; observed ['attach_evidence', 'export_report'].",
+            "kind": "tool_choice",
+            "passed": true
+          },
+          {
+            "detail": "Evidence attachment and report export ran through registry tools.",
+            "kind": "tool_choice",
+            "passed": true
+          },
+          {
+            "detail": "Report artifact has markdown ref and required claim types.",
+            "kind": "report_structure",
+            "passed": true
+          },
+          {
+            "detail": "Source-derived/interpretive claims are cited and avoid unsupported mechanisms.",
+            "kind": "unsupported_claim",
+            "passed": true
+          },
+          {
+            "detail": "Every registry invocation produced an eval-origin ToolCallTrace with output.",
+            "kind": "trace_completeness",
+            "passed": true
+          },
+          {
+            "detail": "No invoked tool returned a stubbed-tool error.",
+            "kind": "schema_validity",
+            "passed": true
+          }
+        ],
+        "passed": true,
+        "trace_step_ids": [
+          "tc_01KW00C19PE2D19ZX63RTWTJ1K",
+          "tc_01KW00C19PE2D19ZX63RTWTJ1N"
         ]
       }
     ],
     "score": 1.0,
-    "suite": "deterministic-smoke"
+    "suite": "deterministic-hero-workflow"
   },
   "evidence_results": [
     {
@@ -529,7 +709,7 @@
         ]
       },
       "query": "What public dataset and assay does this demo use?",
-      "trace_id": "tc_01KVXMPX0NDDD021TCY7MN24Q7"
+      "trace_id": "tc_01KW00C192FVAR5FFMYAHXQGK2"
     },
     {
       "output": {
@@ -703,7 +883,7 @@
         ]
       },
       "query": "What evidence supports IL-10 dampening cytokine production in LPS or human immune-cell contexts?",
-      "trace_id": "tc_01KVXMPX0NDDD021TCY7MN24Q8"
+      "trace_id": "tc_01KW00C192FVAR5FFMYAHXQGK3"
     },
     {
       "output": {
@@ -881,7 +1061,7 @@
         ]
       },
       "query": "What context supports LPS-stimulated PBMC cytokine response interpretation?",
-      "trace_id": "tc_01KVXMPX0NDDD021TCY7MN24Q9"
+      "trace_id": "tc_01KW00C192FVAR5FFMYAHXQGK4"
     }
   ],
   "generated_by": "scripts/build_demo_web_artifacts.py",
@@ -1077,7 +1257,7 @@
         "source_locator": "DOI 10.1038/s41592-025-02861-6",
         "source_type": "paper",
         "title": "nELISA: a high-throughput, high-plex platform enables quantitative profiling of the inflammatory secretome",
-        "trace_id": "tc_01KVXMPX0NDDD021TCY7MN24Q7",
+        "trace_id": "tc_01KW00C192FVAR5FFMYAHXQGK2",
         "url": "https://doi.org/10.1038/s41592-025-02861-6"
       },
       {
@@ -1087,7 +1267,7 @@
         "source_locator": "DOI 10.1084/jem.178.3.1041",
         "source_type": "paper",
         "title": "Interleukin 10 inhibits human lymphocyte interferon gamma-production by suppressing natural killer cell stimulatory factor/IL-12 synthesis in accessory cells",
-        "trace_id": "tc_01KVXMPX0NDDD021TCY7MN24Q8",
+        "trace_id": "tc_01KW00C192FVAR5FFMYAHXQGK3",
         "url": "https://doi.org/10.1084/jem.178.3.1041"
       },
       {
@@ -1097,7 +1277,7 @@
         "source_locator": "DOI 10.1016/1043-4666(92)90062-v",
         "source_type": "paper",
         "title": "Direct stimulation of cytokines in whole blood. I. Comparison with isolated PBMC stimulation",
-        "trace_id": "tc_01KVXMPX0NDDD021TCY7MN24Q8",
+        "trace_id": "tc_01KW00C192FVAR5FFMYAHXQGK3",
         "url": "https://doi.org/10.1016/1043-4666(92)90062-v"
       },
       {
@@ -1107,7 +1287,7 @@
         "source_locator": "DOI 10.1016/1043-4666(94)90080-9",
         "source_type": "paper",
         "title": "LPS-induced release of IL-1 beta, IL-6, IL-8, TNF-alpha and sCD14 in whole blood and PBMC",
-        "trace_id": "tc_01KVXMPX0NDDD021TCY7MN24Q9",
+        "trace_id": "tc_01KW00C192FVAR5FFMYAHXQGK4",
         "url": "https://doi.org/10.1016/1043-4666(94)90080-9"
       },
       {
@@ -1117,7 +1297,7 @@
         "source_locator": "https://github.com/nplexbio/nELISA-PBMC",
         "source_type": "github",
         "title": "nELISA-PBMC public repo",
-        "trace_id": "tc_01KVXMPX0NDDD021TCY7MN24Q7",
+        "trace_id": "tc_01KW00C192FVAR5FFMYAHXQGK2",
         "url": "https://github.com/nplexbio/nELISA-PBMC"
       },
       {
@@ -1127,7 +1307,7 @@
         "source_locator": "https://info.nomic.bio/perturb-pbmc",
         "source_type": "webpage",
         "title": "Nomic Perturb-PBMC page",
-        "trace_id": "tc_01KVXMPX0NDDD021TCY7MN24Q7",
+        "trace_id": "tc_01KW00C192FVAR5FFMYAHXQGK2",
         "url": "https://info.nomic.bio/perturb-pbmc"
       },
       {
@@ -1137,7 +1317,7 @@
         "source_locator": "DOI 10.1074/jbc.270.16.9558",
         "source_type": "paper",
         "title": "Interleukin (IL)-10 Inhibits Nuclear Factor kB (NFkB) Activation in Human Monocytes",
-        "trace_id": "tc_01KVXMPX0NDDD021TCY7MN24Q8",
+        "trace_id": "tc_01KW00C192FVAR5FFMYAHXQGK3",
         "url": "https://doi.org/10.1074/jbc.270.16.9558"
       }
     ],
@@ -1147,12 +1327,12 @@
         "label": "Ranked fixture result",
         "support": [
           {
-            "id": "res_01KVXMPX0KFS6V4AF3HQEQN2MJ",
-            "trace_id": "tc_01KVXMPX0MDST977P3B67C1AE3",
+            "id": "res_01KW00C191YSPBAGEKQ87DWD10",
+            "trace_id": "tc_01KW00C191YSPBAGEKQ87DWD11",
             "type": "analysis_result"
           },
           {
-            "trace_id": "tc_01KVXMPX0MDST977P3B67C1AE4",
+            "trace_id": "tc_01KW00C191YSPBAGEKQ87DWD12",
             "type": "ranking"
           }
         ],
@@ -1165,19 +1345,19 @@
           {
             "source_id": "src_nomic_perturb_pbmc",
             "title": "Nomic Perturb-PBMC page",
-            "trace_id": "tc_01KVXMPX0NDDD021TCY7MN24Q7",
+            "trace_id": "tc_01KW00C192FVAR5FFMYAHXQGK2",
             "type": "citation"
           },
           {
             "source_id": "src_nelisa_pbmc_repo",
             "title": "nELISA-PBMC public repo",
-            "trace_id": "tc_01KVXMPX0NDDD021TCY7MN24Q7",
+            "trace_id": "tc_01KW00C192FVAR5FFMYAHXQGK2",
             "type": "citation"
           },
           {
             "source_id": "src_dagher_2025_nelisa",
             "title": "nELISA: a high-throughput, high-plex platform enables quantitative profiling of the inflammatory secretome",
-            "trace_id": "tc_01KVXMPX0NDDD021TCY7MN24Q7",
+            "trace_id": "tc_01KW00C192FVAR5FFMYAHXQGK2",
             "type": "citation"
           }
         ],
@@ -1188,20 +1368,20 @@
         "label": "Conservative biological readout",
         "support": [
           {
-            "id": "res_01KVXMPX0KFS6V4AF3HQEQN2MJ",
-            "trace_id": "tc_01KVXMPX0MDST977P3B67C1AE3",
+            "id": "res_01KW00C191YSPBAGEKQ87DWD10",
+            "trace_id": "tc_01KW00C191YSPBAGEKQ87DWD11",
             "type": "analysis_result"
           },
           {
             "source_id": "src_dandrea_1993_il10",
             "title": "Interleukin 10 inhibits human lymphocyte interferon gamma-production by suppressing natural killer cell stimulatory factor/IL-12 synthesis in accessory cells",
-            "trace_id": "tc_01KVXMPX0NDDD021TCY7MN24Q8",
+            "trace_id": "tc_01KW00C192FVAR5FFMYAHXQGK3",
             "type": "citation"
           },
           {
             "source_id": "src_wang_1995_il10_nfkb",
             "title": "Interleukin (IL)-10 Inhibits Nuclear Factor kB (NFkB) Activation in Human Monocytes",
-            "trace_id": "tc_01KVXMPX0NDDD021TCY7MN24Q8",
+            "trace_id": "tc_01KW00C192FVAR5FFMYAHXQGK3",
             "type": "citation"
           }
         ],
@@ -1209,14 +1389,14 @@
       }
     ],
     "generated_from": {
-      "analysis_result_id": "res_01KVXMPX0KFS6V4AF3HQEQN2MJ",
-      "analysis_trace_id": "tc_01KVXMPX0MDST977P3B67C1AE3",
+      "analysis_result_id": "res_01KW00C191YSPBAGEKQ87DWD10",
+      "analysis_trace_id": "tc_01KW00C191YSPBAGEKQ87DWD11",
       "evidence_trace_ids": [
-        "tc_01KVXMPX0NDDD021TCY7MN24Q7",
-        "tc_01KVXMPX0NDDD021TCY7MN24Q8",
-        "tc_01KVXMPX0NDDD021TCY7MN24Q9"
+        "tc_01KW00C192FVAR5FFMYAHXQGK2",
+        "tc_01KW00C192FVAR5FFMYAHXQGK3",
+        "tc_01KW00C192FVAR5FFMYAHXQGK4"
       ],
-      "ranking_trace_id": "tc_01KVXMPX0MDST977P3B67C1AE4"
+      "ranking_trace_id": "tc_01KW00C191YSPBAGEKQ87DWD12"
     },
     "id": "report_demo_il10_lps",
     "limitations": [
@@ -1344,18 +1524,18 @@
   "trace_export": {
     "count": 9,
     "eval_trace_ids": [
-      "tc_01KVXMPX0P8M3ETY9Y0R1BNA6Z",
-      "tc_01KVXMPX0QN2NE5VYKF6Q5W1HV",
-      "tc_01KVXMPX0QN2NE5VYKF6Q5W1HW"
+      "tc_01KW00C1938TPV2DF9KBB6XT2M",
+      "tc_01KW00C1938TPV2DF9KBB6XT2N",
+      "tc_01KW00C1938TPV2DF9KBB6XT2P"
     ],
     "path": "traces/tool_calls.jsonl",
     "web_chat_trace_ids": [
-      "tc_01KVXMPX035YYMJ7R8QM6C0Y3T",
-      "tc_01KVXMPX0MDST977P3B67C1AE3",
-      "tc_01KVXMPX0MDST977P3B67C1AE4",
-      "tc_01KVXMPX0NDDD021TCY7MN24Q7",
-      "tc_01KVXMPX0NDDD021TCY7MN24Q8",
-      "tc_01KVXMPX0NDDD021TCY7MN24Q9"
+      "tc_01KW00C18PTK468MFCSE5H8VJZ",
+      "tc_01KW00C191YSPBAGEKQ87DWD11",
+      "tc_01KW00C191YSPBAGEKQ87DWD12",
+      "tc_01KW00C192FVAR5FFMYAHXQGK2",
+      "tc_01KW00C192FVAR5FFMYAHXQGK3",
+      "tc_01KW00C192FVAR5FFMYAHXQGK4"
     ]
   },
   "validation": {
