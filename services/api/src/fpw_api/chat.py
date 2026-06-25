@@ -176,7 +176,6 @@ class OpenRouterChatModelAdapter:
         self.model_name = model_name
         self._fallback = fallback or MockChatModelAdapter()
         self._timeout_seconds = timeout_seconds
-        self._last_provider_error: str | None = None
 
     async def choose_tool(
         self,
@@ -197,9 +196,7 @@ class OpenRouterChatModelAdapter:
                 project_id,
                 available_tools,
             )
-            self._last_provider_error = None
-        except OpenRouterAdapterError as exc:
-            self._last_provider_error = exc.public_message
+        except OpenRouterAdapterError:
             return await self._fallback.choose_tool(
                 message=message,
                 project_id=project_id,
@@ -212,7 +209,6 @@ class OpenRouterChatModelAdapter:
             decision = ChatToolDecision.model_validate(raw_decision)
             registry.lookup(decision.tool_name)
         except (ValidationError, ToolRegistryError):
-            self._last_provider_error = "provider_decision_invalid"
             return await self._fallback.choose_tool(
                 message=message,
                 project_id=project_id,
@@ -232,11 +228,6 @@ class OpenRouterChatModelAdapter:
             tool_output=tool_output,
             tool_error=tool_error,
         )
-        if self._last_provider_error:
-            return (
-                f"{rendered} OpenRouter was unavailable, so the deterministic demo "
-                "adapter handled this turn."
-            )
         return rendered
 
     def _request_decision(
