@@ -35,10 +35,19 @@ type ChatToolTrace = {
   chat_message_id: string | null;
 };
 
+type ChatRuntime = {
+  mode: "openrouter_live" | "deterministic_mock" | "unavailable";
+  provider: string;
+  model: string;
+  limitation: string | null;
+  reason: string | null;
+};
+
 type ChatResponse = {
   session_id: string;
   project_id: string;
   model: string;
+  runtime: ChatRuntime;
   messages: ChatMessage[];
   assistant_message: ChatMessage;
   tool_traces: ChatToolTrace[];
@@ -52,6 +61,7 @@ export function ChatPanel() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [traceLog, setTraceLog] = useState<ChatToolTrace[]>([]);
   const [model, setModel] = useState("mock/openrouter-kimi-structural");
+  const [runtime, setRuntime] = useState<ChatRuntime | null>(null);
   const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -80,13 +90,14 @@ export function ChatPanel() {
         }),
       });
       if (!response.ok) {
-        throw new Error(`Chat request failed with HTTP ${response.status}`);
+        throw new Error(await readChatError(response));
       }
       const payload = (await response.json()) as ChatResponse;
       setSessionId(payload.session_id);
       setMessages(payload.messages);
       setTraceLog((current) => [...payload.tool_traces, ...current].slice(0, 8));
       setModel(payload.model);
+      setRuntime(payload.runtime);
       setMessage("");
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Chat request failed.");
@@ -97,7 +108,7 @@ export function ChatPanel() {
 
   return (
     <Panel>
-      <PanelTitle icon={MessageSquare} title="Web chat" meta={modelLabel(model)} />
+      <PanelTitle icon={MessageSquare} title="Web chat" meta={runtimeLabel(runtime, model)} />
       <div className="grid min-h-[31rem] gap-px bg-border lg:grid-cols-[minmax(0,1fr)_22rem]">
         <div className="flex min-h-[24rem] flex-col bg-surface">
           <div className="flex-1 space-y-3 overflow-y-auto px-4 py-4">
@@ -157,6 +168,9 @@ export function ChatPanel() {
               </button>
             </div>
             {error ? <p className="mt-2 text-sm text-red-700">{error}</p> : null}
+            {runtime?.limitation ? (
+              <p className="mt-2 text-xs text-muted">{runtime.limitation}</p>
+            ) : null}
           </form>
         </div>
 
@@ -205,8 +219,36 @@ export function ChatPanel() {
   );
 }
 
-function modelLabel(model: string): string {
-  return model.startsWith("mock/") ? "mock model" : model;
+function runtimeLabel(runtime: ChatRuntime | null, model: string): string {
+  if (!runtime) {
+    return model.startsWith("mock/") ? "mock model" : model;
+  }
+  if (runtime.mode === "deterministic_mock") {
+    return "deterministic mock";
+  }
+  if (runtime.mode === "openrouter_live") {
+    return `live ${runtime.model}`;
+  }
+  return "model unavailable";
+}
+
+async function readChatError(response: Response): Promise<string> {
+  try {
+    const payload = (await response.json()) as unknown;
+    if (isRecord(payload) && isRecord(payload.detail)) {
+      const message = payload.detail.message;
+      const code = payload.detail.code;
+      if (typeof message === "string" && typeof code === "string") {
+        return `${message} (${code})`;
+      }
+      if (typeof message === "string") {
+        return message;
+      }
+    }
+  } catch {
+    // Fall through to a generic HTTP error.
+  }
+  return `Chat request failed with HTTP ${response.status}`;
 }
 
 function traceSummary(trace: ChatToolTrace): string {

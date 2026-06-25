@@ -11,6 +11,7 @@ import urllib.request
 from pathlib import Path
 from typing import Any
 
+from fpw_api.chat import create_default_chat_model_adapter
 from scripts.demo_reset import reset_demo_project
 
 
@@ -49,11 +50,31 @@ def _env_check() -> dict[str, Any]:
     provider = os.environ.get("MODEL_PROVIDER", "openrouter")
     has_openrouter_key = bool(os.environ.get("OPENROUTER_API_KEY", "").strip())
     use_mock = os.environ.get("FPW_USE_MOCK_MODEL", "").casefold() in {"1", "true", "yes"}
-    mode = "mock" if use_mock or not has_openrouter_key else "openrouter"
+    railway_environment = os.environ.get("RAILWAY_ENVIRONMENT", "").strip()
+    adapter = create_default_chat_model_adapter()
+    detail = (
+        f"MODEL_PROVIDER={provider}; chat_adapter_mode={adapter.runtime_mode}; "
+        f"model={adapter.model_name}; openrouter_key_configured={has_openrouter_key}"
+    )
+    if adapter.runtime_reason:
+        detail = f"{detail}; reason={adapter.runtime_reason}"
+    if adapter.runtime_mode == "unavailable":
+        return {"name": "runtime_env", "status": "failed", "detail": detail}
+    if (
+        provider.casefold() == "openrouter"
+        and not use_mock
+        and not has_openrouter_key
+        and railway_environment
+    ):
+        return {
+            "name": "runtime_env",
+            "status": "failed",
+            "detail": f"{detail}; live OpenRouter mode requires OPENROUTER_API_KEY",
+        }
     return {
         "name": "runtime_env",
         "status": "ok",
-        "detail": f"MODEL_PROVIDER={provider}; chat_adapter_mode={mode}",
+        "detail": detail,
     }
 
 
