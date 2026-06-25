@@ -6,7 +6,8 @@ labels: implementation
 
 <!-- Do NOT pre-apply `agent-ready` — it is the human gate that triggers the implementer
      (Codex) AFTER the spec's open questions are resolved. Add `needs-spec` to have Claude
-     draft a spec first. See docs/DEVELOPMENT_WORKFLOW.md. -->
+     draft a spec first after triage. Add `needs-decision` only for blocking questions.
+     Use domain labels from docs/DEVELOPMENT_WORKFLOW.md. -->
 
 
 # Goal
