@@ -676,6 +676,37 @@ def test_create_plot_unknown_result_returns_not_found() -> None:
     assert result.trace.error.code == "not_found"
 
 
+def test_define_comparison_rejects_non_demo_project(tmp_path) -> None:
+    registry = create_default_tool_registry()
+    sink = InMemoryTraceSink()
+
+    result = asyncio.run(
+        registry.invoke(
+            "define_comparison",
+            {
+                "project_id": "proj_other",
+                "dataset_id": DEMO_DATASET_ID,
+                "comparison": {
+                    "group_a": {"perturbagen": "IL-10"},
+                    "group_b": {"perturbagen": "control"},
+                    "stimulation_context": "LPS",
+                    "paired_by": "donor",
+                },
+            },
+            ToolContext(
+                origin=TraceOrigin(surface="api", client="pytest"),
+                trace_sink=sink,
+                state={"state_root": tmp_path},
+            ),
+        )
+    )
+
+    assert result.output is None
+    assert result.error is not None
+    assert result.error.code == "out_of_scope"
+    assert not (tmp_path / "projects" / "proj_other").exists()
+
+
 def test_define_comparison_rejects_unsupported_unpaired_assumption() -> None:
     registry = create_default_tool_registry()
     sink = InMemoryTraceSink()

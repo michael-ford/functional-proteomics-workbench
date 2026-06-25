@@ -698,11 +698,7 @@ def _trace_count_for_project(context: ToolContext, project_id: str) -> int:
 
 def _define_comparison_handler(tool_input: BaseModel, _context: ToolContext) -> AnalysisPlanOutput:
     typed_input = DefineComparisonInput.model_validate(tool_input)
-    if typed_input.dataset_id != DEMO_DATASET_ID:
-        raise ToolExecutionError(
-            "not_found",
-            f"v0.1 analysis is available only for the seeded dataset {DEMO_DATASET_ID}.",
-        )
+    _require_demo_dataset(typed_input)
 
     try:
         comparison = ComparisonRequest.from_mapping(typed_input.comparison)
@@ -739,6 +735,7 @@ def _define_comparison_handler(tool_input: BaseModel, _context: ToolContext) -> 
 
 def _run_comparison_handler(tool_input: BaseModel, context: ToolContext) -> AnalysisResultOutput:
     typed_input = RunComparisonInput.model_validate(tool_input)
+    _require_demo_project(typed_input.project_id)
     plan = _PLANS.get(typed_input.plan_id)
     if plan is None:
         raise ToolExecutionError("not_found", f"analysis plan not found: {typed_input.plan_id}")
@@ -802,6 +799,7 @@ def _run_comparison_handler(tool_input: BaseModel, context: ToolContext) -> Anal
 
 def _rank_proteins_handler(tool_input: BaseModel, _context: ToolContext) -> ProteinRankingOutput:
     typed_input = RankProteinsInput.model_validate(tool_input)
+    _require_demo_project(typed_input.project_id)
     result = _RESULTS.get(typed_input.result_id)
     if result is None:
         raise ToolExecutionError("not_found", f"analysis result not found: {typed_input.result_id}")
@@ -821,6 +819,7 @@ def _rank_proteins_handler(tool_input: BaseModel, _context: ToolContext) -> Prot
 
 def _create_plot_handler(tool_input: BaseModel, context: ToolContext) -> PlotArtifactOutput:
     typed_input = CreatePlotInput.model_validate(tool_input)
+    _require_demo_project(typed_input.project_id)
     if typed_input.plot_type not in SUPPORTED_PLOT_TYPES:
         raise ToolExecutionError(
             "unsupported_plot",
@@ -918,6 +917,7 @@ def _attach_evidence_handler(
 
 def _export_report_handler(tool_input: BaseModel, context: ToolContext) -> ReportArtifactOutput:
     typed_input = ExportReportInput.model_validate(tool_input)
+    _require_demo_project(typed_input.project_id)
     result = _RESULTS.get(typed_input.result_id)
     if result is None:
         raise ToolExecutionError("not_found", f"analysis result not found: {typed_input.result_id}")
