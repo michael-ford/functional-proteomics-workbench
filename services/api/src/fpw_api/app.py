@@ -6,8 +6,8 @@ from pydantic import BaseModel, Field
 from fpw_api.chat import (
     ChatModelAdapter,
     InMemoryChatStore,
-    MockChatModelAdapter,
     create_chat_router,
+    create_default_chat_model_adapter,
 )
 from fpw_api.mcp import create_mcp_router
 from fpw_api.tools import ToolRegistry, create_default_tool_registry
@@ -42,7 +42,7 @@ def create_app(
     application.state.trace_sink = trace_sink or InMemoryTraceSink()
     application.state.project_state = project_state if project_state is not None else {}
     application.state.chat_store = chat_store or InMemoryChatStore()
-    application.state.chat_model_adapter = chat_model_adapter or MockChatModelAdapter()
+    application.state.chat_model_adapter = chat_model_adapter or create_default_chat_model_adapter()
     application.include_router(create_chat_router())
     application.include_router(create_mcp_router())
 

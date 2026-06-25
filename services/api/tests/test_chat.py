@@ -1,7 +1,41 @@
 from fastapi.testclient import TestClient
 
 from fpw_api import create_app
+from fpw_api.chat import (
+    MockChatModelAdapter,
+    OpenRouterChatModelAdapter,
+    create_default_chat_model_adapter,
+)
 from fpw_api.tools import InMemoryTraceSink, create_default_tool_registry
+
+
+def test_default_chat_adapter_uses_mock_without_openrouter_key(monkeypatch) -> None:
+    monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
+    monkeypatch.setenv("MODEL_PROVIDER", "openrouter")
+
+    adapter = create_default_chat_model_adapter()
+
+    assert isinstance(adapter, MockChatModelAdapter)
+    assert adapter.model_name == "mock/openrouter-kimi-structural"
+
+
+def test_default_chat_adapter_uses_openrouter_when_key_is_configured(monkeypatch) -> None:
+    monkeypatch.setenv("OPENROUTER_API_KEY", "test-key")
+    monkeypatch.setenv("OPENROUTER_MODEL", "moonshotai/kimi-k2-test")
+
+    adapter = create_default_chat_model_adapter()
+
+    assert isinstance(adapter, OpenRouterChatModelAdapter)
+    assert adapter.model_name == "moonshotai/kimi-k2-test"
+
+
+def test_default_chat_adapter_can_force_mock_for_ci(monkeypatch) -> None:
+    monkeypatch.setenv("OPENROUTER_API_KEY", "test-key")
+    monkeypatch.setenv("FPW_USE_MOCK_MODEL", "true")
+
+    adapter = create_default_chat_model_adapter()
+
+    assert isinstance(adapter, MockChatModelAdapter)
 
 
 def test_chat_invokes_safe_tool_through_shared_registry_and_records_trace() -> None:
