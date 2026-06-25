@@ -629,6 +629,29 @@ def test_create_plot_rejects_unsupported_plot_type(tmp_path) -> None:
     assert result.error.code == "unsupported_plot"
 
 
+def test_create_plot_unknown_result_returns_not_found() -> None:
+    registry = create_default_tool_registry()
+    sink = InMemoryTraceSink()
+
+    result = asyncio.run(
+        registry.invoke(
+            "create_plot",
+            {
+                "project_id": "proj_demo",
+                "result_id": "res_01KCYAG0000000000000000000",
+                "plot_type": "ranked_effect_bar",
+            },
+            ToolContext(origin=TraceOrigin(surface="api", client="pytest"), trace_sink=sink),
+        )
+    )
+
+    assert result.output is None
+    assert result.error is not None
+    assert result.error.code == "not_found"
+    assert result.trace.error is not None
+    assert result.trace.error.code == "not_found"
+
+
 def test_define_comparison_rejects_unsupported_unpaired_assumption() -> None:
     registry = create_default_tool_registry()
     sink = InMemoryTraceSink()

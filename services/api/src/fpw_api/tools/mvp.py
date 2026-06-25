@@ -403,7 +403,13 @@ def mvp_tool_definitions() -> list[ToolDefinition]:
             PlotArtifactOutput,
             scope="project",
             mutates_state=True,
-            error_codes=["invalid_input", "unsupported_plot", "out_of_scope", "internal_error"],
+            error_codes=[
+                "invalid_input",
+                "not_found",
+                "unsupported_plot",
+                "out_of_scope",
+                "internal_error",
+            ],
             handler=_create_plot_handler,
         ),
         _tool(
