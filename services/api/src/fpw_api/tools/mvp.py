@@ -9,6 +9,7 @@ import importlib
 import json
 import math
 import os
+import shutil
 import sys
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
@@ -1216,6 +1217,7 @@ def _write_seeded_project_files(context: ToolContext, project_state: dict[str, A
     project = project_state.get("project", {})
     if not isinstance(project, dict) or project.get("id") != DEMO_PROJECT_ID:
         return
+    _copy_seeded_dataset_artifacts(context)
     dataset = _dataset_contract(context)
     _write_json_project_artifact(context, DEMO_PROJECT_ID, Path("project.json"), project)
     _write_text_project_artifact(
@@ -1231,6 +1233,27 @@ def _write_seeded_project_files(context: ToolContext, project_state: dict[str, A
         Path("datasets/schema_profile.json"),
         _schema_profile_for_fixture(),
     )
+
+
+def _copy_seeded_dataset_artifacts(context: ToolContext) -> None:
+    copies = [
+        (_repo_root() / DEMO_FIXTURE_RELATIVE, Path("datasets/raw") / DEMO_RAW_NAME),
+        (
+            _repo_root() / DEMO_PROVENANCE_RELATIVE,
+            Path("datasets/raw") / DEMO_PROVENANCE_NAME,
+        ),
+        (
+            _repo_root() / DEMO_NORMALIZED_RELATIVE,
+            Path("datasets/normalized") / DEMO_NORMALIZED_NAME,
+        ),
+    ]
+    project_root = _project_root(context, DEMO_PROJECT_ID)
+    for source, relative in copies:
+        destination = project_root / relative
+        if destination.exists() and _sha256_file(destination) == _sha256_file(source):
+            continue
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(source, destination)
 
 
 def _dataset_contract(context: ToolContext) -> dict[str, Any]:

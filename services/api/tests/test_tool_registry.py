@@ -551,6 +551,10 @@ def test_registry_only_hero_replay_creates_artifacts_and_project_trace(tmp_path)
         "export_report",
     ]
     assert all(trace["status"] == "ok" for trace in trace_output["traces"])
+    dataset_root = tmp_path / "projects" / project_id / "datasets"
+    assert (dataset_root / "raw" / "nelisa_pbmc_il10_lps_subset.csv").exists()
+    assert (dataset_root / "raw" / "provenance.json").exists()
+    assert (dataset_root / "normalized" / "nelisa_pbmc_il10_lps_long.parquet").exists()
     plot_path = tmp_path / "projects" / project_id / "analysis" / "plots"
     report_path = tmp_path / "projects" / project_id / "reports"
     assert any(plot_path.glob("plot_*.json"))
