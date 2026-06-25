@@ -113,6 +113,20 @@ issue opened
                                 (implementer waits until MERGED)
 ```
 
+Lifecycle labels are triage gates, not default issue-template metadata. Issue templates may
+apply type labels such as `spec` or `implementation`, but `needs-spec` and `agent-ready` are
+applied only after triage. Add `needs-spec` when Claude should draft a durable spec and
+open-question list. Do not add it automatically on issue creation; wait until a human or
+orchestrator confirms the spec pass is useful and Claude availability is acceptable.
+
+Research issues use the same lifecycle when they need a durable spec or open-question pass:
+`needs-spec` gets Claude to draft, `needs-decision` marks blockers, and an orchestrator
+session interviews Mike to resolve decisions. If the orchestrator can directly restate a
+trusted maintainer decision in an issue comment, it may do that and update labels instead of
+forcing a spec pass. The orchestrator may make GitHub metadata changes directly (comments,
+labels, issue creation, and applying `agent-ready`) but should not implement feature code
+except for small docs or issue-state changes needed to unblock the queue.
+
 Both agent workflows run on the self-hosted runner. Reviewers remain one-shot `codex exec` /
 Claude CLI jobs, but the implementer is a persistent interactive Codex session in tmux
 (attach with `tmux attach -t fpw-agents`). `scripts/spawn-impl-agent.sh` starts Codex with
@@ -155,8 +169,10 @@ durable prompt/state directory. A manual `workflow_dispatch` path exists for cle
 
 ## Labels
 
-Single implementation label (`agent-ready`), per owner decision — no `agent-claude` /
-`agent-codex` split; the default implementer is **Codex** (`IMPL_AGENT` in `execute.yml`).
+Single implementation label (`agent-ready`), per owner decision. Do not split the
+implementation trigger by agent; the default implementer is **Codex** (`IMPL_AGENT` in
+`execute.yml`). Use `needs-decision` as the only decision-blocking label; do not introduce
+a second human-decision label.
 
 | Label | Meaning |
 |---|---|
@@ -165,5 +181,18 @@ Single implementation label (`agent-ready`), per owner decision — no `agent-cl
 | `needs-decision` | Open questions block this issue; resolve in an orchestrator session |
 | `agent-ready` | Spec finalized → Codex implements |
 | `contract-change` | PR may touch protected contract files (`packages/shared-schemas/**`, `docs/*` contracts, `.github/workflows/**`) |
+
+Current v0.1 domain labels:
+
+| Label | Meaning |
+|---|---|
+| `data` | Dataset, fixture, or ingestion work |
+| `analysis` | Analysis and statistics work |
+| `corpus` | Corpus, RAG, retrieval, and evidence work |
+| `backend` | Backend API work |
+| `frontend` | Frontend web app work |
+| `eval` | Evaluation and replay work |
+| `mcp` | MCP and tool interface work |
+| `infra` | CI, deployment, and repo automation |
 
 See `.github/ISSUE_TEMPLATE/` and `.github/pull_request_template.md`.

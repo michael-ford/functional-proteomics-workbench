@@ -23,6 +23,25 @@ See `docs/ARCHITECTURE.md`.
 See `Makefile`: `make setup`, `make test`, `make eval`, `make run-local`. (Stubs until the
 IMPL wave.)
 
+## Issue labels and lifecycle
+
+Lifecycle labels are explicit gates:
+
+- `needs-spec` triggers Claude's spec-drafting pass.
+- `spec-drafted` means Claude has posted a spec plus open questions.
+- `needs-decision` is the only decision-blocking label.
+- `agent-ready` means the spec is finalized and Codex may implement.
+- `contract-change` marks PRs allowed to touch protected contracts.
+
+Do not pre-label implementation issues with `agent-ready`; a human/orchestrator applies it
+after blockers are resolved. Do not auto-add `needs-spec` on issue creation; apply it only
+after triage confirms a durable Claude spec or open-question pass is needed. Research issues
+use the same lifecycle when they need a spec, otherwise the orchestrator may record a trusted
+maintainer decision and update labels directly.
+
+Current v0.1 domain labels are `data`, `analysis`, `corpus`, `backend`, `frontend`, `eval`,
+`mcp`, and `infra`.
+
 ## Stable contracts (change only in a PR labeled `contract-change`)
 
 - `packages/shared-schemas/**`
