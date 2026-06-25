@@ -162,9 +162,8 @@ def test_project_scoped_tool_trace_uses_validated_input_project_id() -> None:
         )
     )
 
-    assert result.output is None
-    assert result.error is not None
-    assert result.error.code == "out_of_scope"
+    assert result.error is None
+    assert result.output is not None
     assert result.trace.project_id == "proj_demo"
     assert sink.traces == [result.trace]
 
@@ -368,6 +367,257 @@ def test_analysis_tools_create_traced_plan_result_and_ranking_artifact(tmp_path)
     ]
     assert all(trace.status == "ok" for trace in sink.traces[-3:])
     assert all(trace.project_id == "proj_demo" for trace in sink.traces[-3:])
+
+
+def test_registry_only_hero_replay_creates_artifacts_and_project_trace(tmp_path) -> None:
+    index_path = write_corpus_index(build_corpus_index(), tmp_path / "corpus-index.json")
+    registry = create_default_tool_registry()
+    sink = InMemoryTraceSink()
+    context = ToolContext(
+        origin=TraceOrigin(surface="api", client="pytest"),
+        trace_sink=sink,
+        state={"state_root": tmp_path, "corpus_index_path": index_path},
+    )
+    comparison = {
+        "group_a": {"perturbagen": "IL-10"},
+        "group_b": {"perturbagen": "control"},
+        "stimulation_context": "LPS",
+        "paired_by": "donor",
+    }
+
+    project_result = asyncio.run(
+        registry.invoke("create_project", {"title": "Fixture demo"}, context)
+    )
+    assert project_result.error is None
+    assert project_result.output is not None
+    project_output = project_result.output.model_dump(mode="json")
+    project_id = project_output["project_id"]
+    context = ToolContext(
+        origin=TraceOrigin(surface="api", client="pytest"),
+        trace_sink=sink,
+        project_id=project_id,
+        state=context.state,
+    )
+
+    upload_result = asyncio.run(
+        registry.invoke("create_upload_url", {"project_id": project_id}, context)
+    )
+    validation_result = asyncio.run(
+        registry.invoke(
+            "validate_dataset",
+            {"project_id": project_id, "dataset_id": DEMO_DATASET_ID},
+            context,
+        )
+    )
+    schema_result = asyncio.run(
+        registry.invoke(
+            "inspect_dataset_schema",
+            {"project_id": project_id, "dataset_id": DEMO_DATASET_ID},
+            context,
+        )
+    )
+    plan_result = asyncio.run(
+        registry.invoke(
+            "define_comparison",
+            {
+                "project_id": project_id,
+                "dataset_id": DEMO_DATASET_ID,
+                "comparison": comparison,
+            },
+            context,
+        )
+    )
+    assert plan_result.output is not None
+    plan_output = plan_result.output.model_dump(mode="json")
+    comparison_result = asyncio.run(
+        registry.invoke(
+            "run_comparison",
+            {"project_id": project_id, "plan_id": plan_output["id"]},
+            context,
+        )
+    )
+    assert comparison_result.output is not None
+    comparison_output = comparison_result.output.model_dump(mode="json")
+    ranking_result = asyncio.run(
+        registry.invoke(
+            "rank_proteins",
+            {"project_id": project_id, "result_id": comparison_output["id"]},
+            context,
+        )
+    )
+    plot_result = asyncio.run(
+        registry.invoke(
+            "create_plot",
+            {
+                "project_id": project_id,
+                "result_id": comparison_output["id"],
+                "plot_type": "ranked_effect_bar",
+            },
+            context,
+        )
+    )
+    corpus_result = asyncio.run(
+        registry.invoke(
+            "search_corpus",
+            {
+                "query": "IL-10 dampens LPS cytokine production",
+                "entities": ["IL-10", "LPS"],
+                "k": 2,
+            },
+            context,
+        )
+    )
+    assert corpus_result.output is not None
+    corpus_output = corpus_result.output.model_dump(mode="json")
+    chunk_ids = [
+        scored["chunk"]["id"]
+        for scored in corpus_output["chunks"]
+        if scored["metadata"]["approved_for_claims"]
+    ][:2]
+    attach_result = asyncio.run(
+        registry.invoke(
+            "attach_evidence",
+            {"project_id": project_id, "chunk_ids": chunk_ids},
+            context,
+        )
+    )
+    assert attach_result.output is not None
+    attach_output = attach_result.output.model_dump(mode="json")
+    report_result = asyncio.run(
+        registry.invoke(
+            "export_report",
+            {
+                "project_id": project_id,
+                "result_id": comparison_output["id"],
+                "attachment_ids": [attach_output["id"]],
+            },
+            context,
+        )
+    )
+    eval_result = asyncio.run(
+        registry.invoke("run_eval_suite", {"suite": "smoke"}, context)
+    )
+    trace_result = asyncio.run(
+        registry.invoke("get_trace", {"project_id": project_id}, context)
+    )
+
+    for result in [
+        upload_result,
+        validation_result,
+        schema_result,
+        ranking_result,
+        plot_result,
+        report_result,
+        eval_result,
+        trace_result,
+    ]:
+        assert result.error is None
+        assert result.output is not None
+    assert validation_result.output is not None
+    assert schema_result.output is not None
+    assert plot_result.output is not None
+    assert report_result.output is not None
+    assert eval_result.output is not None
+    assert trace_result.output is not None
+    validation_output = validation_result.output.model_dump(mode="json")
+    schema_output = schema_result.output.model_dump(mode="json")
+    plot_output = plot_result.output.model_dump(mode="json")
+    report_output = report_result.output.model_dump(mode="json")
+    eval_output = eval_result.output.model_dump(mode="json")
+    assert validation_output["status"] == "passed"
+    assert schema_output["detected_axes"]["perturbagen"] == "perturbagen"
+    assert plot_output["spec_ref"]["uri"].endswith(".json")
+    assert report_output["claims"][1]["kind"] == "source-derived"
+    assert report_output["claims"][1]["evidence_chunk_ids"]
+    assert eval_output["status"] == "passed"
+    trace_output = trace_result.output.model_dump(mode="json")
+    tool_names = [trace["tool_name"] for trace in trace_output["traces"]]
+    assert tool_names == [
+        "create_project",
+        "create_upload_url",
+        "validate_dataset",
+        "inspect_dataset_schema",
+        "define_comparison",
+        "run_comparison",
+        "rank_proteins",
+        "create_plot",
+        "search_corpus",
+        "attach_evidence",
+        "export_report",
+    ]
+    assert all(trace["status"] == "ok" for trace in trace_output["traces"])
+    plot_path = tmp_path / "projects" / project_id / "analysis" / "plots"
+    report_path = tmp_path / "projects" / project_id / "reports"
+    assert any(plot_path.glob("plot_*.json"))
+    assert any(report_path.glob("rep_*.md"))
+
+
+def test_validate_dataset_rejects_out_of_scope_dataset() -> None:
+    registry = create_default_tool_registry()
+    sink = InMemoryTraceSink()
+
+    result = asyncio.run(
+        registry.invoke(
+            "validate_dataset",
+            {"project_id": "proj_demo", "dataset_id": "ds_01KCYAG0000000000000000001"},
+            ToolContext(origin=TraceOrigin(surface="api", client="pytest"), trace_sink=sink),
+        )
+    )
+
+    assert result.output is None
+    assert result.error is not None
+    assert result.error.code == "out_of_scope"
+
+
+def test_create_plot_rejects_unsupported_plot_type(tmp_path) -> None:
+    registry = create_default_tool_registry()
+    sink = InMemoryTraceSink()
+    context = ToolContext(
+        origin=TraceOrigin(surface="api", client="pytest"),
+        trace_sink=sink,
+        project_id="proj_demo",
+        state={"state_root": tmp_path},
+    )
+    comparison = {
+        "group_a": {"perturbagen": "IL-10"},
+        "group_b": {"perturbagen": "control"},
+        "stimulation_context": "LPS",
+        "paired_by": "donor",
+    }
+    plan_result = asyncio.run(
+        registry.invoke(
+            "define_comparison",
+            {"project_id": "proj_demo", "dataset_id": DEMO_DATASET_ID, "comparison": comparison},
+            context,
+        )
+    )
+    assert plan_result.output is not None
+    plan_output = plan_result.output.model_dump(mode="json")
+    analysis_result = asyncio.run(
+        registry.invoke(
+            "run_comparison",
+            {"project_id": "proj_demo", "plan_id": plan_output["id"]},
+            context,
+        )
+    )
+    assert analysis_result.output is not None
+    analysis_output = analysis_result.output.model_dump(mode="json")
+
+    result = asyncio.run(
+        registry.invoke(
+            "create_plot",
+            {
+                "project_id": "proj_demo",
+                "result_id": analysis_output["id"],
+                "plot_type": "heatmap",
+            },
+            context,
+        )
+    )
+
+    assert result.output is None
+    assert result.error is not None
+    assert result.error.code == "unsupported_plot"
 
 
 def test_define_comparison_rejects_unsupported_unpaired_assumption() -> None:

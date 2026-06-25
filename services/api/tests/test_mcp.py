@@ -177,7 +177,7 @@ def test_mcp_tool_errors_still_emit_trace(monkeypatch) -> None:
                     "name": "validate_dataset",
                     "arguments": {
                         "project_id": "proj_demo",
-                        "dataset_id": "ds_01KCYAG0000000000000000000",
+                        "dataset_id": "ds_01KCYAG0000000000000000001",
                     },
                 },
             },
