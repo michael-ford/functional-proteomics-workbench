@@ -9,11 +9,18 @@ Deploy two Railway services from this repository:
 - API service: `uv run --project services/api uvicorn fpw_api.app:app --host 0.0.0.0 --port $PORT`
 - Web service: `pnpm install --frozen-lockfile && pnpm --filter @fpw/web build`, then `pnpm --filter @fpw/web start`
 
-The root `Procfile` declares matching `api` and `web` process commands for Railway service
-configuration.
+The Railway services use tracked Dockerfiles so clean checkouts deploy reproducibly:
+
+- `fpw-api`: set `RAILWAY_DOCKERFILE_PATH=Dockerfile.api`
+- `fpw-web`: set `RAILWAY_DOCKERFILE_PATH=Dockerfile.web`
+
+The root `Procfile` declares matching `api` and `web` process commands for any Procfile-based
+Railway configuration.
 
 Set the web service variable `FPW_API_BASE_URL` to the public API service URL so `/api/fpw/*`
-rewrites reach FastAPI.
+rewrites reach FastAPI. The web Dockerfile declares this as a build argument because Next.js
+materializes rewrites during `next build`; keep the value non-secret and set it before
+deploying `fpw-web`.
 
 ## Required Environment Variables
 

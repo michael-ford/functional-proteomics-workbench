@@ -1,0 +1,15 @@
+FROM ghcr.io/astral-sh/uv:python3.12-bookworm-slim
+
+ENV UV_COMPILE_BYTECODE=1 \
+    UV_LINK_MODE=copy
+
+WORKDIR /app
+
+COPY packages ./packages
+COPY services/api ./services/api
+
+RUN uv sync --project services/api --frozen --no-dev
+
+EXPOSE 8000
+
+CMD ["sh", "-c", "uv run --project services/api --frozen --no-dev uvicorn fpw_api.app:app --host 0.0.0.0 --port ${PORT:-8000}"]
