@@ -7,6 +7,7 @@ import hashlib
 import importlib
 import json
 import os
+import sys
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Literal
@@ -942,11 +943,11 @@ def _retrieved_cited_chunk_ids(context: ToolContext, *, project_id: str) -> set[
     return chunk_ids
 
 
-def _run_eval_suite_handler(tool_input: BaseModel, _context: ToolContext) -> EvalRunOutput:
+async def _run_eval_suite_handler(tool_input: BaseModel, _context: ToolContext) -> EvalRunOutput:
     typed_input = RunEvalSuiteInput.model_validate(tool_input)
     mode: Literal["smoke", "full"] = "full" if typed_input.suite == "full" else "smoke"
-    runner = importlib.import_module("evals.runners.runner")
-    report = runner.run_eval_suite(mode)
+    runner = _eval_runner_module()
+    report = await runner.run_eval_suite_async(mode)
     trace_step_ids = [
         trace_step_id
         for result in report["results"]
@@ -960,6 +961,18 @@ def _run_eval_suite_handler(tool_input: BaseModel, _context: ToolContext) -> Eva
         score=report["score"],
         trace_step_ids=trace_step_ids,
     )
+
+
+def _eval_runner_module() -> Any:
+    try:
+        return importlib.import_module("evals.runners.runner")
+    except ModuleNotFoundError as exc:
+        if exc.name != "evals":
+            raise
+        repo_root = str(_repo_root())
+        if repo_root not in sys.path:
+            sys.path.insert(0, repo_root)
+        return importlib.import_module("evals.runners.runner")
 
 
 def _get_trace_handler(tool_input: BaseModel, context: ToolContext) -> GetTraceOutput:

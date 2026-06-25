@@ -117,10 +117,32 @@ def run_eval_suite(
     if mode not in ALLOWED_MODES:
         raise ValueError(f"unsupported eval mode {mode!r}")
 
+    return asyncio.run(
+        run_eval_suite_async(
+            mode,
+            created_at=created_at,
+            run_id=run_id,
+            cases_dir=cases_dir,
+        )
+    )
+
+
+async def run_eval_suite_async(
+    mode: EvalMode,
+    *,
+    created_at: datetime | None = None,
+    run_id: str | None = None,
+    cases_dir: Path | None = None,
+) -> dict[str, Any]:
+    """Run the offline eval suite from an existing async event loop."""
+
+    if mode not in ALLOWED_MODES:
+        raise ValueError(f"unsupported eval mode {mode!r}")
+
     case_specs = _load_hero_case_specs(cases_dir or DEFAULT_CASES_DIR)
     now = _as_utc(created_at or datetime.now(UTC))
     report_id = run_id or _new_eval_run_id(now)
-    results = _run_hero_workflow_cases(eval_run_id=report_id, case_specs=case_specs)
+    results = await _run_hero_workflow_cases(eval_run_id=report_id, case_specs=case_specs)
     passed = sum(1 for result in results if result["passed"])
     report = {
         "id": report_id,
@@ -244,7 +266,7 @@ def _validate_case_expectation(expectation: Any, *, path: str) -> None:
         _validate_eval_check(check, path=f"{path}.checks[{index}]")
 
 
-def _run_hero_workflow_cases(
+async def _run_hero_workflow_cases(
     *,
     eval_run_id: str,
     case_specs: dict[str, dict[str, Any]],
@@ -265,7 +287,7 @@ def _run_hero_workflow_cases(
             state=state,
         )
 
-        case1 = _invoke(
+        case1 = await _invoke(
             registry,
             "create_project",
             {"title": "IL-10/LPS Perturb-PBMC hero workflow"},
@@ -279,19 +301,19 @@ def _run_hero_workflow_cases(
             eval_run_id=eval_run_id,
             state=state,
         )
-        case2_validate = _invoke(
+        case2_validate = await _invoke(
             registry,
             "validate_dataset",
             {"project_id": project_id, "dataset_id": DEMO_DATASET_ID},
             context,
         )
-        case2_schema = _invoke(
+        case2_schema = await _invoke(
             registry,
             "inspect_dataset_schema",
             {"project_id": project_id, "dataset_id": DEMO_DATASET_ID},
             context,
         )
-        case3 = _invoke(
+        case3 = await _invoke(
             registry,
             "define_comparison",
             {
@@ -301,7 +323,7 @@ def _run_hero_workflow_cases(
             },
             context,
         )
-        case4 = _invoke(
+        case4 = await _invoke(
             registry,
             "define_comparison",
             {
@@ -312,21 +334,21 @@ def _run_hero_workflow_cases(
             context,
         )
         plan_id = _output(case4)["id"]
-        case5_run = _invoke(
+        case5_run = await _invoke(
             registry,
             "run_comparison",
             {"project_id": project_id, "plan_id": plan_id},
             context,
         )
         result_id = _output(case5_run)["id"]
-        case5_rank = _invoke(
+        case5_rank = await _invoke(
             registry,
             "rank_proteins",
             {"project_id": project_id, "result_id": result_id, "metric": "effect_size"},
             context,
         )
         case6_searches = [
-            _invoke(
+            await _invoke(
                 registry,
                 "search_corpus",
                 {
@@ -352,13 +374,13 @@ def _run_hero_workflow_cases(
             ]
         ]
         chunk_ids = _retrieved_chunk_ids(case6_searches)
-        case7_attach = _invoke(
+        case7_attach = await _invoke(
             registry,
             "attach_evidence",
             {"project_id": project_id, "chunk_ids": chunk_ids},
             context,
         )
-        case7_report = _invoke(
+        case7_report = await _invoke(
             registry,
             "export_report",
             {
@@ -506,8 +528,13 @@ def _run_hero_workflow_cases(
     ]
 
 
-def _invoke(registry: Any, tool_name: str, payload: dict[str, Any], context: ToolContext) -> Any:
-    return asyncio.run(registry.invoke(tool_name, payload, context))
+async def _invoke(
+    registry: Any,
+    tool_name: str,
+    payload: dict[str, Any],
+    context: ToolContext,
+) -> Any:
+    return await registry.invoke(tool_name, payload, context)
 
 
 def _result(
@@ -523,11 +550,7 @@ def _result(
     ]
     actual_tools = [_trace_tool(invocation) for invocation in invocations]
     stub_free = all(
-        invocation.trace.status == "ok"
-        and (
-            invocation.trace.error is None
-            or "not implemented in the ToolRegistry skeleton" not in invocation.trace.error.message
-        )
+        invocation.trace.status == "ok" and invocation.trace.output is not None
         for invocation in invocations
     )
     checks = [

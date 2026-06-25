@@ -549,6 +549,30 @@ def test_export_report_rejects_corrupted_fake_evidence_attachment() -> None:
     assert sink.traces[-1].status == "error"
 
 
+def test_run_eval_suite_tool_delegates_without_nested_event_loop_error() -> None:
+    registry = create_default_tool_registry()
+    sink = InMemoryTraceSink()
+
+    result = asyncio.run(
+        registry.invoke(
+            "run_eval_suite",
+            {"suite": "smoke"},
+            ToolContext(origin=TraceOrigin(surface="api", client="pytest"), trace_sink=sink),
+        )
+    )
+
+    assert result.error is None
+    assert result.output is not None
+    output = result.output.model_dump(mode="json")
+    assert output["suite"] == "deterministic-hero-workflow"
+    assert output["mode"] == "smoke"
+    assert output["status"] == "passed"
+    assert output["score"] == 1.0
+    assert output["trace_step_ids"]
+    assert sink.traces[-1].tool_name == "run_eval_suite"
+    assert sink.traces[-1].status == "ok"
+
+
 def test_search_corpus_fails_closed_before_index_build(tmp_path) -> None:
     registry = create_default_tool_registry()
     sink = InMemoryTraceSink()
