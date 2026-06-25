@@ -10,7 +10,7 @@ ENV PATH="${PNPM_HOME}:${PATH}"
 
 WORKDIR /app
 
-RUN corepack enable && corepack prepare pnpm@10.33.0 --activate
+RUN npm install -g pnpm@10.33.0
 
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY apps/web/package.json ./apps/web/package.json
@@ -22,6 +22,10 @@ COPY demo_data ./demo_data
 
 RUN pnpm --filter @fpw/web build
 
+RUN chown -R node:node /app
+
+USER node
+
 EXPOSE 3000
 
-CMD ["sh", "-c", "pnpm --filter @fpw/web exec next start -H 0.0.0.0 -p ${PORT:-3000}"]
+CMD ["sh", "-c", "exec pnpm --filter @fpw/web exec next start -H 0.0.0.0 -p ${PORT:-3000}"]
