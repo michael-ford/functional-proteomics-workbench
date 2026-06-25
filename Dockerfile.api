@@ -11,11 +11,11 @@ COPY services/api ./services/api
 RUN uv sync --project services/api --frozen --no-dev
 
 RUN groupadd --system app \
-    && useradd --system --gid app --home-dir /app app \
-    && chown -R app:app /app
+    && useradd --system --gid app --create-home --home-dir /home/app app \
+    && chown -R app:app /app /home/app
 
 USER app
 
 EXPOSE 8000
 
-CMD ["sh", "-c", "exec /app/services/api/.venv/bin/uvicorn fpw_api.app:app --host 0.0.0.0 --port ${PORT:-8000}"]
+CMD ["sh", "-c", "exec uv run --project services/api --frozen --no-dev --no-sync uvicorn fpw_api.app:app --host 0.0.0.0 --port ${PORT:-8000}"]
