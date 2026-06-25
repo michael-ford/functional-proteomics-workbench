@@ -787,6 +787,93 @@ def test_search_corpus_reads_built_index_and_traces_citations(tmp_path) -> None:
     assert sink.traces[-1].output["chunks"][0]["chunk"]["citation"]["doi"]
 
 
+def test_attach_evidence_rejects_unapproved_retrieved_chunk(tmp_path) -> None:
+    index_path = write_corpus_index(build_corpus_index(), tmp_path / "corpus-index.json")
+    registry = create_default_tool_registry()
+    sink = InMemoryTraceSink()
+    context = ToolContext(
+        origin=TraceOrigin(surface="api", client="pytest"),
+        trace_sink=sink,
+        project_id="proj_demo",
+        state={"corpus_index_path": index_path},
+    )
+
+    search_result = asyncio.run(
+        registry.invoke(
+            "search_corpus",
+            {
+                "query": "What evidence supports IL-10 dampening cytokine production in LPS?",
+                "entities": ["IL-10", "LPS"],
+                "k": 1,
+            },
+            context,
+        )
+    )
+    assert search_result.error is None
+    assert search_result.output is not None
+    assert sink.traces[-1].output is not None
+    traced_chunk = sink.traces[-1].output["chunks"][0]
+    traced_chunk["metadata"]["approved_for_claims"] = False
+    chunk_id = traced_chunk["chunk"]["id"]
+
+    attach_result = asyncio.run(
+        registry.invoke(
+            "attach_evidence",
+            {"project_id": "proj_demo", "chunk_ids": [chunk_id]},
+            context,
+        )
+    )
+
+    assert attach_result.output is None
+    assert attach_result.error is not None
+    assert attach_result.error.code == "invalid_input"
+    assert "approved cited corpus results" in attach_result.error.message
+
+
+def test_attach_evidence_rejects_retrieved_chunk_without_citation_locator(tmp_path) -> None:
+    index_path = write_corpus_index(build_corpus_index(), tmp_path / "corpus-index.json")
+    registry = create_default_tool_registry()
+    sink = InMemoryTraceSink()
+    context = ToolContext(
+        origin=TraceOrigin(surface="api", client="pytest"),
+        trace_sink=sink,
+        project_id="proj_demo",
+        state={"corpus_index_path": index_path},
+    )
+
+    search_result = asyncio.run(
+        registry.invoke(
+            "search_corpus",
+            {
+                "query": "What evidence supports IL-10 dampening cytokine production in LPS?",
+                "entities": ["IL-10", "LPS"],
+                "k": 1,
+            },
+            context,
+        )
+    )
+    assert search_result.error is None
+    assert search_result.output is not None
+    assert sink.traces[-1].output is not None
+    traced_chunk = sink.traces[-1].output["chunks"][0]
+    traced_chunk["chunk"]["citation"]["doi"] = None
+    traced_chunk["chunk"]["citation"]["url"] = None
+    chunk_id = traced_chunk["chunk"]["id"]
+
+    attach_result = asyncio.run(
+        registry.invoke(
+            "attach_evidence",
+            {"project_id": "proj_demo", "chunk_ids": [chunk_id]},
+            context,
+        )
+    )
+
+    assert attach_result.output is None
+    assert attach_result.error is not None
+    assert attach_result.error.code == "invalid_input"
+    assert "approved cited corpus results" in attach_result.error.message
+
+
 def test_search_corpus_fails_closed_before_index_build(tmp_path) -> None:
     registry = create_default_tool_registry()
     sink = InMemoryTraceSink()

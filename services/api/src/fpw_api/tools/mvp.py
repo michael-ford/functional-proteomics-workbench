@@ -897,6 +897,16 @@ def _attach_evidence_handler(
             "evidence chunks must come from prior deterministic corpus retrieval: "
             + ", ".join(missing),
         )
+    invalid = sorted(set(typed_input.chunk_ids) - _retrieved_cited_chunk_ids(
+        context,
+        project_id=typed_input.project_id,
+    ))
+    if invalid:
+        raise ToolExecutionError(
+            "invalid_input",
+            "evidence chunks were not retrieved from approved cited corpus results: "
+            + ", ".join(invalid),
+        )
     attachment = {
         "id": new_id(EntityPrefix.EVIDENCE_ATTACHMENT),
         "schema_version": SCHEMA_VERSION,
@@ -926,7 +936,7 @@ def _export_report_handler(tool_input: BaseModel, context: ToolContext) -> Repor
             "invalid_input",
             "result_id does not belong to the requested project_id.",
         )
-    attachments = _report_attachments(typed_input)
+    attachments = _report_attachments(typed_input, context)
     chunk_ids = [chunk_id for attachment in attachments for chunk_id in attachment["chunk_ids"]]
     if not chunk_ids:
         raise ToolExecutionError(
@@ -1116,13 +1126,22 @@ def _plot_spec(plot_type: str, result: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def _report_attachments(typed_input: ExportReportInput) -> list[dict[str, Any]]:
+def _report_attachments(
+    typed_input: ExportReportInput,
+    context: ToolContext,
+) -> list[dict[str, Any]]:
     if typed_input.attachment_ids is None:
-        return [
+        attachments = [
             attachment
             for attachment in _ATTACHMENTS.values()
             if attachment["project_id"] == typed_input.project_id
         ]
+        _ensure_attachments_reference_cited_chunks(
+            attachments,
+            context=context,
+            project_id=typed_input.project_id,
+        )
+        return attachments
     attachments: list[dict[str, Any]] = []
     for attachment_id in typed_input.attachment_ids:
         attachment = _ATTACHMENTS.get(attachment_id)
@@ -1134,7 +1153,68 @@ def _report_attachments(typed_input: ExportReportInput) -> list[dict[str, Any]]:
                 "attachment_ids must belong to the requested project_id.",
             )
         attachments.append(attachment)
+    _ensure_attachments_reference_cited_chunks(
+        attachments,
+        context=context,
+        project_id=typed_input.project_id,
+    )
     return attachments
+
+
+def _ensure_attachments_reference_cited_chunks(
+    attachments: list[dict[str, Any]],
+    *,
+    context: ToolContext,
+    project_id: str,
+) -> None:
+    valid_chunk_ids = _retrieved_cited_chunk_ids(context, project_id=project_id)
+    invalid_chunk_ids = sorted(
+        {
+            chunk_id
+            for attachment in attachments
+            for chunk_id in attachment["chunk_ids"]
+            if chunk_id not in valid_chunk_ids
+        }
+    )
+    if invalid_chunk_ids:
+        raise ToolExecutionError(
+            "invalid_input",
+            "evidence attachment contains chunks that were not retrieved from approved "
+            "cited corpus results: "
+            + ", ".join(invalid_chunk_ids),
+        )
+
+
+def _retrieved_cited_chunk_ids(context: ToolContext, *, project_id: str) -> set[str]:
+    traces = getattr(context.trace_sink, "traces", None)
+    if not isinstance(traces, list):
+        return set()
+    chunk_ids: set[str] = set()
+    for trace in traces:
+        if trace.project_id != project_id or trace.tool_name != "search_corpus":
+            continue
+        if trace.status != "ok" or not isinstance(trace.output, dict):
+            continue
+        chunks = trace.output.get("chunks")
+        if not isinstance(chunks, list):
+            continue
+        for scored_chunk in chunks:
+            if not isinstance(scored_chunk, dict):
+                continue
+            metadata = scored_chunk.get("metadata")
+            evidence_chunk = scored_chunk.get("chunk")
+            if not isinstance(metadata, dict) or not isinstance(evidence_chunk, dict):
+                continue
+            citation = evidence_chunk.get("citation")
+            chunk_id = evidence_chunk.get("id")
+            if (
+                isinstance(chunk_id, str)
+                and metadata.get("approved_for_claims") is True
+                and isinstance(citation, dict)
+                and bool(citation.get("url") or citation.get("doi"))
+            ):
+                chunk_ids.add(chunk_id)
+    return chunk_ids
 
 
 def _report_claims(result: dict[str, Any], chunk_ids: list[str]) -> list[dict[str, Any]]:
