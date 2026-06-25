@@ -10,7 +10,7 @@ import json
 import math
 import os
 import sys
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any, Literal
 
@@ -53,7 +53,6 @@ DEMO_PROVENANCE_NAME = "provenance.json"
 DEMO_NORMALIZED_NAME = "nelisa_pbmc_il10_lps_long.parquet"
 DEMO_SELECTION_URL = "/datasets?source=selected_public&dataset=perturb-pbmc-il10-lps"
 DEMO_DASHBOARD_URL = "/?project_id=proj_demo"
-DEMO_UPLOAD_EXPIRES_AT = "2026-06-24T00:00:00Z"
 
 REQUIRED_DEMO_COLUMNS = (
     "sample_id",
@@ -550,7 +549,7 @@ def _create_upload_url_handler(
     _ensure_project_state(context, typed_input.project_id)
     return CreateUploadUrlOutput(
         upload_url=DEMO_SELECTION_URL,
-        expires_at=DEMO_UPLOAD_EXPIRES_AT,
+        expires_at=_future_expiry(),
         note=(
             "v0.1 supports only the selected public Perturb-PBMC IL-10/LPS fixture; "
             "arbitrary uploads are intentionally disabled."
@@ -1649,6 +1648,10 @@ def _repo_root() -> Path:
 
 def _utc_now() -> str:
     return datetime.now(UTC).isoformat().replace("+00:00", "Z")
+
+
+def _future_expiry() -> str:
+    return (datetime.now(UTC) + timedelta(hours=1)).isoformat().replace("+00:00", "Z")
 
 
 def _sha256_file(path: Path) -> str:

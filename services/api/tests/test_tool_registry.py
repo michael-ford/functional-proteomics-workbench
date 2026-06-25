@@ -1,5 +1,6 @@
 import asyncio
 import csv
+from datetime import UTC, datetime
 from typing import Literal
 
 import pytest
@@ -514,16 +515,20 @@ def test_registry_only_hero_replay_creates_artifacts_and_project_trace(tmp_path)
         assert result.error is None
         assert result.output is not None
     assert validation_result.output is not None
+    assert upload_result.output is not None
     assert schema_result.output is not None
     assert plot_result.output is not None
     assert report_result.output is not None
     assert eval_result.output is not None
     assert trace_result.output is not None
+    upload_output = upload_result.output.model_dump(mode="json")
     validation_output = validation_result.output.model_dump(mode="json")
     schema_output = schema_result.output.model_dump(mode="json")
     plot_output = plot_result.output.model_dump(mode="json")
     report_output = report_result.output.model_dump(mode="json")
     eval_output = eval_result.output.model_dump(mode="json")
+    expires_at = datetime.fromisoformat(upload_output["expires_at"].replace("Z", "+00:00"))
+    assert expires_at > datetime.now(UTC)
     assert validation_output["status"] == "passed"
     assert schema_output["detected_axes"]["perturbagen"] == "perturbagen"
     assert plot_output["spec_ref"]["uri"].endswith(".json")
