@@ -15,6 +15,13 @@ describe("ChatPanel", () => {
         session_id: "chat_01KCYAG0000000000000000000",
         project_id: "proj_demo",
         model: "mock/openrouter-kimi-structural",
+        runtime: {
+          mode: "deterministic_mock",
+          provider: "mock",
+          model: "mock/openrouter-kimi-structural",
+          limitation: "v0.1 chat is limited to read-only project status tools.",
+          reason: "FPW_USE_MOCK_MODEL",
+        },
         messages: [
           {
             id: "msg_01KCYAG0000000000000000001",
@@ -85,6 +92,7 @@ describe("ChatPanel", () => {
     fireEvent.click(screen.getByRole("button", { name: "Send message" }));
 
     await screen.findByText("v0.1 Perturb-PBMC IL-10/LPS demo is validated.");
+    expect(screen.getByText("deterministic mock")).toBeVisible();
     expect(screen.getByText("get_project_status")).toBeVisible();
     expect(screen.getByText("web_chat")).toBeVisible();
     await waitFor(() => {
@@ -100,5 +108,38 @@ describe("ChatPanel", () => {
         }),
       );
     });
+  });
+
+  it("renders sanitized live provider failures without adding a mock response", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 502,
+      json: async () => ({
+        detail: {
+          code: "provider_response_not_json",
+          message: "The live model provider returned an invalid response.",
+          runtime: {
+            mode: "openrouter_live",
+            provider: "openrouter",
+            model: "moonshotai/kimi-k2",
+            limitation: "v0.1 chat is limited to read-only project status tools.",
+            reason: null,
+          },
+        },
+      }),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<ChatPanel />);
+
+    fireEvent.change(screen.getByLabelText("Message"), {
+      target: { value: "project status" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Send message" }));
+
+    await screen.findByText(
+      "The live model provider returned an invalid response. (provider_response_not_json)",
+    );
+    expect(screen.queryByText("v0.1 Perturb-PBMC IL-10/LPS demo is validated.")).toBeNull();
   });
 });

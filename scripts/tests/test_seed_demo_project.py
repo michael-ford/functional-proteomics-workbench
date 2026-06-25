@@ -74,7 +74,20 @@ def test_deployment_smoke_skip_http_runs_demo_reset(monkeypatch) -> None:
         "api_ready": "skipped",
         "demo_reset": "ok",
     }
-    assert "chat_adapter_mode=mock" in checks[0]["detail"]
+    assert "chat_adapter_mode=deterministic_mock" in checks[0]["detail"]
+    assert "openrouter_key_configured=False" in checks[0]["detail"]
+
+
+def test_deployment_smoke_reports_unavailable_runtime(monkeypatch) -> None:
+    monkeypatch.setenv("MODEL_PROVIDER", "unsupported")
+    monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
+    monkeypatch.delenv("FPW_USE_MOCK_MODEL", raising=False)
+
+    checks = run_deployment_smoke(api_url="http://127.0.0.1:9", skip_http=True)
+
+    assert checks[0]["name"] == "runtime_env"
+    assert checks[0]["status"] == "failed"
+    assert "chat_adapter_mode=unavailable" in checks[0]["detail"]
 
 
 def test_demo_fixture_validation_passes_for_committed_fixture() -> None:
