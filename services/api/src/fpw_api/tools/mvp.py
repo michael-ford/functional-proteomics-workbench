@@ -784,11 +784,19 @@ def _rank_proteins_handler(tool_input: BaseModel, _context: ToolContext) -> Prot
 
 def _attach_evidence_handler(
     tool_input: BaseModel,
-    _context: ToolContext,
+    context: ToolContext,
 ) -> EvidenceAttachmentOutput:
     typed_input = AttachEvidenceInput.model_validate(tool_input)
     if not typed_input.chunk_ids:
         raise ToolExecutionError("invalid_input", "attach_evidence requires at least one chunk_id.")
+    valid_chunk_ids = _retrieved_cited_chunk_ids(context, project_id=typed_input.project_id)
+    unknown_chunk_ids = sorted(set(typed_input.chunk_ids) - valid_chunk_ids)
+    if unknown_chunk_ids:
+        raise ToolExecutionError(
+            "invalid_input",
+            "evidence chunks were not retrieved from approved cited corpus results: "
+            f"{unknown_chunk_ids}",
+        )
     attachment = {
         "id": new_id(EntityPrefix.EVIDENCE_ATTACHMENT),
         "schema_version": SCHEMA_VERSION,
@@ -813,6 +821,7 @@ def _export_report_handler(tool_input: BaseModel, context: ToolContext) -> Repor
         )
 
     attached_chunk_ids = _attached_chunk_ids(
+        context=context,
         project_id=typed_input.project_id,
         attachment_ids=typed_input.attachment_ids or [],
     )
@@ -873,7 +882,13 @@ def _export_report_handler(tool_input: BaseModel, context: ToolContext) -> Repor
     return ReportArtifactOutput.model_validate(report)
 
 
-def _attached_chunk_ids(*, project_id: str, attachment_ids: list[str]) -> list[str]:
+def _attached_chunk_ids(
+    *,
+    context: ToolContext,
+    project_id: str,
+    attachment_ids: list[str],
+) -> list[str]:
+    valid_chunk_ids = _retrieved_cited_chunk_ids(context, project_id=project_id)
     chunk_ids: list[str] = []
     for attachment_id in attachment_ids:
         attachment = _ATTACHMENTS.get(attachment_id)
@@ -884,7 +899,46 @@ def _attached_chunk_ids(*, project_id: str, attachment_ids: list[str]) -> list[s
                 "invalid_input",
                 "attachment_id does not belong to the requested project_id.",
             )
+        unknown_chunk_ids = sorted(set(attachment["chunk_ids"]) - valid_chunk_ids)
+        if unknown_chunk_ids:
+            raise ToolExecutionError(
+                "invalid_input",
+                "evidence attachment contains chunks that were not retrieved from approved "
+                f"cited corpus results: {unknown_chunk_ids}",
+            )
         chunk_ids.extend(attachment["chunk_ids"])
+    return chunk_ids
+
+
+def _retrieved_cited_chunk_ids(context: ToolContext, *, project_id: str) -> set[str]:
+    traces = getattr(context.trace_sink, "traces", None)
+    if not isinstance(traces, list):
+        return set()
+    chunk_ids: set[str] = set()
+    for trace in traces:
+        if trace.project_id != project_id or trace.tool_name != "search_corpus":
+            continue
+        if trace.status != "ok" or not isinstance(trace.output, dict):
+            continue
+        chunks = trace.output.get("chunks")
+        if not isinstance(chunks, list):
+            continue
+        for chunk in chunks:
+            if not isinstance(chunk, dict):
+                continue
+            metadata = chunk.get("metadata")
+            evidence_chunk = chunk.get("chunk")
+            if not isinstance(metadata, dict) or not isinstance(evidence_chunk, dict):
+                continue
+            citation = evidence_chunk.get("citation")
+            chunk_id = evidence_chunk.get("id")
+            if (
+                isinstance(chunk_id, str)
+                and metadata.get("approved_for_claims") is True
+                and isinstance(citation, dict)
+                and (citation.get("url") or citation.get("doi"))
+            ):
+                chunk_ids.add(chunk_id)
     return chunk_ids
 
 

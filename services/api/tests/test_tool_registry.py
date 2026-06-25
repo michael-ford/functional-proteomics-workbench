@@ -21,7 +21,7 @@ from fpw_api.tools import (
     invoke_for_mcp,
     invoke_for_web_chat,
 )
-from fpw_api.tools.mvp import DEMO_DATASET_ID
+from fpw_api.tools.mvp import _ATTACHMENTS, DEMO_DATASET_ID
 
 MVP_TOOL_NAMES = {
     "create_project",
@@ -451,6 +451,102 @@ def test_search_corpus_reads_built_index_and_traces_citations(tmp_path) -> None:
         == first["metadata"]["source_id"]
     )
     assert sink.traces[-1].output["chunks"][0]["chunk"]["citation"]["doi"]
+
+
+def test_attach_evidence_rejects_fabricated_chunk_ids() -> None:
+    registry = create_default_tool_registry()
+    sink = InMemoryTraceSink()
+
+    result = asyncio.run(
+        registry.invoke(
+            "attach_evidence",
+            {
+                "project_id": "proj_demo",
+                "chunk_ids": ["chunk_01KCYAG0000000000000000000"],
+            },
+            ToolContext(
+                origin=TraceOrigin(surface="api", client="pytest"),
+                trace_sink=sink,
+                project_id="proj_demo",
+            ),
+        )
+    )
+
+    assert result.output is None
+    assert result.error is not None
+    assert result.error.code == "invalid_input"
+    assert "not retrieved from approved cited corpus results" in result.error.message
+    assert sink.traces[-1].tool_name == "attach_evidence"
+    assert sink.traces[-1].status == "error"
+
+
+def test_export_report_rejects_corrupted_fake_evidence_attachment() -> None:
+    registry = create_default_tool_registry()
+    sink = InMemoryTraceSink()
+    context = ToolContext(
+        origin=TraceOrigin(surface="api", client="pytest"),
+        trace_sink=sink,
+        project_id="proj_demo",
+    )
+    plan = asyncio.run(
+        registry.invoke(
+            "define_comparison",
+            {
+                "project_id": "proj_demo",
+                "dataset_id": DEMO_DATASET_ID,
+                "comparison": {
+                    "group_a": {"perturbagen": "IL-10"},
+                    "group_b": {"perturbagen": "control"},
+                    "stimulation_context": "LPS",
+                    "paired_by": "donor",
+                },
+            },
+            context,
+        )
+    )
+    assert plan.output is not None
+    result = asyncio.run(
+        registry.invoke(
+            "run_comparison",
+            {
+                "project_id": "proj_demo",
+                "plan_id": plan.output.model_dump(mode="json")["id"],
+            },
+            context,
+        )
+    )
+    assert result.output is not None
+    attachment_id = "evd_01KCYAG0000000000000000000"
+    try:
+        _ATTACHMENTS[attachment_id] = {
+            "id": attachment_id,
+            "schema_version": "0.1.0",
+            "project_id": "proj_demo",
+            "chunk_ids": ["chunk_01KCYAG0000000000000000000"],
+            "supports_report_id": None,
+            "note": "corrupted fake attachment",
+        }
+
+        report = asyncio.run(
+            registry.invoke(
+                "export_report",
+                {
+                    "project_id": "proj_demo",
+                    "result_id": result.output.model_dump(mode="json")["id"],
+                    "attachment_ids": [attachment_id],
+                },
+                context,
+            )
+        )
+    finally:
+        _ATTACHMENTS.pop(attachment_id, None)
+
+    assert report.output is None
+    assert report.error is not None
+    assert report.error.code == "invalid_input"
+    assert "not retrieved from approved cited corpus results" in report.error.message
+    assert sink.traces[-1].tool_name == "export_report"
+    assert sink.traces[-1].status == "error"
 
 
 def test_search_corpus_fails_closed_before_index_build(tmp_path) -> None:
