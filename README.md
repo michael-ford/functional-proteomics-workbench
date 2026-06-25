@@ -4,8 +4,11 @@ A narrow, high-signal vertical slice of agent-native scientific software: a stat
 auditable, agent-operated analysis workspace for functional proteomics, built on a
 direct subset of public Nomic **Perturb-PBMC** data.
 
-> **Status:** scaffolding + spec sprint. No application code yet. See `HANDOFF.md` for the
-> full plan and `docs/OPEN_QUESTIONS.md` for what is intentionally unresolved.
+> **Status:** v0.1 demo slice is implemented in-repo: Next.js web app, FastAPI API,
+> MCP server, shared analysis/corpus/storage packages, demo data, deterministic smoke evals,
+> and demo reset/replay tooling. The demo is ready for local walkthroughs; live Railway
+> deployment is tracked separately. See `HANDOFF.md` for the original plan and
+> `docs/OPEN_QUESTIONS.md` for what is intentionally unresolved.
 
 ## What it is
 
@@ -33,8 +36,44 @@ project state** reachable from both a **web app** and an **MCP server**, with fu
 
 ## Quickstart
 
-> Filled in during the implementation wave. See `Makefile` for the intended entrypoints
-> (`make setup`, `make test`, `make eval`, `make run-local`).
+Install dependencies:
+
+```bash
+make setup
+```
+
+Run the full local verification suite:
+
+```bash
+make test
+```
+
+Run the deterministic CI-safe eval smoke suite:
+
+```bash
+make eval-smoke
+```
+
+Reset the seeded demo state:
+
+```bash
+make demo-reset
+```
+
+Run the FastAPI backend locally:
+
+```bash
+make run-local
+```
+
+For the browser app, run the web dev server separately:
+
+```bash
+make run-web
+```
+
+For demo deployment, reset, replay, and recording details, see `docs/DEMO_RUNBOOK.md` and
+`docs/FINAL_WALKTHROUGH_SCRIPT.md`.
 
 ## Key docs
 

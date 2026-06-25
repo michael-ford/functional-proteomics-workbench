@@ -2281,20 +2281,24 @@ A future agent should read or at least skim the following sources to reload cont
 
 ---
 
-39. Immediate Next Steps in New Session
+39. Historical Immediate Next Steps
 
-The next Codex/Claude Code session should do the following.
+This section records the original bootstrap plan from the planning handoff. It is historical:
+the repo scaffolding and v0.1 demo implementation now exist on `main`; use `README.md`,
+`AGENTS.md`, and `docs/DEVELOPMENT_WORKFLOW.md` for current operating instructions.
+
+The next Codex/Claude Code session was originally expected to do the following.
 
 Step 1: Create Repo and Add Handoff
 
-Create the GitHub repo and add:
+Create the GitHub repo and add the initial placeholders:
 
 HANDOFF.md
-README.md placeholder
-AGENTS.md placeholder
+README.md
+AGENTS.md
 docs/OPEN_QUESTIONS.md
 
-Do not implement application code yet.
+Application code was intentionally deferred during this bootstrap step.
 
 Step 2: Add Spec Sprint Issues
 
