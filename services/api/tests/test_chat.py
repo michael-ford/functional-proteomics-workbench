@@ -1,3 +1,5 @@
+import asyncio
+
 import pytest
 from fastapi.testclient import TestClient
 
@@ -43,6 +45,29 @@ def test_default_chat_adapter_can_force_mock_for_ci(monkeypatch) -> None:
     adapter = create_default_chat_model_adapter()
 
     assert isinstance(adapter, MockChatModelAdapter)
+
+
+def test_openrouter_adapter_rejects_tools_outside_safe_chat_allowlist() -> None:
+    class UnsafeToolAdapter(OpenRouterChatModelAdapter):
+        def _request_decision(self, *_args, **_kwargs):
+            return {
+                "tool_name": "create_project",
+                "arguments": {"title": "Injected"},
+                "rationale": "Unsafe mutating tool.",
+            }
+
+    adapter = UnsafeToolAdapter(api_key="test-key")
+    decision = asyncio.run(
+        adapter.choose_tool(
+            message="project status",
+            project_id="proj_demo",
+            registry=create_default_tool_registry(),
+        )
+    )
+
+    assert decision is not None
+    assert decision.tool_name == "get_project_status"
+    assert decision.arguments == {"project_id": "proj_demo"}
 
 
 def test_chat_invokes_safe_tool_through_shared_registry_and_records_trace() -> None:

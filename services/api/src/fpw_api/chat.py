@@ -23,6 +23,7 @@ from fpw_api.tools.registry import ToolRegistryError
 DEFAULT_CHAT_MODEL = "mock/openrouter-kimi-structural"
 DEFAULT_OPENROUTER_MODEL = "moonshotai/kimi-k2"
 OPENROUTER_CHAT_COMPLETIONS_URL = "https://openrouter.ai/api/v1/chat/completions"
+SAFE_CHAT_TOOL_NAMES = frozenset({"get_project_status"})
 
 
 class ChatRequest(BaseModel):
@@ -187,7 +188,7 @@ class OpenRouterChatModelAdapter:
         available_tools = [
             {"name": definition.name, "description": definition.description}
             for definition in registry.list_definitions()
-            if definition.name == "get_project_status"
+            if definition.name in SAFE_CHAT_TOOL_NAMES
         ]
         try:
             raw_decision = await asyncio.to_thread(
@@ -207,6 +208,8 @@ class OpenRouterChatModelAdapter:
             return None
         try:
             decision = ChatToolDecision.model_validate(raw_decision)
+            if decision.tool_name not in SAFE_CHAT_TOOL_NAMES:
+                raise ToolRegistryError(f"unsafe chat tool: {decision.tool_name}")
             registry.lookup(decision.tool_name)
         except (ValidationError, ToolRegistryError):
             return await self._fallback.choose_tool(
