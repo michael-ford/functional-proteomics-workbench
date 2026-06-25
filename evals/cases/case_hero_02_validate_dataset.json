@@ -1,0 +1,30 @@
+{
+  "id": "case_hero_02_validate_dataset",
+  "name": "Validate approved Perturb-PBMC fixture",
+  "description": "Validate the approved selected_public Perturb-PBMC subset and inspect its long-format schema.",
+  "tags": ["tool_choice", "schema_validity", "trace_completeness"],
+  "deterministic": true,
+  "fixture_refs": ["demo_data/raw/nelisa_pbmc_il10_lps_subset.csv"],
+  "expectations": [
+    {
+      "tool_name": "validate_dataset",
+      "checks": [
+        {
+          "kind": "schema_validity",
+          "passed": true,
+          "detail": "Dataset validation passes with the fixture row count."
+        }
+      ]
+    },
+    {
+      "tool_name": "inspect_dataset_schema",
+      "checks": [
+        {
+          "kind": "schema_validity",
+          "passed": true,
+          "detail": "Schema inspection detects donor, stimulation, perturbagen, protein, and value axes."
+        }
+      ]
+    }
+  ]
+}

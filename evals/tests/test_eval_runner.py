@@ -8,10 +8,12 @@ from pathlib import Path
 
 from evals.runners import (
     REPORT_SCHEMA,
+    EvalCaseConfigurationError,
     ReportValidationError,
     run_eval_suite,
     validate_eval_run_report,
 )
+from evals.runners.runner import HERO_CASE_IDS
 from evals.runners.runner import main
 
 
@@ -23,22 +25,30 @@ class EvalRunnerTests(unittest.TestCase):
             run_id="eval_run_test",
         )
 
-        self.assertEqual(report["suite"], "deterministic-smoke")
+        self.assertEqual(report["suite"], "deterministic-hero-workflow")
         self.assertEqual(report["mode"], "smoke")
         self.assertEqual(report["score"], 1.0)
-        case_ids = {result["case_id"] for result in report["results"]}
-        self.assertEqual(case_ids, {"case_runner_smoke", "case_corpus_retrieval_smoke"})
-        corpus_result = next(
+        case_ids = [result["case_id"] for result in report["results"]]
+        self.assertEqual(case_ids, list(HERO_CASE_IDS))
+        self.assertTrue(all(result["trace_step_ids"] for result in report["results"]))
+        rank_result = next(
             result
             for result in report["results"]
-            if result["case_id"] == "case_corpus_retrieval_smoke"
-        )
-        self.assertEqual(len(corpus_result["trace_step_ids"]), 3)
-        self.assertTrue(
-            any(check["kind"] == "citation_support" for check in corpus_result["checks"])
+            if result["case_id"] == "case_hero_05_rank_proteins"
         )
         self.assertTrue(
-            any(check["kind"] == "entity_grounding" for check in corpus_result["checks"])
+            any(check["kind"] == "numeric" and check["passed"] for check in rank_result["checks"])
+        )
+        report_result = next(
+            result
+            for result in report["results"]
+            if result["case_id"] == "case_hero_07_generate_report"
+        )
+        self.assertTrue(
+            any(
+                check["kind"] == "unsupported_claim" and check["passed"]
+                for check in report_result["checks"]
+            )
         )
 
     def test_report_schema_documents_eval_run_shape(self) -> None:
@@ -72,6 +82,25 @@ class EvalRunnerTests(unittest.TestCase):
 
         with self.assertRaisesRegex(ReportValidationError, "passed cases / total cases"):
             validate_eval_run_report(report)
+
+    def test_smoke_runner_rejects_missing_required_hero_case(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            cases_dir = Path(tmpdir)
+            source_dir = Path(__file__).resolve().parents[1] / "cases"
+            for source in source_dir.glob("*.json"):
+                if source.name != "case_hero_07_generate_report.json":
+                    (cases_dir / source.name).write_text(
+                        source.read_text(encoding="utf-8"),
+                        encoding="utf-8",
+                    )
+
+            with self.assertRaisesRegex(EvalCaseConfigurationError, "missing required"):
+                run_eval_suite(
+                    "smoke",
+                    created_at=datetime(2026, 6, 23, 12, 0, tzinfo=UTC),
+                    run_id="eval_run_test",
+                    cases_dir=cases_dir,
+                )
 
     def test_cli_writes_machine_readable_report_artifact(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:

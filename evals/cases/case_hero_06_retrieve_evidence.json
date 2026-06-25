@@ -1,0 +1,45 @@
+{
+  "id": "case_hero_06_retrieve_evidence",
+  "name": "Retrieve grounded corpus evidence",
+  "description": "Retrieve deterministic corpus chunks for dataset provenance, assay context, IL-10, LPS, and PBMC interpretation.",
+  "tags": ["tool_choice", "citation_support", "entity_grounding", "trace_completeness"],
+  "deterministic": true,
+  "fixture_refs": ["packages/corpus/src/functional_proteomics_corpus/data/approved_sources.json"],
+  "expectations": [
+    {
+      "tool_name": "search_corpus",
+      "checks": [
+        {
+          "kind": "citation_support",
+          "passed": true,
+          "detail": "Each query retrieves at least one cited approved source."
+        },
+        {
+          "kind": "entity_grounding",
+          "passed": true,
+          "detail": "Retrieved chunks include matched entities or entity annotations."
+        }
+      ]
+    },
+    {
+      "tool_name": "search_corpus",
+      "checks": [
+        {
+          "kind": "citation_support",
+          "passed": true,
+          "detail": "IL-10/LPS evidence includes citation metadata."
+        }
+      ]
+    },
+    {
+      "tool_name": "search_corpus",
+      "checks": [
+        {
+          "kind": "entity_grounding",
+          "passed": true,
+          "detail": "PBMC/LPS evidence is entity grounded."
+        }
+      ]
+    }
+  ]
+}

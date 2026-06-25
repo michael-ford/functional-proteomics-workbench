@@ -1,0 +1,35 @@
+{
+  "id": "case_hero_07_generate_report",
+  "name": "Generate claim-typed cited report",
+  "description": "Attach retrieved evidence and export a report with claim typing and no unsupported mechanism/generalization claims.",
+  "tags": ["tool_choice", "report_structure", "unsupported_claim", "citation_support", "trace_completeness"],
+  "deterministic": true,
+  "fixture_refs": ["agent_policies/report_style.md"],
+  "expectations": [
+    {
+      "tool_name": "attach_evidence",
+      "checks": [
+        {
+          "kind": "citation_support",
+          "passed": true,
+          "detail": "Evidence chunks are attached before report generation."
+        }
+      ]
+    },
+    {
+      "tool_name": "export_report",
+      "checks": [
+        {
+          "kind": "report_structure",
+          "passed": true,
+          "detail": "Report has markdown artifact and data/source/interpretive/limitation claims."
+        },
+        {
+          "kind": "unsupported_claim",
+          "passed": true,
+          "detail": "Report avoids unsupported mechanism and generalization claims."
+        }
+      ]
+    }
+  ]
+}

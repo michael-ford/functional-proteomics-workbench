@@ -1,8 +1,8 @@
 # Eval Runner
 
 The eval runner is an offline skeleton for the pytest-based eval system described in
-`docs/EVALS.md`. It currently executes one deterministic runner smoke case and writes an
-`EvalRun` JSON report. It does not call a live model.
+`docs/EVALS.md`. It executes the deterministic hero workflow cases 1-7 through the shared
+`ToolRegistry` and writes an `EvalRun` JSON report. It does not call a live model.
 
 Run it with:
 
@@ -20,11 +20,11 @@ The report JSON mirrors the protected `EvalRun` envelope:
 ```json
 {
   "id": "eval_run_20260623T120000000000Z",
-  "suite": "runner-smoke",
+  "suite": "deterministic-hero-workflow",
   "mode": "smoke",
   "results": [
     {
-      "case_id": "case_runner_smoke",
+      "case_id": "case_hero_01_create_project",
       "passed": true,
       "checks": [
         {
@@ -41,6 +41,6 @@ The report JSON mirrors the protected `EvalRun` envelope:
 }
 ```
 
-`trace_step_ids` is present for trace replay compatibility. The current smoke case does not
-invoke the tool registry, so it records an explicit empty list rather than inventing tool
-call traces.
+`trace_step_ids` is present for trace replay compatibility. Each smoke case invokes one or
+more registry tools with `origin.surface == "eval"`, so every case has replayable
+`ToolCallTrace` IDs.
