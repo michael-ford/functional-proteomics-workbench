@@ -578,6 +578,30 @@ def test_validate_dataset_rejects_out_of_scope_dataset() -> None:
     assert result.error.code == "out_of_scope"
 
 
+def test_inspect_dataset_schema_does_not_mutate_project_state(tmp_path) -> None:
+    registry = create_default_tool_registry()
+    sink = InMemoryTraceSink()
+
+    result = asyncio.run(
+        registry.invoke(
+            "inspect_dataset_schema",
+            {"project_id": "proj_demo", "dataset_id": DEMO_DATASET_ID},
+            ToolContext(
+                origin=TraceOrigin(surface="api", client="pytest"),
+                trace_sink=sink,
+                state={"state_root": tmp_path},
+            ),
+        )
+    )
+
+    assert result.error is None
+    assert result.output is not None
+    output = result.output.model_dump(mode="json")
+    assert output["layout"] == "long"
+    assert not (tmp_path / "projects").exists()
+    assert "projects" not in sink.traces[0].input
+
+
 def test_create_plot_rejects_unsupported_plot_type(tmp_path) -> None:
     registry = create_default_tool_registry()
     sink = InMemoryTraceSink()

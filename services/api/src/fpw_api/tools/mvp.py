@@ -588,18 +588,11 @@ def _validate_dataset_handler(
 
 def _inspect_dataset_schema_handler(
     tool_input: BaseModel,
-    context: ToolContext,
+    _context: ToolContext,
 ) -> DatasetSchemaOutput:
     typed_input = ValidateDatasetInput.model_validate(tool_input)
     _require_demo_dataset(typed_input)
-    _ensure_project_state(context, typed_input.project_id)
     profile = _schema_profile_for_fixture()
-    _write_json_project_artifact(
-        context,
-        typed_input.project_id,
-        Path("datasets/schema_profile.json"),
-        profile,
-    )
     return DatasetSchemaOutput.model_validate(profile)
 
 
