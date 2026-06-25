@@ -14,6 +14,8 @@ from scripts.seed_demo_project import (
     seed_demo_project,
     validate_demo_fixture,
 )
+from scripts.demo_reset import reset_demo_project
+from scripts.deployment_smoke import run_deployment_smoke
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -44,6 +46,35 @@ def test_seed_demo_project_is_idempotent(tmp_path: Path) -> None:
     assert dataset["raw_ref"]["uri"] == (
         f"project://{PROJECT_ID}/datasets/raw/{RAW_FIXTURE_NAME}"
     )
+
+
+def test_demo_reset_removes_stale_state_and_reseeds(tmp_path: Path) -> None:
+    state_root = tmp_path / "state"
+    stale_file = state_root / "projects" / PROJECT_ID / "stale.txt"
+    stale_file.parent.mkdir(parents=True)
+    stale_file.write_text("remove me", encoding="utf-8")
+
+    summary = reset_demo_project(state_root=state_root, fixture_root=FIXTURE_ROOT)
+
+    assert summary["reset"] is True
+    assert summary["project_id"] == PROJECT_ID
+    assert summary["row_count"] == 2394
+    assert not stale_file.exists()
+    assert (Path(summary["project_dir"]) / "project.json").exists()
+
+
+def test_deployment_smoke_skip_http_runs_demo_reset(monkeypatch) -> None:
+    monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
+    monkeypatch.setenv("FPW_USE_MOCK_MODEL", "true")
+
+    checks = run_deployment_smoke(api_url="http://127.0.0.1:9", skip_http=True)
+
+    assert {check["name"]: check["status"] for check in checks} == {
+        "runtime_env": "ok",
+        "api_ready": "skipped",
+        "demo_reset": "ok",
+    }
+    assert "chat_adapter_mode=mock" in checks[0]["detail"]
 
 
 def test_demo_fixture_validation_passes_for_committed_fixture() -> None:

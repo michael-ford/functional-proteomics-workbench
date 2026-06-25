@@ -2,13 +2,18 @@
 
 from __future__ import annotations
 
+import asyncio
+import json
+import os
 import time
+import urllib.error
+import urllib.request
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import Any, Literal, Protocol
 
 from fastapi import APIRouter, HTTPException, Request, status
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, ValidationError
 from shared_schemas import new_id
 
 from fpw_api.tools import InMemoryTraceSink, ToolRegistry, TraceSink, invoke_for_web_chat
@@ -16,6 +21,9 @@ from fpw_api.tools.mvp import DEMO_PROJECT_ID
 from fpw_api.tools.registry import ToolRegistryError
 
 DEFAULT_CHAT_MODEL = "mock/openrouter-kimi-structural"
+DEFAULT_OPENROUTER_MODEL = "moonshotai/kimi-k2"
+OPENROUTER_CHAT_COMPLETIONS_URL = "https://openrouter.ai/api/v1/chat/completions"
+SAFE_CHAT_TOOL_NAMES = frozenset({"get_project_status"})
 
 
 class ChatRequest(BaseModel):
@@ -152,6 +160,177 @@ class MockChatModelAdapter:
                     f"Datasets: {dataset_count}. Prior tool traces: {trace_count}."
                 )
         return f"{decision.tool_name} completed through the shared ToolRegistry."
+
+
+class OpenRouterChatModelAdapter:
+    """OpenRouter/Kimi adapter with deterministic fallback for demo/test environments."""
+
+    def __init__(
+        self,
+        *,
+        api_key: str,
+        model_name: str = DEFAULT_OPENROUTER_MODEL,
+        fallback: ChatModelAdapter | None = None,
+        timeout_seconds: float = 20.0,
+    ) -> None:
+        self._api_key = api_key
+        self.model_name = model_name
+        self._fallback = fallback or MockChatModelAdapter()
+        self._timeout_seconds = timeout_seconds
+
+    async def choose_tool(
+        self,
+        *,
+        message: str,
+        project_id: str,
+        registry: ToolRegistry,
+    ) -> ChatToolDecision | None:
+        available_tools = [
+            {"name": definition.name, "description": definition.description}
+            for definition in registry.list_definitions()
+            if definition.name in SAFE_CHAT_TOOL_NAMES
+        ]
+        try:
+            raw_decision = await asyncio.to_thread(
+                self._request_decision,
+                message,
+                project_id,
+                available_tools,
+            )
+        except OpenRouterAdapterError:
+            return await self._fallback.choose_tool(
+                message=message,
+                project_id=project_id,
+                registry=registry,
+            )
+
+        if raw_decision is None:
+            return None
+        try:
+            decision = ChatToolDecision.model_validate(raw_decision)
+            if decision.tool_name not in SAFE_CHAT_TOOL_NAMES:
+                raise ToolRegistryError(f"unsafe chat tool: {decision.tool_name}")
+            registry.lookup(decision.tool_name)
+        except (ValidationError, ToolRegistryError):
+            return await self._fallback.choose_tool(
+                message=message,
+                project_id=project_id,
+                registry=registry,
+            )
+        return decision
+
+    def render_response(
+        self,
+        *,
+        decision: ChatToolDecision | None,
+        tool_output: dict[str, Any] | None,
+        tool_error: dict[str, Any] | None,
+    ) -> str:
+        rendered = self._fallback.render_response(
+            decision=decision,
+            tool_output=tool_output,
+            tool_error=tool_error,
+        )
+        return rendered
+
+    def _request_decision(
+        self,
+        message: str,
+        project_id: str,
+        available_tools: list[dict[str, str]],
+    ) -> dict[str, Any] | None:
+        request_body = {
+            "model": self.model_name,
+            "temperature": 0,
+            "response_format": {"type": "json_object"},
+            "messages": [
+                {
+                    "role": "system",
+                    "content": (
+                        "You are the functional proteomics workbench router. "
+                        "Return JSON only. If a safe project-state tool should be called, "
+                        "return an object with tool_name, arguments, and rationale. "
+                        "If no tool is needed, return {\"tool_name\": null}. "
+                        "Only choose from the supplied tools."
+                    ),
+                },
+                {
+                    "role": "user",
+                    "content": json.dumps(
+                        {
+                            "project_id": project_id,
+                            "message": message,
+                            "available_tools": available_tools,
+                            "default_status_tool": {
+                                "tool_name": "get_project_status",
+                                "arguments": {"project_id": project_id},
+                            },
+                        },
+                        sort_keys=True,
+                    ),
+                },
+            ],
+        }
+        request = urllib.request.Request(
+            OPENROUTER_CHAT_COMPLETIONS_URL,
+            data=json.dumps(request_body).encode("utf-8"),
+            headers={
+                "Authorization": f"Bearer {self._api_key}",
+                "Content-Type": "application/json",
+                "HTTP-Referer": os.environ.get("APP_BASE_URL", "http://localhost:8000"),
+                "X-Title": "Functional Proteomics Workbench",
+            },
+            method="POST",
+        )
+        try:
+            with urllib.request.urlopen(request, timeout=self._timeout_seconds) as response:
+                payload = json.loads(response.read().decode("utf-8"))
+        except urllib.error.HTTPError as exc:
+            raise OpenRouterAdapterError(f"provider_http_{exc.code}") from exc
+        except (urllib.error.URLError, TimeoutError, json.JSONDecodeError) as exc:
+            raise OpenRouterAdapterError("provider_unavailable") from exc
+
+        try:
+            content = payload["choices"][0]["message"]["content"]
+        except (KeyError, IndexError, TypeError) as exc:
+            raise OpenRouterAdapterError("provider_response_invalid") from exc
+
+        parsed = _parse_json_object(str(content))
+        if parsed.get("tool_name") is None:
+            return None
+        return {
+            "tool_name": parsed.get("tool_name"),
+            "arguments": parsed.get("arguments") or {"project_id": project_id},
+            "rationale": parsed.get("rationale") or "OpenRouter selected a safe registry tool.",
+        }
+
+
+class OpenRouterAdapterError(RuntimeError):
+    def __init__(self, public_message: str) -> None:
+        super().__init__(public_message)
+        self.public_message = public_message
+
+
+def create_default_chat_model_adapter() -> ChatModelAdapter:
+    provider = os.environ.get("MODEL_PROVIDER", "openrouter").casefold()
+    force_mock = os.environ.get("FPW_USE_MOCK_MODEL", "").casefold() in {"1", "true", "yes"}
+    api_key = os.environ.get("OPENROUTER_API_KEY", "").strip()
+    if provider == "openrouter" and api_key and not force_mock:
+        return OpenRouterChatModelAdapter(
+            api_key=api_key,
+            model_name=os.environ.get("OPENROUTER_MODEL", DEFAULT_OPENROUTER_MODEL),
+        )
+    return MockChatModelAdapter()
+
+
+def _parse_json_object(content: str) -> dict[str, Any]:
+    try:
+        parsed = json.loads(content)
+    except json.JSONDecodeError as exc:
+        raise OpenRouterAdapterError("provider_response_not_json") from exc
+    if not isinstance(parsed, dict):
+        raise OpenRouterAdapterError("provider_response_invalid")
+    return parsed
 
 
 @dataclass

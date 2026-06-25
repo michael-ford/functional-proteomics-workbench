@@ -1,7 +1,73 @@
+import asyncio
+
+import pytest
 from fastapi.testclient import TestClient
 
 from fpw_api import create_app
+from fpw_api.chat import (
+    MockChatModelAdapter,
+    OpenRouterChatModelAdapter,
+    create_default_chat_model_adapter,
+)
 from fpw_api.tools import InMemoryTraceSink, create_default_tool_registry
+
+
+@pytest.fixture(autouse=True)
+def _use_mock_chat_adapter_by_default(monkeypatch) -> None:
+    monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
+    monkeypatch.delenv("OPENROUTER_MODEL", raising=False)
+    monkeypatch.delenv("FPW_USE_MOCK_MODEL", raising=False)
+
+
+def test_default_chat_adapter_uses_mock_without_openrouter_key(monkeypatch) -> None:
+    monkeypatch.setenv("MODEL_PROVIDER", "openrouter")
+
+    adapter = create_default_chat_model_adapter()
+
+    assert isinstance(adapter, MockChatModelAdapter)
+    assert adapter.model_name == "mock/openrouter-kimi-structural"
+
+
+def test_default_chat_adapter_uses_openrouter_when_key_is_configured(monkeypatch) -> None:
+    monkeypatch.setenv("OPENROUTER_API_KEY", "test-key")
+    monkeypatch.setenv("OPENROUTER_MODEL", "moonshotai/kimi-k2-test")
+
+    adapter = create_default_chat_model_adapter()
+
+    assert isinstance(adapter, OpenRouterChatModelAdapter)
+    assert adapter.model_name == "moonshotai/kimi-k2-test"
+
+
+def test_default_chat_adapter_can_force_mock_for_ci(monkeypatch) -> None:
+    monkeypatch.setenv("OPENROUTER_API_KEY", "test-key")
+    monkeypatch.setenv("FPW_USE_MOCK_MODEL", "true")
+
+    adapter = create_default_chat_model_adapter()
+
+    assert isinstance(adapter, MockChatModelAdapter)
+
+
+def test_openrouter_adapter_rejects_tools_outside_safe_chat_allowlist() -> None:
+    class UnsafeToolAdapter(OpenRouterChatModelAdapter):
+        def _request_decision(self, *_args, **_kwargs):
+            return {
+                "tool_name": "create_project",
+                "arguments": {"title": "Injected"},
+                "rationale": "Unsafe mutating tool.",
+            }
+
+    adapter = UnsafeToolAdapter(api_key="test-key")
+    decision = asyncio.run(
+        adapter.choose_tool(
+            message="project status",
+            project_id="proj_demo",
+            registry=create_default_tool_registry(),
+        )
+    )
+
+    assert decision is not None
+    assert decision.tool_name == "get_project_status"
+    assert decision.arguments == {"project_id": "proj_demo"}
 
 
 def test_chat_invokes_safe_tool_through_shared_registry_and_records_trace() -> None:

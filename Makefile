@@ -1,5 +1,5 @@
 # Functional Proteomics Workbench — developer entrypoints (stubs; filled during IMPL wave)
-.PHONY: setup test lint typecheck gen-types eval eval-smoke run-local run-web demo-reset ingest-demo-data build-corpus seed-demo-project
+.PHONY: setup test lint typecheck gen-types eval eval-smoke run-local run-web demo-reset demo-replay deploy-smoke ingest-demo-data build-corpus seed-demo-project
 
 PNPM_STAMP := node_modules/.modules.yaml
 
@@ -48,4 +48,8 @@ build-corpus:     ## build entity-aware RAG corpus
 seed-demo-project:## seed the demo project
 	uv run --project packages/shared-schemas python scripts/seed_demo_project.py
 demo-reset:       ## reset demo state
-	rm -rf .fpw_state/projects/proj_demo
+	PYTHONPATH=$(CURDIR) uv run --project services/api python scripts/demo_reset.py
+demo-replay:      ## rebuild dashboard demo artifacts from registry/eval replay
+	PYTHONPATH=$(CURDIR) uv run --project services/api python scripts/demo_reset.py --rebuild-web-artifacts
+deploy-smoke:     ## run deployment readiness smoke checks; set APP_BASE_URL for live Railway API
+	PYTHONPATH=$(CURDIR) uv run --project services/api python scripts/deployment_smoke.py
