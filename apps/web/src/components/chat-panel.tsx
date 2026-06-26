@@ -60,7 +60,6 @@ export function ChatPanel() {
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [traceLog, setTraceLog] = useState<ChatToolTrace[]>([]);
-  const [model, setModel] = useState("mock/openrouter-kimi-structural");
   const [runtime, setRuntime] = useState<ChatRuntime | null>(null);
   const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -96,11 +95,10 @@ export function ChatPanel() {
       setSessionId(payload.session_id);
       setMessages(payload.messages);
       setTraceLog((current) => [...payload.tool_traces, ...current].slice(0, 8));
-      setModel(payload.model);
       setRuntime(payload.runtime);
       setMessage("");
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "Chat request failed.");
+      setError(formatChatFailure(caught));
     } finally {
       setIsSending(false);
     }
@@ -108,12 +106,14 @@ export function ChatPanel() {
 
   return (
     <Panel>
-      <PanelTitle icon={MessageSquare} title="Web chat" meta={runtimeLabel(runtime, model)} />
+      <PanelTitle icon={MessageSquare} title="Web chat" meta={runtimeLabel(runtime)} />
       <div className="grid min-h-[31rem] gap-px bg-border lg:grid-cols-[minmax(0,1fr)_22rem]">
         <div className="flex min-h-[24rem] flex-col bg-surface">
           <div className="flex-1 space-y-3 overflow-y-auto px-4 py-4">
             {conversation.length === 0 ? (
-              <EmptyState>No chat turns recorded.</EmptyState>
+              <EmptyState>
+                Ask about project status, the selected Perturb-PBMC dataset, or a trace-backed result.
+              </EmptyState>
             ) : (
               conversation.map((item) => (
                 <div
@@ -184,7 +184,7 @@ export function ChatPanel() {
           </div>
           <div className="max-h-[30rem] divide-y divide-border overflow-y-auto">
             {traceLog.length === 0 ? (
-              <EmptyState>No tool traces recorded.</EmptyState>
+              <EmptyState>Tool traces will appear here after the assistant runs a workspace tool.</EmptyState>
             ) : (
               traceLog.map((trace) => (
                 <article key={trace.id} className="px-4 py-3 text-sm">
@@ -219,9 +219,9 @@ export function ChatPanel() {
   );
 }
 
-function runtimeLabel(runtime: ChatRuntime | null, model: string): string {
+function runtimeLabel(runtime: ChatRuntime | null): string {
   if (!runtime) {
-    return model.startsWith("mock/") ? "mock model" : model;
+    return "model ready";
   }
   if (runtime.mode === "deterministic_mock") {
     return "deterministic mock";
@@ -230,6 +230,19 @@ function runtimeLabel(runtime: ChatRuntime | null, model: string): string {
     return `live ${runtime.model}`;
   }
   return "model unavailable";
+}
+
+function formatChatFailure(caught: unknown): string {
+  const fallback =
+    "Chat is temporarily unavailable. Check your connection and try again.";
+  if (!(caught instanceof Error)) {
+    return fallback;
+  }
+  const message = caught.message.trim();
+  if (!message || message === "Failed to fetch" || message === "NetworkError when attempting to fetch resource.") {
+    return fallback;
+  }
+  return `${message} Try again in a moment.`;
 }
 
 async function readChatError(response: Response): Promise<string> {

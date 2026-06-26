@@ -8,6 +8,23 @@ describe("ChatPanel", () => {
     vi.unstubAllGlobals();
   });
 
+  it("renders production-friendly initial runtime and empty states", () => {
+    render(<ChatPanel />);
+
+    expect(screen.getByText("model ready")).toBeVisible();
+    expect(
+      screen.getByText(
+        "Ask about project status, the selected Perturb-PBMC dataset, or a trace-backed result.",
+      ),
+    ).toBeVisible();
+    expect(
+      screen.getByText("Tool traces will appear here after the assistant runs a workspace tool."),
+    ).toBeVisible();
+    expect(screen.queryByText("mock model")).toBeNull();
+    expect(screen.queryByText("No chat turns recorded.")).toBeNull();
+    expect(screen.queryByText("No tool traces recorded.")).toBeNull();
+  });
+
   it("posts chat turns to the API proxy and renders the returned tool trace", async () => {
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
@@ -138,8 +155,25 @@ describe("ChatPanel", () => {
     fireEvent.click(screen.getByRole("button", { name: "Send message" }));
 
     await screen.findByText(
-      "The live model provider returned an invalid response. (provider_response_not_json)",
+      "The live model provider returned an invalid response. (provider_response_not_json) Try again in a moment.",
     );
     expect(screen.queryByText("v0.1 Perturb-PBMC IL-10/LPS demo is validated.")).toBeNull();
+  });
+
+  it("renders actionable copy when the chat network request fails", async () => {
+    const fetchMock = vi.fn().mockRejectedValue(new TypeError("Failed to fetch"));
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<ChatPanel />);
+
+    fireEvent.change(screen.getByLabelText("Message"), {
+      target: { value: "project status" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Send message" }));
+
+    await screen.findByText(
+      "Chat is temporarily unavailable. Check your connection and try again.",
+    );
+    expect(screen.queryByText("Failed to fetch")).toBeNull();
   });
 });
