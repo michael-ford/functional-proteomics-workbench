@@ -6,24 +6,27 @@ import {
   FileText,
   FlaskConical,
   GitBranch,
-  Home,
   ListChecks,
   type LucideIcon,
 } from "lucide-react";
 
+import { WorkspaceNavLink } from "./workspace-nav-link";
+
 type NavItem = {
   href: string;
   label: string;
-  icon: LucideIcon;
+  icon: "home" | "database" | "fileText" | "gitBranch" | "listChecks";
 };
 
 export const navItems: NavItem[] = [
-  { href: "/", label: "Project", icon: Home },
-  { href: "/datasets", label: "Dataset", icon: Database },
-  { href: "/report", label: "Report", icon: FileText },
-  { href: "/traces", label: "Trace", icon: GitBranch },
-  { href: "/evals", label: "Evals", icon: ListChecks },
+  { href: "/", label: "Project", icon: "home" },
+  { href: "/datasets", label: "Dataset", icon: "database" },
+  { href: "/report", label: "Report", icon: "fileText" },
+  { href: "/traces", label: "Trace", icon: "gitBranch" },
+  { href: "/evals", label: "Evaluations", icon: "listChecks" },
 ];
+
+export type { NavItem };
 
 type WorkspaceShellProps = {
   children: React.ReactNode;
@@ -50,14 +53,14 @@ export function WorkspaceShell({
         </Link>
         <nav aria-label="Workspace" className="mt-8 space-y-1">
           {navItems.map((item) => (
-            <Link
+            <WorkspaceNavLink
               key={item.href}
-              href={item.href}
-              className="flex items-center gap-3 rounded px-3 py-2 text-sm font-medium text-nav-muted transition hover:bg-white/5 hover:text-nav-ink"
-            >
-              <item.icon size={17} aria-hidden="true" />
-              {item.label}
-            </Link>
+              item={item}
+              className="flex items-center gap-3 rounded px-3 py-2 text-sm font-medium transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+              activeClassName="bg-white/10 text-nav-ink shadow-[inset_3px_0_0_theme(colors.accent)]"
+              inactiveClassName="text-nav-muted hover:bg-white/5 hover:text-nav-ink"
+              iconSize={17}
+            />
           ))}
         </nav>
         <div className="absolute inset-x-4 bottom-5 rounded border border-nav-border bg-nav-2 p-3">
@@ -89,14 +92,14 @@ export function WorkspaceShell({
           </div>
           <nav aria-label="Mobile workspace" className="grid grid-cols-1 gap-1 px-4 pb-3 sm:grid-cols-3 lg:hidden">
             {navItems.map((item) => (
-              <Link
+              <WorkspaceNavLink
                 key={item.href}
-                href={item.href}
-                className="flex min-w-0 items-center justify-center gap-2 rounded border border-border bg-wash px-3 py-2 text-sm font-medium"
-              >
-                <item.icon size={15} aria-hidden="true" />
-                {item.label}
-              </Link>
+                item={item}
+                className="flex min-w-0 items-center justify-center gap-2 rounded border px-3 py-2 text-sm font-medium transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+                activeClassName="border-accent bg-accent text-white shadow-sm"
+                inactiveClassName="border-border bg-wash text-ink hover:border-accent hover:text-accent"
+                iconSize={15}
+              />
             ))}
           </nav>
         </header>
