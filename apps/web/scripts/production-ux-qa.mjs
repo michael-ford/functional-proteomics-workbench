@@ -6,8 +6,16 @@ import path from "node:path";
 import process from "node:process";
 
 const DEFAULT_BASE_URL = "https://fpw-web-production.up.railway.app";
-const ROUTES = ["/", "/datasets", "/report", "/traces", "/evals"];
-const NAV_LABELS = ["Project", "Dataset", "Report", "Trace", "Evals"];
+const NAV_ITEMS = [
+  { href: "/", label: "Project" },
+  { href: "/datasets", label: "Dataset" },
+  { href: "/report", label: "Report" },
+  { href: "/traces", label: "Trace" },
+  { href: "/evals", label: "Evaluations" },
+];
+const ROUTES = NAV_ITEMS.map((item) => item.href);
+const CHAT_EMPTY_STATE = "Ask about project status, the selected Perturb-PBMC dataset, or a trace-backed result.";
+const CHAT_SUBMIT_ATTEMPTS = 3;
 const VIEWPORTS = [
   { name: "desktop", width: 1440, height: 1000 },
   { name: "tablet", width: 834, height: 1112 },
@@ -98,13 +106,19 @@ async function checkNavigation(name, viewport) {
   const page = await newPage({ name, ...viewport });
   try {
     await gotoRoute(page, "/");
-    for (const label of NAV_LABELS) {
-      await visibleLink(page, label).click();
+    const nav = visibleWorkspaceNav(page, name);
+    await expect(nav).toBeVisible();
+    for (const item of NAV_ITEMS) {
+      const link = navLink(nav, item);
+      await expect(link).toBeVisible();
+      await link.click();
       await page.waitForLoadState("networkidle");
+      await expect(page).toHaveURL(new RegExp(`${escapeRegExp(item.href === "/" ? "/" : item.href)}(?:$|[?#])`));
+      await expect(navLink(nav, item)).toHaveAttribute("aria-current", "page");
       await expectHeading(page);
-      await assertCleanUxText(page, `${name} navigation ${label}`);
-      await assertNoHorizontalOverflow(page, `${name} navigation ${label}`);
-      await saveScreenshot(page, `${name}-nav-${slug(label)}`);
+      await assertCleanUxText(page, `${name} navigation ${item.label}`);
+      await assertNoHorizontalOverflow(page, `${name} navigation ${item.label}`);
+      await saveScreenshot(page, `${name}-nav-${slug(item.label)}`);
     }
   } finally {
     await page.close();
@@ -112,33 +126,30 @@ async function checkNavigation(name, viewport) {
 }
 
 async function checkChatSuccess() {
-  const page = await newPage({ name: "desktop", width: 1440, height: 1000 });
+  const page = await newPage({
+    name: "desktop",
+    width: 1440,
+    height: 1000,
+    allowTransientChatFailure: true,
+  });
   try {
     await gotoRoute(page, "/");
     const input = chatInput(page);
     const send = page.getByRole("button", { name: "Send message" });
 
-    await expectText(page, "No chat turns recorded.");
+    await expectText(page, CHAT_EMPTY_STATE);
     await assertDisabled(send, "empty chat send button");
     await input.fill("   ");
     await assertDisabled(send, "whitespace chat send button");
 
-    await input.fill("Project status");
-    const enterResponse = page.waitForResponse(isChatPostResponse);
-    await input.press("Enter");
-    await waitForDisabled(send, "chat Enter loading state");
-    await assertChatResponseOk(await waitForResponse(enterResponse, "chat Enter submit"), "chat Enter submit");
+    await submitChatMessage(page, input, send, "Project status", "enter", "chat Enter submit");
     await expectText(page, "assistant");
     await expectTraceCount(page);
     await assertCleanUxText(page, "chat enter success");
     await assertNoHorizontalOverflow(page, "chat enter success");
     await saveScreenshot(page, "chat-enter-success");
 
-    await input.fill("Show the latest trace summary");
-    const buttonResponse = page.waitForResponse(isChatPostResponse);
-    await send.click();
-    await waitForDisabled(send, "chat button loading state");
-    await assertChatResponseOk(await waitForResponse(buttonResponse, "chat button submit"), "chat button submit");
+    await submitChatMessage(page, input, send, "Show the latest trace summary", "button", "chat button submit");
     await expectText(page, "assistant");
     await expectTraceCount(page);
     await assertCleanUxText(page, "chat button repeated success");
@@ -279,15 +290,47 @@ async function waitForResponse(responsePromise, label) {
   }
 }
 
-async function assertChatResponseOk(response, label) {
-  if (!response) {
-    return;
+async function submitChatMessage(
+  page,
+  input,
+  send,
+  message,
+  method,
+  label,
+  maxAttempts = CHAT_SUBMIT_ATTEMPTS,
+) {
+  let lastFailure = null;
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    await input.fill(message);
+    const responsePromise = page.waitForResponse(isChatPostResponse);
+    if (method === "enter") {
+      await input.press("Enter");
+    } else {
+      await send.click();
+    }
+    await waitForDisabled(send, `${label} loading state${attemptLabel(attempt)}`);
+    const response = await waitForResponse(responsePromise, `${label}${attemptLabel(attempt)}`);
+    if (!response) {
+      return "failed";
+    }
+    if (response.ok()) {
+      return "ok";
+    }
+
+    const body = await response.text().catch(() => "");
+    lastFailure = `${label} returned HTTP ${response.status()}${body ? `: ${body.slice(0, 240)}` : ""}`;
+    if (attempt < maxAttempts && isRetryableChatFailure(response.status(), body)) {
+      await page.waitForTimeout(1000 * attempt);
+      continue;
+    }
+    failures.push(lastFailure);
+    return "failed";
   }
-  if (response.ok()) {
-    return;
+
+  if (lastFailure) {
+    failures.push(lastFailure);
   }
-  const body = await response.text().catch(() => "");
-  failures.push(`${label} returned HTTP ${response.status()}${body ? `: ${body.slice(0, 240)}` : ""}`);
+  return "failed";
 }
 
 function isChatPostResponse(response) {
@@ -299,6 +342,17 @@ function formatError(error) {
     return error.message.split("\n")[0];
   }
   return String(error);
+}
+
+function isRetryableChatFailure(status, body) {
+  if (status < 500 || status >= 600) {
+    return false;
+  }
+  return /provider|upstream|temporarily|timeout|invalid response/i.test(body);
+}
+
+function attemptLabel(attempt) {
+  return attempt === 1 ? "" : ` attempt ${attempt}`;
 }
 
 async function expectTraceCount(page) {
@@ -336,8 +390,13 @@ async function saveScreenshot(page, name) {
   screenshots.push(file);
 }
 
-function visibleLink(page, label) {
-  return page.getByRole("link", { name: new RegExp(`^${escapeRegExp(label)}$`) }).first();
+function visibleWorkspaceNav(page, viewportName) {
+  const navName = viewportName === "desktop" ? "Workspace" : "Mobile workspace";
+  return page.getByRole("navigation", { name: navName });
+}
+
+function navLink(nav, item) {
+  return nav.locator(`a[href="${item.href}"]`).filter({ hasText: item.label });
 }
 
 function chatInput(page) {
@@ -362,6 +421,9 @@ function escapeRegExp(value) {
 
 function isAllowedConsoleMessage(text, viewport) {
   if (viewport.allowSyntheticChatFailure && /503 \(Service Unavailable\)/i.test(text)) {
+    return true;
+  }
+  if (viewport.allowTransientChatFailure && /status of 5\d\d/i.test(text)) {
     return true;
   }
   return /Download the React DevTools/i.test(text);
