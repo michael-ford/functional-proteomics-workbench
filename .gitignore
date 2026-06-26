@@ -31,3 +31,6 @@ demo_data/processed/*
 # Eval report artifacts
 evals/results/*
 !evals/results/.gitkeep
+
+# Production UX QA artifacts
+.fpw_ux_qa/
