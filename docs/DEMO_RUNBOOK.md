@@ -72,6 +72,34 @@ PYTHONPATH="$PWD" uv run --project services/api python scripts/deployment_smoke.
 The smoke check verifies runtime adapter mode, `/ready`, and a deterministic demo reset. It
 reports only whether `OPENROUTER_API_KEY` is configured; it never prints secret values.
 
+## Production UX QA Gate
+
+Run the MVP production UX gate against the Railway web service:
+
+```bash
+make qa-production-ux
+```
+
+Run the same gate against a local or preview web URL:
+
+```bash
+FPW_UX_QA_BASE_URL=http://localhost:3000 make qa-production-ux
+```
+
+The gate exercises direct route loads for `/`, `/datasets`, `/report`, `/traces`, and
+`/evals`; desktop and mobile navigation; chat empty and whitespace disabled states; Enter
+submit; button submit; repeated successful turns; loading/success trace panel state; a
+synthetic chat failure state; trace detail expand/collapse; desktop, tablet, mobile, and
+narrow mobile responsive widths; document-level horizontal overflow; and obvious raw
+implementation text such as `undefined`, `NaN`, runtime errors, TODO text, or stale mock model
+metadata. It saves screenshots and `summary.json` under `.fpw_ux_qa/<run-id>/`, which is an
+ignored local artifact path.
+
+Treat any non-zero exit as a blocking UX failure. Inspect `summary.json` first for the exact
+failing check, then use the saved screenshots to confirm whether the issue is a product defect
+or a stale selector in the gate. The synthetic failure check only intercepts `/api/fpw/chat` in
+that browser page; the success-path chat checks use the configured target normally.
+
 ## Final Pre-Recording Checklist
 
 - Railway API `/ready` returns `ready`.

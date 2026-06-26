@@ -5,6 +5,7 @@
     "build": "pnpm --filter @fpw/web build",
     "dev:web": "pnpm --filter @fpw/web dev",
     "lint": "pnpm --filter @fpw/web lint",
+    "qa:production-ux": "pnpm --filter @fpw/web qa:production-ux",
     "test": "pnpm --filter @fpw/web test",
     "typecheck": "pnpm --filter @fpw/web typecheck"
   }
